@@ -9,6 +9,13 @@ https://youtu.be/5NtCb7rdipo?t=10m4s
 #### b) ROS Kinetic
 http://wiki.ros.org/kinetic/Installation/Ubuntu   
 
+### c) Coding & Editors
+Sublime
+http://tipsonubuntu.com/2017/05/30/install-sublime-text-3-ubuntu-16-04-official-way/
+
+### d) Drivers
+Ubuntu Terminal: sudo apt-get install nvidia-384
+
 ### 2 Dataset
 http://www.cvlibs.net/datasets/kitti/raw_data.php   
 https://github.com/tomas789/kitti2bag
