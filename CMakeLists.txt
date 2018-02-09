@@ -202,3 +202,6 @@ include_directories(
 add_executable(kitti_listener src/kitti_subscriber.cpp)
 target_link_libraries(kitti_listener ${catkin_LIBRARIES})
 #add_dependencies(kitti_listener test_kitti)
+
+add_executable(kitti_pcl src/kitti_pcl.cpp)
+target_link_libraries(kitti_pcl ${catkin_LIBRARIES})
