@@ -29,6 +29,8 @@ https://github.com/tomas789/kitti2bag
 Terminal 1: roscore   
 Terminal 2: rviz    
 Terminal 3: rosbag play kitti_2011_09_26_drive_0005_synced.bag    
+Terminal 4: rosrun test_kitti kitti_subscriber    
+
 After converting the Kitti Data to a rosbag file like in topic 2 and using tutorial   
 https://github.com/udacity/didi-competition/blob/master/docs/GettingStarted.md
 #### 1 Pausing rosbag replay with space bar
