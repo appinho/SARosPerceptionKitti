@@ -1,40 +1,80 @@
+// ROS specific includes
 #include <ros/ros.h>
-// PCL specific includes
 #include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/Point.h>
-//#include <pcl_conversions/pcl_conversions.h>
-//#include <pcl/point_cloud.h>
-//#include <pcl/point_types.h>
 
+// PCL specific includes
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/extract_indices.h>
+
+// Publisher
 ros::Publisher pub;
 
-void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input){
-  // Create a container for the data.
-  sensor_msgs::PointCloud2 output;
+// Parameters
+const float voxel_size = 0.2;
+const float opening_angle = M_PI/3;
+const float minimum_height = -1.4;
 
-  // Do data processing here...
-  // input->data.size()
-  for(int i = 0; i < 10; ++i){
-    geometry_msgs::Point p;
-    float X = 0.0;
-    float Y = 0.0;
-    float Z = 0.0;
-    memcpy(&X, &input->data[16*i], sizeof(float));
-    memcpy(&Y, &input->data[16*i] + 4, sizeof(float));
-    memcpy(&Z, &input->data[16*i] + 8, sizeof(float));
+void voxel_cb(const sensor_msgs::PointCloud2ConstPtr& input){
 
-    p.x = X;
-    p.y = Y;
-    p.z = Z;
-    //ROS_INFO("Entry [%g]",X);
-    ROS_INFO("Coordinates X,Y,Z: [%g],[%g],[%g]", p.x, p.y, p.z);
-    //output.data.push_back(input->data[i]);
+  // Container for original & filtered data
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::fromROSMsg (*input, *cloud);
+  pcl::PointCloud<pcl::PointXYZ> cloud_filtered;
+
+  // Perform the actual filtering
+  pcl::VoxelGrid<pcl::PointXYZ> sor;
+  sor.setInputCloud(cloud);
+  sor.setLeafSize(voxel_size, voxel_size, voxel_size);
+  sor.filter(cloud_filtered);
+
+  //std::cout << cloud_filtered.size() << std::endl;
+
+  // Publish the data
+  pub.publish(cloud_filtered);
+}
+
+void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& input){
+
+  // Convert the sensor_msgs/PointCloud2 data to pcl/PointCloud
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::fromROSMsg (*input, *cloud);
+
+  // Filter point cloud
+  pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
+  pcl::ExtractIndices<pcl::PointXYZ> extract;
+
+  // Loop through point cloud
+  for(int i = 0; i < cloud->size(); ++i){
+
+    // Read point
+    pcl::PointXYZ point;
+    point = cloud->at(i);
+
+    // Determine angle of laser point
+    float angle = std::abs( std::atan2(point.y, point.x) );
+
+    // Check opening angle
+    if(angle < opening_angle){
+      // Check minimum height
+      //if(point.z > minimum_height && angle < opening_angle){
+        inliers->indices.push_back(i);
+      //}
+    }
   }
-  std::cout << std::endl;
-  output = *input;
 
-  // Publish the data.
-  pub.publish (output);
+  // Extract points
+  extract.setInputCloud(cloud);
+  extract.setIndices(inliers);
+  extract.setNegative(false);
+  extract.filter(*cloud);
+
+  //std::cout << "Size of reduced point cloud " << cloud->size() << std::endl;
+
+  // Publish the data
+  pub.publish(cloud);
 }
 
 int main (int argc, char** argv){
@@ -43,7 +83,7 @@ int main (int argc, char** argv){
   ros::NodeHandle nh;
 
   // Create a ROS subscriber for the input point cloud
-  ros::Subscriber sub = nh.subscribe ("/kitti/velo/pointcloud", 1, cloud_cb);
+  ros::Subscriber sub = nh.subscribe ("/kitti/velo/pointcloud", 1, voxel_cb);
 
   // Create a ROS publisher for the output point cloud
   pub = nh.advertise<sensor_msgs::PointCloud2> ("output", 1);

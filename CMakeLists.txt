@@ -11,6 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
   rosbag
   roscpp
   std_msgs
+  pcl_conversions
+  pcl_ros
+  sensor_msgs
 )
 
 ## System dependencies are found with CMake's conventions
