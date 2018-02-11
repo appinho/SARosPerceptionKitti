@@ -15,6 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   sensor_msgs
 )
+find_package(OpenCV)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -206,5 +208,5 @@ add_executable(kitti_listener src/kitti_subscriber.cpp)
 target_link_libraries(kitti_listener ${catkin_LIBRARIES})
 #add_dependencies(kitti_listener test_kitti)
 
-add_executable(kitti_pcl src/kitti_pcl.cpp src/dbscan.cpp)
-target_link_libraries(kitti_pcl ${catkin_LIBRARIES})
+add_executable(kitti_pcl src/kitti_pcl.cpp include/test_kitti/detection.h src/detection.cpp)
+target_link_libraries(kitti_pcl ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
