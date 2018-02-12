@@ -3,7 +3,7 @@
 
 Detection::Detection(float range){
 	range_ = range;
-	edge_size_ = 0.2;
+	edge_size_ = 0.25;
 	cells_per_edge_ = int(range * 2 / edge_size_);
 }
 
@@ -47,7 +47,7 @@ void Detection::runConnectedComponent(const pcl::PointCloud<pcl::PointXYZ>::Ptr 
 		// New cluster
 		Cluster c;
 		c.y = range_ - (stats.at<int>(i,0) + stats.at<int>(i,2) / 2.0) * edge_size_;
-		c.x = range_ - (stats.at<int>(i,1) + stats.at<int>(i,3) / 2.0) * edge_size_ - 0.5;
+		c.x = range_ - (stats.at<int>(i,1) + stats.at<int>(i,3) / 2.0) * edge_size_ - 0.81;
 		c.l_y = stats.at<int>(i,2) * edge_size_;
 		c.l_x = stats.at<int>(i,3) * edge_size_;
 

@@ -1,6 +1,7 @@
 // ROS specific includes
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
+#include "sensor_msgs/Imu.h"
 #include <geometry_msgs/Point.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -12,11 +13,19 @@
 #include <pcl/filters/extract_indices.h>
 
 // Detection
-#include "../include/test_kitti/detection.h"
+//#include "../include/test_kitti/detection.h"
+
+#include "../include/test_kitti/evaluation.h"
+
+// Tracker
+Tracking tracker;
+Evaluation evaluator;
 
 // Publisher
 ros::Publisher pcl_pub;
 ros::Publisher dbb_pub;
+ros::Publisher gt_pub;
+
 
 // Parameters
 const float voxel_size = 0.2;
@@ -27,6 +36,8 @@ const float maximum_range = 20.0;
 
 const bool filter_pointcloud = true;
 const bool convert_to_voxelgrid = false;
+
+int num_last_objects = 0;
 
 void show_detection(const std::vector<Cluster> & clusters){
 
@@ -46,7 +57,7 @@ void show_detection(const std::vector<Cluster> & clusters){
     marker.action = visualization_msgs::Marker::ADD;
     marker.pose.position.x = clusters[i].x;
     marker.pose.position.y = clusters[i].y;
-    marker.pose.position.z = 0;
+    marker.pose.position.z = 0.1;
     marker.pose.orientation.x = 0.0;
     marker.pose.orientation.y = 0.0;
     marker.pose.orientation.z = 0.0;
@@ -67,10 +78,22 @@ void show_detection(const std::vector<Cluster> & clusters){
     //   << " " << marker_array.markers.size() << std::endl;
   }
 
+  if(num_last_objects > clusters.size()){
+    std::cout << "Deleted ";
+    for(int i = clusters.size(); i < num_last_objects; ++i){
+      marker_array.markers[i].action = visualization_msgs::Marker::DELETE;
+      marker_array.markers[i].color.a = 0.0;
+      std::cout << i << " (" << marker_array.markers[i].pose.position.x << ","
+        << marker_array.markers[i].pose.position.y << ")";
+    }
+    std::cout << std::endl;
+  }
+  num_last_objects = clusters.size();
+
   dbb_pub.publish(marker_array);
 }
 
-void callback(const sensor_msgs::PointCloud2ConstPtr& input){
+void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
 
   // Convert the sensor_msgs/PointCloud2 data to pcl/PointCloud
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
@@ -130,11 +153,27 @@ void callback(const sensor_msgs::PointCloud2ConstPtr& input){
   detector.runConnectedComponent(cloud);
   show_detection(detector.getClusters());
 
+  // Tracker
+  tracker.processMeasurements(detector.getClusters());
+
+  // Evaluator
+  //visualization_msgs::Marker bike_marker = evaluator.plotBike();
+  visualization_msgs::MarkerArray groundtruthdata = evaluator.showTracklets();
+  gt_pub.publish(groundtruthdata);
+
   // Publish the data
   std::cout << "PCL points # " << cloud->size()
     << " , Clusters # " << detector.getClusters().size() << std::endl;
   pcl_pub.publish(cloud);
 }
+
+void callback_imu(const sensor_msgs::Imu::ConstPtr& msg){
+
+  ROS_INFO("Imu Seq: [%d]", msg->header.seq);
+  ROS_INFO("Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", 
+    msg->orientation.x,msg->orientation.y,msg->orientation.z,msg->orientation.w);
+}
+
 
 int main (int argc, char** argv){
   // Initialize ROS
@@ -142,13 +181,19 @@ int main (int argc, char** argv){
   ros::NodeHandle nh;
 
   // Create a ROS subscriber for the input point cloud
-  ros::Subscriber sub = nh.subscribe ("/kitti/velo/pointcloud", 1, callback);
+  ros::Subscriber sub_pcl = nh.subscribe ("/kitti/velo/pointcloud", 1, callback_pcl);
+
+  // Create a ROS subscriber for the IMU data
+  ros::Subscriber sub_imu = nh.subscribe ("/kitti/oxts/imu", 1, callback_imu);
 
   // Create a ROS publisher for the output point cloud
   pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pointcloud", 1);
 
   // Create a ROS publisher for the detected bounding boxes
-  dbb_pub = nh.advertise<visualization_msgs::MarkerArray>( "detection", 0 );
+  dbb_pub = nh.advertise<visualization_msgs::MarkerArray>( "detection", 100);
+
+  // Create a ROS publisher for the ground truth data
+  gt_pub = nh.advertise<visualization_msgs::MarkerArray>( "groundtruth", 100);
 
   // Spin
   ros::spin ();

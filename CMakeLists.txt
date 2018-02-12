@@ -14,7 +14,9 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_ros
   sensor_msgs
+  cmake_modules
 )
+
 find_package(OpenCV)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -208,5 +210,10 @@ add_executable(kitti_listener src/kitti_subscriber.cpp)
 target_link_libraries(kitti_listener ${catkin_LIBRARIES})
 #add_dependencies(kitti_listener test_kitti)
 
-add_executable(kitti_pcl src/kitti_pcl.cpp include/test_kitti/detection.h src/detection.cpp)
+add_executable(kitti_pcl src/kitti_pcl.cpp
+	include/test_kitti/detection.h src/detection.cpp
+	include/test_kitti/tracking.h src/tracking.cpp
+	include/test_kitti/evaluation.h src/evaluation.cpp
+	include/test_kitti/tracklets.h)
+	
 target_link_libraries(kitti_pcl ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
