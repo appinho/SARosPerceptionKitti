@@ -3,6 +3,31 @@
 
 Detection::Detection(){
 
+	// Initialize visualization for detected bounding boxes
+    marker_array_ = visualization_msgs::MarkerArray();
+    for(int i = 0; i < DET_BUFFER_SIZE; ++i){
+
+    	// Fill in marker information
+    	visualization_msgs::Marker marker;
+    	marker.header.frame_id = "base_link";
+    	marker.header.stamp = ros::Time();
+    	marker.ns = "my_namespace";
+    	marker.id = i;
+    	marker.text = "Object";
+	    marker.type = visualization_msgs::Marker::CUBE;
+	    marker.action = visualization_msgs::Marker::ADD;
+	   	marker.mesh_resource = "package://pr2_description/meshes/base_v0/base.dae";
+	    marker.frame_locked = true;
+
+	    // Display box with certain color and alpha
+	    marker.color.a = 0.5;
+	    marker.color.r = 1.0;
+	    marker.color.g = 0.0;
+	    marker.color.b = 0.0;
+
+	    // Push back marker to marker array
+    	marker_array_.markers.push_back(marker);
+    }
 }
 
 Detection::~Detection(){
@@ -61,6 +86,36 @@ void Detection::transformWorldToImage(const float x, const float y, int * img_x,
 
 	*img_x = (DET_RANGE - x) / DET_GRID_CELL_SIZE;
 	*img_y = (DET_RANGE - y) / DET_GRID_CELL_SIZE;
+}
+
+visualization_msgs::MarkerArray & Detection::showDetection(){
+
+  // Loop through clusters
+  for(int i = 0; i < clusters_.size(); ++i){
+
+	// Fill in current position, orientation
+    marker_array_.markers[i].pose.position.x = clusters_[i].x;
+    marker_array_.markers[i].pose.position.y = clusters_[i].y;
+    marker_array_.markers[i].pose.position.z = 1.0;
+	// Fill in current dimension
+	marker_array_.markers[i].scale.x = clusters_[i].l_x;
+	marker_array_.markers[i].scale.y = clusters_[i].l_y;
+	marker_array_.markers[i].scale.z = 2.0;
+  }
+  // Loop through remaining buffer size
+  for(int i = clusters_.size(); i < DET_BUFFER_SIZE; ++i){
+
+	// Fill in current position, orientation
+    marker_array_.markers[i].pose.position.x = 0.0;
+    marker_array_.markers[i].pose.position.y = 0.0;
+    marker_array_.markers[i].pose.position.z = 0.0;
+	// Fill in current dimension
+	marker_array_.markers[i].scale.x = 0.1;
+	marker_array_.markers[i].scale.y = 0.1;
+	marker_array_.markers[i].scale.z = 2.0;
+  }
+
+  return marker_array_;
 }
 
 std::vector<Cluster> & Detection::getClusters(){

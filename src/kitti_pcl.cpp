@@ -33,63 +33,6 @@ ros::Publisher pcl_pub;
 ros::Publisher dbb_pub;
 ros::Publisher gt_pub;
 
-// TODO Remove this later with bug fix detection
-int num_last_objects = 0;
-
-void show_detection(const std::vector<Cluster> & clusters){
-
-  visualization_msgs::MarkerArray marker_array;
-
-  // Loop through clusters
-  for(int i = 0; i < clusters.size(); ++i){
-
-    // Create marker and fill it
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = "base_link";
-    marker.header.stamp = ros::Time();
-    marker.ns = "my_namespace";
-    marker.id = i;
-    marker.text = "OBJECT";
-    marker.type = visualization_msgs::Marker::CUBE;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = clusters[i].x;
-    marker.pose.position.y = clusters[i].y;
-    marker.pose.position.z = 0.1;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
-    marker.scale.x = clusters[i].l_x;
-    marker.scale.y = clusters[i].l_y;
-    marker.scale.z = 0.1;
-    marker.color.a = 0.3; // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 1.0;
-    marker.color.b = 0.0;
-    //only if using a MESH_RESOURCE marker type:
-    marker.mesh_resource = "package://pr2_description/meshes/base_v0/base.dae";
-    marker.frame_locked = true;
-    marker_array.markers.push_back(marker);
-
-    // std::cout << marker.id << "    " << marker.pose.position.x << " " << marker.pose.position.y 
-    //   << " " << marker_array.markers.size() << std::endl;
-  }
-
-  if(num_last_objects > clusters.size()){
-    std::cout << "Deleted ";
-    for(int i = clusters.size(); i < num_last_objects; ++i){
-      marker_array.markers[i].action = visualization_msgs::Marker::DELETE;
-      marker_array.markers[i].color.a = 0.0;
-      std::cout << i << " (" << marker_array.markers[i].pose.position.x << ","
-        << marker_array.markers[i].pose.position.y << ") ";
-    }
-    std::cout << std::endl;
-  }
-  num_last_objects = clusters.size();
-
-  dbb_pub.publish(marker_array);
-}
-
 void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
 
   // Convert the sensor_msgs/PointCloud2 data to pcl/PointCloud
@@ -143,18 +86,19 @@ void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
     sor.filter(*cloud);
   }
 
-  //std::cout << cloud->size() << std::endl;
-
+  // Detector
   detector.runConnectedComponent(cloud);
-  show_detection(detector.getClusters());
+  visualization_msgs::MarkerArray detected_bounding_boxes =
+    detector.showDetection();
+  dbb_pub.publish(detected_bounding_boxes);
 
   // Tracker
   tracker.processMeasurements(detector.getClusters());
 
   // Evaluator
-  //visualization_msgs::Marker bike_marker = evaluator.plotBike();
-  visualization_msgs::MarkerArray groundtruthdata = evaluator.showTracklets();
-  gt_pub.publish(groundtruthdata);
+  visualization_msgs::MarkerArray ground_truth_bounding_boxes =
+    evaluator.showTracklets();
+  gt_pub.publish(ground_truth_bounding_boxes);
 
   // Publish the data
   ROS_INFO("#PCL points [%d], #Clusters [%d]", int(cloud->size()), int(detector.getClusters().size()));
@@ -185,7 +129,7 @@ int main (int argc, char** argv){
   pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pointcloud", 1);
 
   // Create a ROS publisher for the detected bounding boxes
-  dbb_pub = nh.advertise<visualization_msgs::MarkerArray>( "detection", 100);
+  dbb_pub = nh.advertise<visualization_msgs::MarkerArray>( "detection", DET_BUFFER_SIZE);
 
   // Create a ROS publisher for the ground truth data
   gt_pub = nh.advertise<visualization_msgs::MarkerArray>( "groundtruth", 100);

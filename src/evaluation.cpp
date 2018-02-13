@@ -41,7 +41,6 @@ Evaluation::Evaluation(std::string filename){
     	start_stop_vector_.push_back(start_stop);
     }
 
-
     // Set frame counter to 0
     frame_counter_ = 0;
 }

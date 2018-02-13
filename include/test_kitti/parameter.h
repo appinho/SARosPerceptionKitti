@@ -16,6 +16,7 @@ const bool PCL_CONVERT2VOX = false;
 const float PCL_VOXEL_SIZE = 0.2;
 
 // DET Detection parameters
+const int DET_BUFFER_SIZE = 100;
 const float DET_RANGE = PCL_FILTER_MAX_RANGE;
 const float DET_GRID_CELL_SIZE = 0.25;
 const int DET_CELLS_PER_EDGE = int(DET_RANGE * 2 / DET_GRID_CELL_SIZE);
