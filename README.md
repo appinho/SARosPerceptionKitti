@@ -1,6 +1,20 @@
 # kitti_ros
 
+## Video of RVIZ
+
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/pQ3EL-UoUpI/0.jpg)](https://www.youtube.com/watch?v=pQ3EL-UoUpI)
+
+### 0 To Dos
+- Plot text to bounding boxes   
+- Remove warning of marker    
+- Universal frame counter   
+- Calculate RMSE and plot it    
+- Remove bug in detection   
+- Plot ego car    
+- Integrate timestamps    
+- Integrate simple tracker (KF,UKF)   
+- Apply methods to all videos   
+- Refactor code   
 
 ### 1 Installations
 
