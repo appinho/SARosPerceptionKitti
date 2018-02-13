@@ -205,16 +205,12 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-## Add this for creating executable subscriber
-add_executable(kitti_listener src/kitti_subscriber.cpp)
-target_link_libraries(kitti_listener ${catkin_LIBRARIES})
-#add_dependencies(kitti_listener test_kitti)
-
-add_executable(kitti_pcl src/kitti_pcl.cpp
+## Add this for creating executables
+add_executable(kitti_ros src/main.cpp
 	include/test_kitti/detection.h src/detection.cpp
 	include/test_kitti/tracking.h src/tracking.cpp
 	include/test_kitti/evaluation.h src/evaluation.cpp
 	include/test_kitti/tracklets.h
 	include/test_kitti/parameter.h)
 	
-target_link_libraries(kitti_pcl ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(kitti_ros ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})

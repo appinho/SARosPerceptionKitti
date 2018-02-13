@@ -2,7 +2,9 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include "sensor_msgs/Imu.h"
+#include "sensor_msgs/NavSatFix.h"
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_datatypes.h>
@@ -24,6 +26,7 @@ Detection detector;
 
 // Tracker
 Tracking tracker;
+double time_stamp;
 
 // Evaluator
 Evaluation evaluator("/home/simonappel/Coding/RosbagKitti/0005/tracklet_labels.xml");
@@ -93,7 +96,7 @@ void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
   dbb_pub.publish(detected_bounding_boxes);
 
   // Tracker
-  tracker.processMeasurements(detector.getClusters());
+  tracker.processMeasurements(detector.getClusters(), time_stamp);
 
   // Evaluator
   visualization_msgs::MarkerArray ground_truth_bounding_boxes =
@@ -107,14 +110,30 @@ void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
 
 void callback_imu(const sensor_msgs::Imu::ConstPtr& msg){
 
-  ROS_INFO("Imu Seq: [%d]", msg->header.seq);
-  ROS_INFO("Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", 
-    msg->orientation.x,msg->orientation.y,msg->orientation.z,msg->orientation.w);
-  ego_orientation = tf::Quaternion(msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
+  // ROS_INFO("Imu Seq: [%d]", msg->header.seq);
+  // ROS_INFO("Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", 
+  //   msg->orientation.x,msg->orientation.y,msg->orientation.z,msg->orientation.w);
+  // ego_orientation = tf::Quaternion(msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
+}
+
+void callback_gps_fix(const sensor_msgs::NavSatFix::ConstPtr& msg){
+
+//  std::cout << "Gps fix Seq: " << msg->header.stamp << std::endl;
+  time_stamp = msg->header.stamp.toSec();
+}
+
+void callback_gps_vel(const geometry_msgs::TwistStamped::ConstPtr& msg){
+
+//  std::cout << "Gps vel Seq: " << std::endl;
+//   ROS_INFO("Imu Orientation x: [%f], y: [%f], z: [%f], w: [%f]", 
+//     msg->orientation.x,msg->orientation.y,msg->orientation.z,msg->orientation.w);
+//   ego_orientation = tf::Quaternion(msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
 }
 
 
 int main (int argc, char** argv){
+
+  std::cout << "START" << std::endl;
   // Initialize ROS
   ros::init (argc, argv, "kitti_pcl");
   ros::NodeHandle nh;
@@ -124,6 +143,10 @@ int main (int argc, char** argv){
 
   // Create a ROS subscriber for the IMU data
   ros::Subscriber sub_imu = nh.subscribe ("/kitti/oxts/imu", 1, callback_imu);
+
+    // Create two ROS subscribers for the GPS data
+  ros::Subscriber sub_gps_fix = nh.subscribe ("/kitti/oxts/gps/fix", 1, callback_gps_fix);
+  ros::Subscriber sub_gps_vel = nh.subscribe ("/kitti/oxts/gps/vel", 1, callback_gps_vel);
 
   // Create a ROS publisher for the output point cloud
   pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pointcloud", 1);

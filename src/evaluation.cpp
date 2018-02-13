@@ -90,7 +90,7 @@ visualization_msgs::MarkerArray & Evaluation::showTracklets(){
 		}
 		// If tracklet is NOT visible for current time frame frame_counter
 		else{
-		    marker_array_.markers[i].pose.position.x = TRA_X_OFFSET;
+		    marker_array_.markers[i].pose.position.x = 0;
 		    marker_array_.markers[i].pose.position.y = 0;
 		    marker_array_.markers[i].pose.position.z = 0;
 		    marker_array_.markers[i].scale.x = 0.1; //tracklets_.getTracklet(1)->l;

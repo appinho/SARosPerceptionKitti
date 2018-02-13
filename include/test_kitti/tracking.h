@@ -21,7 +21,7 @@ public:
 	Tracking();
 	~Tracking();
 
-	void processMeasurements(const std::vector<Cluster> & detected_clusters);
+	void processMeasurements(const std::vector<Cluster> & detected_clusters, const double time_stamp);
 	std::vector<Track> & getTracks();
 
 private:
@@ -30,4 +30,5 @@ private:
 	// Members
 	bool is_initialized_;	///* True after first processMeasurements call
 	int n_z_laser_;  		///* Laser measurement dimension
+	double last_time_stamp_;
 };
