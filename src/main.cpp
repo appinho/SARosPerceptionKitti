@@ -34,6 +34,7 @@ Evaluation evaluator("/home/simonappel/Coding/RosbagKitti/0005/tracklet_labels.x
 // Publisher
 ros::Publisher pcl_pub;
 ros::Publisher dbb_pub;
+ros::Publisher tra_pub;
 ros::Publisher gt_pub;
 
 void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
@@ -97,6 +98,9 @@ void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
 
   // Tracker
   tracker.processMeasurements(detector.getClusters(), time_stamp);
+  //visualization_msgs::MarkerArray tracked_bounding_boxes =
+  //  tracker.showTracks();
+  //tra_pub.publish(tracked_bounding_boxes);
 
   // Evaluator
   visualization_msgs::MarkerArray ground_truth_bounding_boxes =
@@ -133,29 +137,29 @@ void callback_gps_vel(const geometry_msgs::TwistStamped::ConstPtr& msg){
 
 int main (int argc, char** argv){
 
-  std::cout << "START" << std::endl;
   // Initialize ROS
+  std::cout << "START" << std::endl;
   ros::init (argc, argv, "kitti_pcl");
   ros::NodeHandle nh;
 
+  // SUBSCRIBER
   // Create a ROS subscriber for the input point cloud
   ros::Subscriber sub_pcl = nh.subscribe ("/kitti/velo/pointcloud", 1, callback_pcl);
-
   // Create a ROS subscriber for the IMU data
   ros::Subscriber sub_imu = nh.subscribe ("/kitti/oxts/imu", 1, callback_imu);
-
     // Create two ROS subscribers for the GPS data
   ros::Subscriber sub_gps_fix = nh.subscribe ("/kitti/oxts/gps/fix", 1, callback_gps_fix);
   ros::Subscriber sub_gps_vel = nh.subscribe ("/kitti/oxts/gps/vel", 1, callback_gps_vel);
 
+  // PUBLISHER
   // Create a ROS publisher for the output point cloud
   pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pointcloud", 1);
-
   // Create a ROS publisher for the detected bounding boxes
   dbb_pub = nh.advertise<visualization_msgs::MarkerArray>( "detection", DET_BUFFER_SIZE);
-
+    // Create a ROS publisher for the tracked bounding boxes
+  tra_pub = nh.advertise<visualization_msgs::MarkerArray>( "detection", TRA_BUFFER_SIZE);
   // Create a ROS publisher for the ground truth data
-  gt_pub = nh.advertise<visualization_msgs::MarkerArray>( "groundtruth", 100);
+  gt_pub = nh.advertise<visualization_msgs::MarkerArray>( "groundtruth", GT_BUFFER_SIZE);
 
   // Spin
   ros::spin ();

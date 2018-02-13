@@ -74,9 +74,9 @@ void Detection::runConnectedComponent(const pcl::PointCloud<pcl::PointXYZ>::Ptr 
 		c.l_y = stats.at<int>(i,2) * DET_GRID_CELL_SIZE;
 		c.l_x = stats.at<int>(i,3) * DET_GRID_CELL_SIZE;
 
-		//std::cout << "Cluster # " << i << " at "
-	 	//	<< c.x << "," << c.y << " and dim " 
-	 	//	<< c.l_x << "," << c.l_y << std::endl;
+		// std::cout << "Cluster # " << i << " at "
+	 // 		<< c.x << "," << c.y << " and dim " 
+	 // 		<< c.l_x << "," << c.l_y << std::endl;
 
 		clusters_.push_back(c); 
 	}
