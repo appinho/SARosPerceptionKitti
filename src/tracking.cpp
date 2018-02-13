@@ -12,7 +12,7 @@ Tracking::~Tracking(){
 }
 
 void Tracking::processMeasurements(const std::vector<Cluster> & detected_clusters){
-	std::cout << detected_clusters[0].x << std::endl;
+	//std::cout << detected_clusters[0].x << std::endl;
 }
 
 std::vector<Track> & Tracking::getTracks(){

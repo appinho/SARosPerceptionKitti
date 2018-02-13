@@ -2,6 +2,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <pcl_ros/point_cloud.h>
 #include <vector>
+#include "parameter.h"
 
 struct Cluster{
 	float x;
@@ -13,7 +14,7 @@ struct Cluster{
 class Detection{
 
 public:
-	Detection(float range);
+	Detection();
 	~Detection();
 	
 	void runConnectedComponent(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
@@ -24,8 +25,4 @@ private:
 	void transformWorldToImage(const float x, const float y, int * img_x, int * img_y);
 
 	std::vector<Cluster> clusters_;
-
-	float range_;
-	int cells_per_edge_;
-	float edge_size_;
 };

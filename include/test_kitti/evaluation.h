@@ -5,16 +5,17 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <utility>
 #include <vector>
+#include <tf/transform_datatypes.h>
 
 class Evaluation{
 
 public:
-	Evaluation();
+	Evaluation(std::string filename);
 	~Evaluation();
 
-	void calculateRMSE();
-	visualization_msgs::Marker & plotBike();
 	visualization_msgs::MarkerArray & showTracklets();
+	void calculateRMSE();
+
 
 private:
 

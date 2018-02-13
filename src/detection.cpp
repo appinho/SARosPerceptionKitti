@@ -1,10 +1,8 @@
 #include "../include/test_kitti/detection.h"
 
 
-Detection::Detection(float range){
-	range_ = range;
-	edge_size_ = 0.25;
-	cells_per_edge_ = int(range * 2 / edge_size_);
+Detection::Detection(){
+
 }
 
 Detection::~Detection(){
@@ -14,8 +12,8 @@ Detection::~Detection(){
 void Detection::runConnectedComponent(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
 
 	// Clear image
-	cv::Mat image_ = cv::Mat::zeros(cells_per_edge_, cells_per_edge_, CV_8UC1);
-	cv::Mat label_ = cv::Mat::zeros(cells_per_edge_, cells_per_edge_, CV_8UC1);
+	cv::Mat image_ = cv::Mat::zeros(DET_CELLS_PER_EDGE, DET_CELLS_PER_EDGE, CV_8UC1);
+	cv::Mat label_ = cv::Mat::zeros(DET_CELLS_PER_EDGE, DET_CELLS_PER_EDGE, CV_8UC1);
 
 	// Fill image
 	int img_x, img_y;
@@ -46,10 +44,10 @@ void Detection::runConnectedComponent(const pcl::PointCloud<pcl::PointXYZ>::Ptr 
 
 		// New cluster
 		Cluster c;
-		c.y = range_ - (stats.at<int>(i,0) + stats.at<int>(i,2) / 2.0) * edge_size_;
-		c.x = range_ - (stats.at<int>(i,1) + stats.at<int>(i,3) / 2.0) * edge_size_ - 0.81;
-		c.l_y = stats.at<int>(i,2) * edge_size_;
-		c.l_x = stats.at<int>(i,3) * edge_size_;
+		c.y = DET_RANGE - (stats.at<int>(i,0) + stats.at<int>(i,2) / 2.0) * DET_GRID_CELL_SIZE;
+		c.x = DET_RANGE - (stats.at<int>(i,1) + stats.at<int>(i,3) / 2.0) * DET_GRID_CELL_SIZE + TRA_X_OFFSET;
+		c.l_y = stats.at<int>(i,2) * DET_GRID_CELL_SIZE;
+		c.l_x = stats.at<int>(i,3) * DET_GRID_CELL_SIZE;
 
 		//std::cout << "Cluster # " << i << " at "
 	 	//	<< c.x << "," << c.y << " and dim " 
@@ -61,8 +59,8 @@ void Detection::runConnectedComponent(const pcl::PointCloud<pcl::PointXYZ>::Ptr 
 
 void Detection::transformWorldToImage(const float x, const float y, int * img_x, int * img_y){
 
-	*img_x = (range_ - x) / edge_size_;
-	*img_y = (range_ - y) / edge_size_;
+	*img_x = (DET_RANGE - x) / DET_GRID_CELL_SIZE;
+	*img_y = (DET_RANGE - y) / DET_GRID_CELL_SIZE;
 }
 
 std::vector<Cluster> & Detection::getClusters(){
