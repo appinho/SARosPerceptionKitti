@@ -14,7 +14,7 @@ public:
 	~Evaluation();
 
 	visualization_msgs::MarkerArray & showTracklets();
-	void calculateRMSE();
+	void showBikeRMSE(const Track & track);
 
 
 private:
@@ -23,4 +23,7 @@ private:
 	int frame_counter_;
 	std::vector< std::pair<int,int> > start_stop_vector_;
 	visualization_msgs::MarkerArray marker_array_;
+
+	void calculateRMSE(const Track & track, const int tracklet_index);
+
 };

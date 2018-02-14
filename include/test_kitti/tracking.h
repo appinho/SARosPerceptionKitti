@@ -9,6 +9,7 @@ using namespace Eigen;
 struct Track{
 	VectorXd x;
 	MatrixXd P;
+    MatrixXd Xsig_pred;
 
 	Track(const Cluster & cluster){
 		x = VectorXd::Zero(TRA_N_X);
@@ -20,6 +21,7 @@ struct Track{
            		0,  0, 10,  0,  0,
            		0,  0,  0,  1,  0,
            		0,  0,  0,  0,  1;
+        Xsig_pred = MatrixXd::Zero(TRA_N_X, 2 * TRA_N_AUG + 1);
 	}
 };
 
@@ -36,6 +38,7 @@ public:
 private:
 	// Functions
 	void Prediction(const double delta_t);
+	void DataAssociation(const std::vector<Cluster> & detected_clusters);
 	void Update(const std::vector<Cluster> & detected_clusters);
 
 	// Members
@@ -43,10 +46,25 @@ private:
 	bool is_initialized_;			///* True after first processMeasurements call
 	int n_z_laser_;  				///* Laser measurement dimension
 	double last_time_stamp_;		///* Buffer for last time stamp
+	VectorXd weights_;
+
+	// Prediction buffer variables
 	VectorXd x_aug_;				///* Buffer state vector for prediction
 	MatrixXd P_aug_;				///* Buffer state covariance for prediction
 	MatrixXd Xsig_aug_;
 	MatrixXd L_;
-	MatrixXd Xsig_pred_;
-	VectorXd weights_;
+
+	// Update buffer variables
+	MatrixXd Zsig_;
+	VectorXd z_pred_;
+	MatrixXd S_;
+	MatrixXd Tc_;
+	MatrixXd R_laser_;
+
+	// Data association
+	std::vector<int> data_association_;
+	float CalculateDistance(const Track & track, const Cluster detected_cluster);
+
+	visualization_msgs::MarkerArray marker_array_;
+
 };

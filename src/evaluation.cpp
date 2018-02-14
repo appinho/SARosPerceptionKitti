@@ -72,8 +72,8 @@ visualization_msgs::MarkerArray & Evaluation::showTracklets(){
 	    	marker_array_.markers[i].pose.orientation.y = quat[1];
 	    	marker_array_.markers[i].pose.orientation.z = quat[0];
 	    	// Fill in current dimension
-	    	marker_array_.markers[i].scale.x = tracklet.l;
-    		marker_array_.markers[i].scale.y = tracklet.w;
+	    	marker_array_.markers[i].scale.x = 0.1; //tracklet.l;
+    		marker_array_.markers[i].scale.y = 0.1; //tracklet.w;
     		marker_array_.markers[i].scale.z = tracklet.h;
 
 	    	// Prints
@@ -108,11 +108,14 @@ visualization_msgs::MarkerArray & Evaluation::showTracklets(){
     return marker_array_;
 }
 
-void Evaluation::calculateRMSE(){
+void Evaluation::showBikeRMSE(const Track & track){
 
-	// TODO
-	std::cout << "Frame " << frame_counter_ << "  " << tracklets_.getTracklet(1)->objectType << std::endl;
-	std::cout << tracklets_.getTracklet(1)->poses[frame_counter_].tx << ","
-		<< tracklets_.getTracklet(1)->poses[frame_counter_].ty << std::endl;
-	frame_counter_++;
+	calculateRMSE(track,1);
+}
+
+void Evaluation::calculateRMSE(const Track & track, const int tracklet_index){
+
+	float rmse = sqrt( pow(track.x(0) - tracklets_.getTracklet(1)->poses[frame_counter_].tx,2) + pow(track.x(1) - tracklets_.getTracklet(1)->poses[frame_counter_].ty ,2) );
+	ROS_INFO("RMSE between track ([%f],[%f]) and tracklet ([%f],[%f]) = [%f]", track.x(0), track.x(1),
+		tracklets_.getTracklet(1)->poses[frame_counter_].tx, tracklets_.getTracklet(1)->poses[frame_counter_].ty, rmse);
 }

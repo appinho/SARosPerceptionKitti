@@ -3,7 +3,7 @@
  */
 
 // TRA Transformation and coordinate system parameters
-const float TRA_X_OFFSET = -0.6; //-0.81;
+const float TRA_X_OFFSET = 0; //-0.6; //-0.81;
 
 // PCL Point cloud parameters
 const bool PCL_FILTER_POINTCLOUD = true;
@@ -22,11 +22,18 @@ const int DET_CELLS_PER_EDGE = int(DET_RANGE * 2 / DET_GRID_CELL_SIZE);
 
 // TRA Tracking parameters
 const int TRA_BUFFER_SIZE = 100;
+const int TRA_Z_LASER = 2;
+const float TRA_STD_LASPX = 0.15;	// Laser measurement noise standard deviation position1 in m
+const float TRA_STD_LASPY = 0.15;	// Laser measurement noise standard deviation position2 in m
 const int TRA_N_X = 5;
 const int TRA_N_AUG = 7;
 
 const float TRA_STD_A = 0.5;				// Process noise standard deviation longitudinal acceleration in m/s^2
 const float TRA_STD_YAWDD = 0.25 * M_PI;	// Process noise standard deviation yaw acceleration in rad/s^2
 const float TRA_LAMBDA = 9.0 - TRA_N_AUG;
+
 // GT Ground truth parameters
 const int GT_BUFFER_SIZE = 100;
+
+// DA Data association parameters
+const float DA_NN_MAX_DIST = 5.0;

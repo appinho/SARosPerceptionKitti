@@ -101,14 +101,15 @@ void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
   ROS_INFO("#Received PCL time stamp [%f]", time_stamp);
 
   tracker.processMeasurements(detector.getClusters(), time_stamp);
-  //visualization_msgs::MarkerArray tracked_bounding_boxes =
-  //  tracker.showTracks();
-  //tra_pub.publish(tracked_bounding_boxes);
+  visualization_msgs::MarkerArray tracked_bounding_boxes =
+    tracker.showTracks();
+  tra_pub.publish(tracked_bounding_boxes);
 
   // Evaluator
   visualization_msgs::MarkerArray ground_truth_bounding_boxes =
     evaluator.showTracklets();
   gt_pub.publish(ground_truth_bounding_boxes);
+  evaluator.showBikeRMSE(tracker.getTracks()[0]);
 
   // Publish the data
   ROS_INFO("#PCL points [%d], #Clusters [%d]", int(cloud->size()), int(detector.getClusters().size()));
@@ -160,7 +161,7 @@ int main (int argc, char** argv){
   // Create a ROS publisher for the detected bounding boxes
   dbb_pub = nh.advertise<visualization_msgs::MarkerArray>( "detection", DET_BUFFER_SIZE);
     // Create a ROS publisher for the tracked bounding boxes
-  tra_pub = nh.advertise<visualization_msgs::MarkerArray>( "detection", TRA_BUFFER_SIZE);
+  tra_pub = nh.advertise<visualization_msgs::MarkerArray>( "tracking", TRA_BUFFER_SIZE);
   // Create a ROS publisher for the ground truth data
   gt_pub = nh.advertise<visualization_msgs::MarkerArray>( "groundtruth", GT_BUFFER_SIZE);
 
