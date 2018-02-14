@@ -5,13 +5,14 @@
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/pQ3EL-UoUpI/0.jpg)](https://www.youtube.com/watch?v=pQ3EL-UoUpI)
 
 ### 0 To Dos
-- Fix coordinate system offset between point cloud, detection and ground truth
+- Integrate simple tracker (KF,UKF)   
+- Improve scope variables in tracker    
+- Create better DA step   
 - Plot text to bounding boxes   
+- Plot ego car    
 - Universal frame counter   
 - Calculate RMSE and plot it    
-- Plot ego car    
-- Integrate timestamps    
-- Integrate simple tracker (KF,UKF)   
+- Fix coordinate system offset between point cloud, detection and ground truth    
 - Apply methods to all videos   
 - Refactor code   
 
