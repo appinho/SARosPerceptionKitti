@@ -27,6 +27,6 @@ const int TRA_N_AUG = 7;
 
 const float TRA_STD_A = 0.5;				// Process noise standard deviation longitudinal acceleration in m/s^2
 const float TRA_STD_YAWDD = 0.25 * M_PI;	// Process noise standard deviation yaw acceleration in rad/s^2
-const int TRA_LAMBDA = 9 - TRA_N_AUG;
+const float TRA_LAMBDA = 9.0 - TRA_N_AUG;
 // GT Ground truth parameters
 const int GT_BUFFER_SIZE = 100;

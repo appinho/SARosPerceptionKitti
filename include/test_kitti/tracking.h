@@ -47,4 +47,6 @@ private:
 	MatrixXd P_aug_;				///* Buffer state covariance for prediction
 	MatrixXd Xsig_aug_;
 	MatrixXd L_;
+	MatrixXd Xsig_pred_;
+	VectorXd weights_;
 };

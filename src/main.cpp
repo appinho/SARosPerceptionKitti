@@ -97,6 +97,9 @@ void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
   dbb_pub.publish(detected_bounding_boxes);
 
   // Tracker
+  time_stamp = input->header.stamp.toSec();
+  ROS_INFO("#Received PCL time stamp [%f]", time_stamp);
+
   tracker.processMeasurements(detector.getClusters(), time_stamp);
   //visualization_msgs::MarkerArray tracked_bounding_boxes =
   //  tracker.showTracks();
@@ -122,8 +125,8 @@ void callback_imu(const sensor_msgs::Imu::ConstPtr& msg){
 
 void callback_gps_fix(const sensor_msgs::NavSatFix::ConstPtr& msg){
 
-//  std::cout << "Gps fix Seq: " << msg->header.stamp << std::endl;
-  time_stamp = msg->header.stamp.toSec();
+  //time_stamp = msg->header.stamp.toSec();
+  ROS_INFO("#Received GPS time stamp [%f]", time_stamp);
 }
 
 void callback_gps_vel(const geometry_msgs::TwistStamped::ConstPtr& msg){
