@@ -5,16 +5,20 @@
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/pQ3EL-UoUpI/0.jpg)](https://www.youtube.com/watch?v=pQ3EL-UoUpI)
 
 ### 0 To Dos
+Visualization   
+- Create visualization class
+- Plot RMSE   
+- Plot text to bounding boxes   
+- Plot ego car   
+Code
 - Integrate ego motion    
-- Fix coordinate system error   
-- Plot tracks   
+- Fix coordinate system offset between point cloud, detection and ground truth    
 - Improve scope variables in tracker    
 - Create better DA step   
-- Plot text to bounding boxes   
-- Plot ego car    
 - Universal frame counter   
-- Calculate RMSE and plot it    
-- Fix coordinate system offset between point cloud, detection and ground truth    
+General
+- Improve it to Multi-Object Tracking
+- Solve association between tracklets and tracks
 - Apply methods to all videos   
 - Refactor code   
 
