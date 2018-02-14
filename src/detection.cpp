@@ -98,8 +98,8 @@ visualization_msgs::MarkerArray & Detection::showDetection(){
     marker_array_.markers[i].pose.position.y = clusters_[i].y;
     marker_array_.markers[i].pose.position.z = 1.0;
 	// Fill in current dimension
-	marker_array_.markers[i].scale.x = clusters_[i].l_x;
-	marker_array_.markers[i].scale.y = clusters_[i].l_y;
+	marker_array_.markers[i].scale.x = 0.1; //clusters_[i].l_x;
+	marker_array_.markers[i].scale.y = 0.1; //clusters_[i].l_y;
 	marker_array_.markers[i].scale.z = 2.0;
   }
   // Loop through remaining buffer size
@@ -108,7 +108,7 @@ visualization_msgs::MarkerArray & Detection::showDetection(){
 	// Fill in current position, orientation
     marker_array_.markers[i].pose.position.x = 0.0;
     marker_array_.markers[i].pose.position.y = 0.0;
-    marker_array_.markers[i].pose.position.z = 0.0;
+    marker_array_.markers[i].pose.position.z = 1.0;
 	// Fill in current dimension
 	marker_array_.markers[i].scale.x = 0.1;
 	marker_array_.markers[i].scale.y = 0.1;

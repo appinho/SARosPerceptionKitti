@@ -24,6 +24,6 @@ private:
 	std::vector< std::pair<int,int> > start_stop_vector_;
 	visualization_msgs::MarkerArray marker_array_;
 
-	void calculateRMSE(const Track & track, const int tracklet_index);
+	void calculateRMSE(const std::vector<VectorXd> &estimations, const int tracklet_index);
 
 };

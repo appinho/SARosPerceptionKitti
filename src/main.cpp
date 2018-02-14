@@ -89,6 +89,9 @@ void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
     sor.setLeafSize(PCL_VOXEL_SIZE, PCL_VOXEL_SIZE, PCL_VOXEL_SIZE);
     sor.filter(*cloud);
   }
+  // Publish the filtered point cloud
+  ROS_INFO("#PCL points [%d], #Clusters [%d]", int(cloud->size()), int(detector.getClusters().size()));
+  pcl_pub.publish(cloud);
 
   // Detector
   detector.runConnectedComponent(cloud);
@@ -98,8 +101,7 @@ void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
 
   // Tracker
   time_stamp = input->header.stamp.toSec();
-  ROS_INFO("#Received PCL time stamp [%f]", time_stamp);
-
+  //ROS_INFO("#Received PCL time stamp [%f]", time_stamp);
   tracker.processMeasurements(detector.getClusters(), time_stamp);
   visualization_msgs::MarkerArray tracked_bounding_boxes =
     tracker.showTracks();
@@ -110,10 +112,6 @@ void callback_pcl(const sensor_msgs::PointCloud2ConstPtr& input){
     evaluator.showTracklets();
   gt_pub.publish(ground_truth_bounding_boxes);
   evaluator.showBikeRMSE(tracker.getTracks()[0]);
-
-  // Publish the data
-  ROS_INFO("#PCL points [%d], #Clusters [%d]", int(cloud->size()), int(detector.getClusters().size()));
-  pcl_pub.publish(cloud);
 }
 
 void callback_imu(const sensor_msgs::Imu::ConstPtr& msg){
@@ -127,7 +125,7 @@ void callback_imu(const sensor_msgs::Imu::ConstPtr& msg){
 void callback_gps_fix(const sensor_msgs::NavSatFix::ConstPtr& msg){
 
   //time_stamp = msg->header.stamp.toSec();
-  ROS_INFO("#Received GPS time stamp [%f]", time_stamp);
+  //ROS_INFO("#Received GPS time stamp [%f]", time_stamp);
 }
 
 void callback_gps_vel(const geometry_msgs::TwistStamped::ConstPtr& msg){

@@ -69,7 +69,8 @@ void Tracking::processMeasurements(const std::vector<Cluster> & detected_cluster
 		double delta_t = time_stamp - last_time_stamp_;
 
 		// Prints
-		std::cout << "Delta t " << delta_t << std::endl;
+		ROS_INFO("Delta T [%f]", delta_t);
+
 
 		// Prediction
 		Prediction(delta_t);
@@ -94,7 +95,7 @@ void Tracking::processMeasurements(const std::vector<Cluster> & detected_cluster
 	last_time_stamp_ = time_stamp;
 
 	// Prints
-	std::cout << "Number of tracks " << tracks_.size() << std::endl;
+	ROS_INFO("Number of tracks [%d]", int(tracks_.size()));
 
 }
 
@@ -259,8 +260,8 @@ void Tracking::Update(const std::vector<Cluster> & detected_clusters){
 			z << detected_clusters[ data_association_[i] ].x, detected_clusters[ data_association_[i] ].y;
 
 			// Prints
-			std::cout << "Lidar measurement found for track " << i << std::endl 
-  			   << z << std::endl;
+			//std::cout << "Lidar measurement found for track " << i << std::endl 
+  			//   << z << std::endl;
 
   			// 1. Predict measurement
 	  		// Init measurement sigma points
@@ -322,7 +323,10 @@ void Tracking::Update(const std::vector<Cluster> & detected_clusters){
 			//update state mean and covariance matrix
 			track.x = track.x + K * z_diff;
 			track.P = track.P - K * S_ * K.transpose();
-			  
+			VectorXd pos = VectorXd::Zero(2);
+			pos << track.x(0), track.x(1);
+			track.hist_pos.push_back(pos);
+
 			// Print prediction
 			std::cout << "Laser Update" << std::endl;
 			std::cout << "x = " << std::endl << track.x << std::endl;
@@ -353,7 +357,7 @@ visualization_msgs::MarkerArray & Tracking::showTracks(){
 		// Fill in current position, orientation
 	    marker_array_.markers[i].pose.position.x = 0.0;
 	    marker_array_.markers[i].pose.position.y = 0.0;
-	    marker_array_.markers[i].pose.position.z = 0.0;
+	    marker_array_.markers[i].pose.position.z = 1.0;
 		// Fill in current dimension
 		marker_array_.markers[i].scale.x = 0.1;
 		marker_array_.markers[i].scale.y = 0.1;

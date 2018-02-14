@@ -92,7 +92,7 @@ visualization_msgs::MarkerArray & Evaluation::showTracklets(){
 		else{
 		    marker_array_.markers[i].pose.position.x = 0;
 		    marker_array_.markers[i].pose.position.y = 0;
-		    marker_array_.markers[i].pose.position.z = 0;
+		    marker_array_.markers[i].pose.position.z = 1.0;
 		    marker_array_.markers[i].scale.x = 0.1; //tracklets_.getTracklet(1)->l;
     		marker_array_.markers[i].scale.y = 0.1; //tracklets_.getTracklet(1)->w;
     		marker_array_.markers[i].scale.z = 2.0; //tracklets_.getTracklet(1)->h;
@@ -110,12 +110,40 @@ visualization_msgs::MarkerArray & Evaluation::showTracklets(){
 
 void Evaluation::showBikeRMSE(const Track & track){
 
-	calculateRMSE(track,1);
+	calculateRMSE(track.hist_pos,1);
 }
 
-void Evaluation::calculateRMSE(const Track & track, const int tracklet_index){
+void Evaluation::calculateRMSE(const std::vector<VectorXd> &estimations, const int tracklet_index){
 
-	float rmse = sqrt( pow(track.x(0) - tracklets_.getTracklet(1)->poses[frame_counter_].tx,2) + pow(track.x(1) - tracklets_.getTracklet(1)->poses[frame_counter_].ty ,2) );
-	ROS_INFO("RMSE between track ([%f],[%f]) and tracklet ([%f],[%f]) = [%f]", track.x(0), track.x(1),
-		tracklets_.getTracklet(1)->poses[frame_counter_].tx, tracklets_.getTracklet(1)->poses[frame_counter_].ty, rmse);
+	if(estimations.empty())
+		return;
+
+	// Define position RMSE
+	VectorXd rmse(2);
+	rmse << 0,0;
+
+	//accumulate squared residuals
+	for(int i = 0; i < estimations.size(); ++i){
+
+		int tracklet_frame_index = estimations.size() - frame_counter_  + i;
+
+		float gt_pos_x = tracklets_.getTracklet(tracklet_index)->poses[tracklet_frame_index].tx + TRA_X_OFFSET;
+		float gt_pos_y = tracklets_.getTracklet(tracklet_index)->poses[tracklet_frame_index].ty;
+		VectorXd ground_truth = VectorXd::Zero(2);
+		ground_truth << gt_pos_x, gt_pos_y;
+		VectorXd residual = estimations[i] - ground_truth;
+
+		//coefficient-wise multiplication
+		residual = residual.array()*residual.array();
+		rmse += residual;
+	}
+
+	//calculate the mean
+	rmse = rmse/estimations.size();
+
+  	//calculate the squared root
+  	rmse = rmse.array().sqrt();
+
+	//float rmse = sqrt( pow(track.x(0) - tracklets_.getTracklet(1)->poses[frame_counter_].tx,2) + pow(track.x(1) - tracklets_.getTracklet(1)->poses[frame_counter_].ty ,2) );
+	ROS_INFO("RMSE after [%d] time steps for tracklet [%d] is x=[%f], y=[%f]", int(estimations.size()), tracklet_index, rmse(0), rmse(1));
 }

@@ -10,6 +10,7 @@ struct Track{
 	VectorXd x;
 	MatrixXd P;
     MatrixXd Xsig_pred;
+    std::vector<VectorXd> hist_pos;
 
 	Track(const Cluster & cluster){
 		x = VectorXd::Zero(TRA_N_X);
@@ -22,6 +23,9 @@ struct Track{
            		0,  0,  0,  1,  0,
            		0,  0,  0,  0,  1;
         Xsig_pred = MatrixXd::Zero(TRA_N_X, 2 * TRA_N_AUG + 1);
+        VectorXd pos = VectorXd::Zero(2);
+		pos << cluster.x, cluster.y;
+		hist_pos.push_back(pos);
 	}
 };
 
