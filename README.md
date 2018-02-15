@@ -9,7 +9,8 @@ Visualization
 - Create visualization class
 - Plot RMSE   
 - Plot text to bounding boxes   
-- Plot ego car   
+- Plot ego car    
+- Plot detection, tracking, ground truth position on diagram and see smoothing effect of tracking filter
 Code
 - Integrate ego motion    
 - Fix coordinate system offset between point cloud, detection and ground truth    
@@ -17,7 +18,8 @@ Code
 - Create better DA step   
 - Universal frame counter   
 General
-- Improve it to Multi-Object Tracking
+- Improve it to Multi-Object Tracking   
+- Include Stereo Camera
 - Solve association between tracklets and tracks
 - Apply methods to all videos   
 - Refactor code   
