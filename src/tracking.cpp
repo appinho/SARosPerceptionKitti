@@ -350,9 +350,9 @@ visualization_msgs::MarkerArray & Tracking::showTracks(){
 		marker_array_.markers[i].scale.x = 0.1;
 		marker_array_.markers[i].scale.y = 0.1;
 		marker_array_.markers[i].scale.z = 2.0;
-	  }
-	  // Loop through remaining buffer size
-	  for(int i = tracks_.size(); i < TRA_BUFFER_SIZE; ++i){
+	}
+	// Loop through remaining buffer size
+	for(int i = tracks_.size(); i < TRA_BUFFER_SIZE; ++i){
 
 		// Fill in current position, orientation
 	    marker_array_.markers[i].pose.position.x = 0.0;
