@@ -1,5 +1,8 @@
 # kitti_ros
 
+[//]: # (Image References)
+
+[image1]: ./images/rqt_plot.png "rqt_plot visualization"
 ## Video of RVIZ
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/pQ3EL-UoUpI/0.jpg)](https://www.youtube.com/watch?v=pQ3EL-UoUpI)
@@ -49,11 +52,19 @@ Set git config name and email
 http://www.cvlibs.net/datasets/kitti/raw_data.php   
 https://github.com/tomas789/kitti2bag
 
-### 3 Visualization   
+### 3 RVIZ   
 Terminal 1: roscore   
 Terminal 2: rviz    
 Terminal 3: rosbag play kitti_2011_09_26_drive_0005_synced.bag    
-Terminal 4: rosrun test_kitti kitti_pcl   
+Terminal 4: rosrun test_kitti kitti_ros   
+
+### 4 RQT_PLOT
+
+![alt text][image1]   
+
+To show element of an array: https://answers.ros.org/question/249736/plot-posestamped-topic-in-rqt_plotrviz/
+
+
 
 After converting the Kitti Data to a rosbag file like in topic 2 and using tutorial   
 https://github.com/udacity/didi-competition/blob/master/docs/GettingStarted.md
