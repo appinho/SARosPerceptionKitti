@@ -5,6 +5,8 @@
 [image1]: ./images/rqt_plot.png "rqt_plot visualization"
 ## Video of RVIZ
 
+The resulting video of RViz can be found on YouTube by clicking on the image below:
+
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/pQ3EL-UoUpI/0.jpg)](https://www.youtube.com/watch?v=pQ3EL-UoUpI)
 
 ### 0 To Dos
