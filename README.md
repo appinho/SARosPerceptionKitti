@@ -14,9 +14,9 @@ The resulting video of RViz can be found on YouTube by clicking on the image bel
 ### 0 To Dos  
 - Integrate ego motion and static coordinates to remove noisy orientation   
 - Include ground extraction and interpolation of point cloud
-- Add DBSCAN cluster algorithm  
-- Add orientation in detection  
-- Include Geometrical and Semantical Model  
+- Add DBSCAN cluster algorithm  (Only seed at dynamical voxels) 
+- Add orientation, height and z coordinate in detection  
+- Include Geometrical and Semantical Model/Classification of tracks not only by semantic but also by dimension  
 - Plot RMSE   
 - Plot text to bounding boxes   
 - Plot ego car    
@@ -26,6 +26,7 @@ The resulting video of RViz can be found on YouTube by clicking on the image bel
 Optional  
 - Include Stereo Camera  
 - Improve Semantic Segmentation by Transfer Learning or better Network architecture  
+- Exchange UKF with PF
 
 ### 1 Installations
 
