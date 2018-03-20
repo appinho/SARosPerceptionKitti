@@ -12,6 +12,7 @@ The resulting video of RViz can be found on YouTube by clicking on the image bel
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/pQ3EL-UoUpI/0.jpg)](https://www.youtube.com/watch?v=pQ3EL-UoUpI)
 
 ### 0 To Dos  
+- Transform World to Image for evaluation  
 - Change DA to be GNN  
 - Include ground extraction and interpolation of point cloud
 - Add DBSCAN cluster algorithm  (Only seed at dynamical voxels) 
