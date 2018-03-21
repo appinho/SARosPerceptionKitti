@@ -12,9 +12,11 @@ The resulting video of RViz can be found on YouTube by clicking on the image bel
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/pQ3EL-UoUpI/0.jpg)](https://www.youtube.com/watch?v=pQ3EL-UoUpI)
 
 ### 0 To Dos  
-- Transform World to Image for evaluation  
+- Unify transformation use so that only cam to image is done by txt file  
+- Create track.msg that differs from object.msg
 - Change DA to be GNN  
-- Include ground extraction and interpolation of point cloud
+- Include ground extraction for more point per object
+- Interpolation of point cloud
 - Add DBSCAN cluster algorithm  (Only seed at dynamical voxels) 
 - Add orientation, height and z coordinate in detection  
 - Include Geometrical and Semantical Model/Classification of tracks not only by semantic but also by dimension  
