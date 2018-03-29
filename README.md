@@ -13,15 +13,15 @@ The resulting video of RViz can be found on YouTube by clicking on the image bel
 
 ### 0 To Dos  
 - Unify transformation use so that only cam to image is done by txt file  
+- Create parameter server
 - Create track.msg that differs from object.msg
-- Change DA to be GNN  
+- Create ROS service for DA to be GNN  
 - Include ground extraction for more point per object
 - Interpolation of point cloud
 - Add DBSCAN cluster algorithm  (Only seed at dynamical voxels) 
-- Add orientation, height and z coordinate in detection  
+- Add height and z coordinate in detection  
 - Include Geometrical and Semantical Model/Classification of tracks not only by semantic but also by dimension  
 - Plot RMSE   
-- Plot text to bounding boxes   
 - Plot ego car    
 - Plot detection, tracking, ground truth position on diagram and see smoothing effect of tracking filter  
 - Create better DA step   
