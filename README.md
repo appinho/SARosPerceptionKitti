@@ -1,4 +1,4 @@
-# ROS Perception Package for Multi-Object Tracking of the KITTI Dataset
+# ROS Perception Package of the KITTI Dataset
 
 [//]: # (Image References)
 
