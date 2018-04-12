@@ -1,77 +1,84 @@
-# ROS Perception Package of the KITTI Dataset
+# ROS package for Perception of the KITTI dataset
 
-[//]: # (Image References)
+<p align="center">
+  <img src="./videos/tracking_60.gif">
+</p>
 
-Change pic
-[image1]: ./images/rqt_plot.png "rqt_plot visualization"
-## Video of RVIZ
+Processing Result for KITTI Tracking Benchmark
+Loading Results - Success
+Evaluate Object Class: CAR
+Loading Groundtruth - Success
+Loaded 1 Sequences.
+Start Evaluation...
+==========================tracking evaluation summary===========================
+Multiple Object Tracking Accuracy (MOTA)                                0.832168
+Multiple Object Tracking Precision (MOTP)                               0.703046
+Multiple Object Tracking Accuracy (MOTAL)                               0.832168
+Multiple Object Detection Accuracy (MODA)                               0.832168
+Multiple Object Detection Precision (MODP)                              0.714124
 
-Change video
-The resulting video of RViz can be found on YouTube by clicking on the image below:
+Recall                                                                  0.833333
+Precision                                                               1.000000
+F1                                                                      0.909091
+False Alarm Rate                                                        0.000000
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/pQ3EL-UoUpI/0.jpg)](https://www.youtube.com/watch?v=pQ3EL-UoUpI)
+Mostly Tracked                                                          0.500000
+Partly Tracked                                                          0.500000
+Mostly Lost                                                             0.000000
 
-### 0 To Dos  
-- Unify transformation use so that only cam to image is done by txt file  
-- Create parameter server
-- Create track.msg that differs from object.msg
-- Create ROS service for DA to be GNN  
-- Include ground extraction for more point per object
-- Interpolation of point cloud
-- Add DBSCAN cluster algorithm  (Only seed at dynamical voxels) 
-- Add height and z coordinate in detection  
-- Include Geometrical and Semantical Model/Classification of tracks not only by semantic but also by dimension  
-- Plot RMSE   
-- Plot ego car    
-- Plot detection, tracking, ground truth position on diagram and see smoothing effect of tracking filter  
-- Create better DA step   
-- Apply methods to all videos   
-Optional  
-- Include Stereo Camera  
-- Improve Semantic Segmentation by Transfer Learning or better Network architecture  
-- Exchange UKF with PF
+True Positives                                                               120
+Ignored True Positives                                                         1
+False Positives                                                                0
+False Negatives                                                               24
+Ignored False Negatives                                                        0
+Missed Targets                                                                24
+ID-switches                                                                    0
+Fragmentations                                                                 3
 
-### 1 Installations
+Ground Truth Objects (Total)                                                 144
+Ignored Ground Truth Objects                                                   1
+Ground Truth Trajectories                                                      2
 
-#### a) Ubuntu 16   
-https://tutorials.ubuntu.com/tutorial/tutorial-create-a-usb-stick-on-ubuntu#0   
-https://youtu.be/5NtCb7rdipo?t=10m4s
+Tracker Objects (Total)                                                      140
+Ignored Tracker Objects                                                       20
+Tracker Trajectories                                                           3
+================================================================================
+Loading Results - Success
+Evaluate Object Class: PEDESTRIAN
+Loading Groundtruth - Success
+Loaded 1 Sequences.
+Start Evaluation...
+==========================tracking evaluation summary===========================
+Multiple Object Tracking Accuracy (MOTA)                                0.390625
+Multiple Object Tracking Precision (MOTP)                               0.689011
+Multiple Object Tracking Accuracy (MOTAL)                               0.390625
+Multiple Object Detection Accuracy (MODA)                               0.390625
+Multiple Object Detection Precision (MODP)                              0.858284
 
-#### b) ROS Kinetic
-http://wiki.ros.org/kinetic/Installation/Ubuntu   
+Recall                                                                  0.562500
+Precision                                                               0.765957
+F1                                                                      0.648649
+False Alarm Rate                                                        0.139241
 
-### c) Coding & Editors
-Sublime
-http://tipsonubuntu.com/2017/05/30/install-sublime-text-3-ubuntu-16-04-official-way/
+Mostly Tracked                                                          0.000000
+Partly Tracked                                                          1.000000
+Mostly Lost                                                             0.000000
 
-### d) Drivers
-Ubuntu Terminal: sudo apt-get install nvidia-384
+True Positives                                                                36
+Ignored True Positives                                                         0
+False Positives                                                               11
+False Negatives                                                               28
+Ignored False Negatives                                                        0
+Missed Targets                                                                28
+ID-switches                                                                    0
+Fragmentations                                                                 6
 
-### e) Git
-Connect the ROS node with GitHub the first time   
-https://help.github.com/articles/adding-an-existing-project-to-github-using-the-command-line/   
-Set git config name and email
+Ground Truth Objects (Total)                                                  64
+Ignored Ground Truth Objects                                                   0
+Ground Truth Trajectories                                                      1
 
-### 2 Dataset
-http://www.cvlibs.net/datasets/kitti/raw_data.php   
-https://github.com/tomas789/kitti2bag
-Explain semantic images and time synchronisation
-
-### 3 ROS
-
-Roslaunch  
-Explain ros messages packages nodes and helper classes
-
-### 4 RQT_PLOT
-
-![alt text][image1]   
-
-To show element of an array: https://answers.ros.org/question/249736/plot-posestamped-topic-in-rqt_plotrviz/
-Show trajectories  
-
-
-After converting the Kitti Data to a rosbag file like in topic 2 and using tutorial   
-https://github.com/udacity/didi-competition/blob/master/docs/GettingStarted.md
-#### 1 Pausing rosbag replay with space bar
-#### 2 Change fixed frame to velodyne
-#### 3 Add 'by topic' PointCloud2
+Tracker Objects (Total)                                                       47
+Ignored Tracker Objects                                                        0
+Tracker Trajectories                                                           2
+================================================================================
+Thank you for participating in our benchmark!

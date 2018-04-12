@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(test_kitti)
+project(perception)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,17 +8,11 @@ project(test_kitti)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rosbag
   roscpp
+  rospy
   std_msgs
-  pcl_conversions
-  pcl_ros
-  sensor_msgs
-  cmake_modules
+  cv_bridge
 )
-
-find_package(OpenCV)
-include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -111,8 +105,8 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES test_kitti
-#  CATKIN_DEPENDS rosbag roscpp std_msgs
+#  LIBRARIES perception
+#  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
@@ -129,7 +123,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/test_kitti.cpp
+#   src/${PROJECT_NAME}/perception.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -140,7 +134,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/test_kitti_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/perception_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -197,20 +191,10 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_test_kitti.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_perception.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-## Add this for creating executables
-add_executable(kitti_ros src/main.cpp
-	include/test_kitti/detection.h src/detection.cpp
-	include/test_kitti/tracking.h src/tracking.cpp
-	include/test_kitti/evaluation.h src/evaluation.cpp
-	include/test_kitti/tracklets.h
-	include/test_kitti/parameter.h)
-	
-target_link_libraries(kitti_ros ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
