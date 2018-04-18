@@ -10,21 +10,13 @@
 
 ## Evaluation Result for Scenario 0060
 
-Processing Result for KITTI Tracking Benchmark  
-
-Evaluate Object Class: CAR  
-MOTA 0.832168  
-MOTP 0.703046  
-MOTAL 0.832168  
-MODA 0.832168  
-MODP 0.714124  
-
-Evaluate Object Class: PEDESTRIAN  
-MOTA 0.390625  
-MOTP 0.689011  
-MOTAL 0.390625  
-MODA 0.390625  
-MODP 0.858284  
+| Class        | CAR           | PEDESTRIAN  |
+| ------------ |:-------------:|:-----------:|
+| MOTA         | 0.832168      | 0.390625    |
+| MOTP         | 0.703046      | 0.689011    |
+| MOTAL        | 0.832168      | 0.390625    |
+| MODA         | 0.832168      | 0.390625    |
+| MODP         | 0.714124      | 0.858284    |
 
 ## Pipeline
 
