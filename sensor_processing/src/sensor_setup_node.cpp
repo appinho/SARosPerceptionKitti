@@ -6,7 +6,7 @@
  */
 
 #include <ros/ros.h>
-#include <sensor_processing_lib/sensor_fusion.h>
+#include <sensor_processing/sensor_fusion.h>
 
 int main(int argc, char **argv){
 	ros::init(argc, argv, "sensor_setup_node");

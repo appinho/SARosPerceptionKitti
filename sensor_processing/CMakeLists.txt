@@ -124,12 +124,12 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME}_lib
+add_library(${PROJECT_NAME}
    src/${PROJECT_NAME}_lib/sensor_fusion.cpp
 )
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_lib
+target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
 )
 
@@ -144,11 +144,11 @@ target_link_libraries(${PROJECT_NAME}_lib
 
 # Sensor setup nodelet
 add_library( sensor_setup_nodelet src/sensor_setup_nodelet.cpp )
-target_link_libraries( sensor_setup_nodelet ${PROJECT_NAME}_lib )
+target_link_libraries( sensor_setup_nodelet ${PROJECT_NAME} )
 
 # Sensor setup node
 add_executable(sensor_setup src/sensor_setup_node.cpp)
-target_link_libraries( sensor_setup ${PROJECT_NAME}_lib )
+target_link_libraries( sensor_setup ${PROJECT_NAME} )
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
