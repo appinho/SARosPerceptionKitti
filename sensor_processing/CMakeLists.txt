@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   cv_bridge
+  pcl_ros
 )
 
 find_package( OpenCV REQUIRED )

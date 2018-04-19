@@ -9,11 +9,33 @@
 #ifndef sensor_processing_H
 #define sensor_processing_H
 
+// Includes
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
+#include <pcl_ros/impl/transforms.hpp>
+#include <pcl/filters/extract_indices.h>
+#include <pcl_ros/point_cloud.h>
+
+// Types of point and cloud to work with
+typedef pcl::PointXYZ VPoint;
+typedef pcl::PointCloud<VPoint> VPointCloud;
 
 namespace sensor_processing{
+
+struct Parameters{
+
+	float grid_min_range;
+	float grid_max_range;
+	float grid_cell_size;
+	int grid_width;
+	int grid_height;
+
+	float lidar_height;
+	float lidar_opening_angle;
+	float lidar_min_height;
+
+};
 
 class SensorFusion{
 
@@ -38,9 +60,14 @@ private:
 	// Node handle
 	ros::NodeHandle nh_, private_nh_;
 
+	// Class members
+	Parameters params_;
+	VPointCloud::Ptr pcl_in_;
+
 	// Publisher & Subscriber
 	ros::Subscriber cloud_sub_;
 	//ros::Subscriber image_sub_;
+	ros::Publisher cloud_pub_;
 	ros::Publisher grid_pub_;
 
 };

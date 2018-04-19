@@ -8,9 +8,12 @@
 
   <!-- Run the sensor setup node -->
   <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node" output="screen">
-    <!--
-    <rosparam file="$(find sensor_setup_node)/config/parameters.yaml" command="load" ns="sensor_setup" />
-  -->
+
+    <rosparam file="$(find sensor_processing)/config/parameters.yaml" command="load" />
+
   </node>
+
+  <node pkg="rviz" type="rviz" name="my_rviz"
+	args="-d $(find sensor_processing)config/rviz_config.rviz"/>
 
 </launch>
