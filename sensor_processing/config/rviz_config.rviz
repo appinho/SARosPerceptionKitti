@@ -3,8 +3,7 @@ Panels:
     Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /PointCloud21
+      Expanded: ~
       Splitter Ratio: 0.439560443
     Tree Height: 825
   - Class: rviz/Selection
@@ -59,6 +58,16 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Alpha: 0.699999988
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /sensor/occ_grid
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -84,25 +93,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 21.2793751
+      Distance: 49.1813126
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 12.6096725
-        Y: -0.277688593
-        Z: -1.19911277
+        X: 29.0078602
+        Y: -1.47042263
+        Z: 3.72361493
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.644798219
+      Pitch: 0.229797497
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.12481165
+      Yaw: 3.08981156
     Saved: ~
 Window Geometry:
   Displays:

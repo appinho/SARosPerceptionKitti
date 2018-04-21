@@ -16,6 +16,7 @@
 #include <pcl_ros/impl/transforms.hpp>
 #include <pcl/filters/extract_indices.h>
 #include <pcl_ros/point_cloud.h>
+#include <nav_msgs/OccupancyGrid.h>
 
 // Types of point and cloud to work with
 typedef pcl::PointXYZ VPoint;
@@ -30,11 +31,30 @@ struct Parameters{
 	float grid_cell_size;
 	int grid_width;
 	int grid_height;
+	int grid_segments;
+	int grid_bins;
+
+	float inv_angular_res;
+	float inv_radial_res;
 
 	float lidar_height;
 	float lidar_opening_angle;
 	float lidar_min_height;
 
+};
+
+struct PolarCell{
+
+	enum Indexes { NOT_SET = 0, FREE = 1, UNKNOWN = 2, OCCUPIED = 3 };
+
+	float z_min, z_max;
+	float height;
+	float rad_dist;
+
+	// Default constructor.
+	PolarCell():
+		z_min(0.0), z_max(0.0), height(0.0), rad_dist(0.0)
+	{}
 };
 
 class SensorFusion{
@@ -63,13 +83,18 @@ private:
 	// Class members
 	Parameters params_;
 	VPointCloud::Ptr pcl_in_;
+	std::vector< std::vector<PolarCell> > polar_grid_;
+	nav_msgs::OccupancyGrid::Ptr occ_grid_;
 
 	// Publisher & Subscriber
 	ros::Subscriber cloud_sub_;
 	//ros::Subscriber image_sub_;
 	ros::Publisher cloud_pub_;
-	ros::Publisher grid_pub_;
+	ros::Publisher occ_grid_pub_;
 
+	// Conversion functions
+	void fromVeloCoordsToPolarCell(const float x, const float y,
+		int & seg, int & bin);
 };
 
 } // namespace sensor_processing

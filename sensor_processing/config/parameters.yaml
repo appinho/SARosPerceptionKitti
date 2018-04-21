@@ -1,7 +1,7 @@
 grid_min_range: 3.0
-grid_max_range: 20.0
-grid_cell_size: 0.25
+grid_max_range: 61.0
+grid_cell_size: 0.2
+grid_segments: 60
 
 lidar_height: -1.73
-lidar_opening_angle: 0.69813170079 # pi / 4.5
-lidar_min_height: -2.4
+lidar_min_height: -1.4
