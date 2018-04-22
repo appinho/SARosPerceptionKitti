@@ -13,10 +13,11 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
-#include <pcl_ros/impl/transforms.hpp>
-#include <pcl/filters/extract_indices.h>
-#include <pcl_ros/point_cloud.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <pcl_ros/impl/transforms.hpp>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/segmentation/sac_segmentation.h>
 
 // Types of point and cloud to work with
 typedef pcl::PointXYZ VPoint;
@@ -33,13 +34,17 @@ struct Parameters{
 	int grid_height;
 	int grid_segments;
 	int grid_bins;
+	float grid_min_height;
 
-	float inv_angular_res;
-	float inv_radial_res;
+	double inv_angular_res;
+	double inv_radial_res;
 
 	float lidar_height;
 	float lidar_opening_angle;
 	float lidar_min_height;
+
+	double ransac_tolerance;
+	int ransac_iterations;
 
 };
 
@@ -47,13 +52,17 @@ struct PolarCell{
 
 	enum Indexes { NOT_SET = 0, FREE = 1, UNKNOWN = 2, OCCUPIED = 3 };
 
-	float z_min, z_max;
+	float x_min, y_min, z_min;
+	float z_max;
+	float ground;
 	float height;
 	float rad_dist;
+	int count;
+	unsigned idx;
 
 	// Default constructor.
 	PolarCell():
-		z_min(0.0), z_max(0.0), height(0.0), rad_dist(0.0)
+		z_min(0.0), z_max(0.0), height(0.0), rad_dist(0.0), count(0)
 	{}
 };
 
@@ -83,18 +92,33 @@ private:
 	// Class members
 	Parameters params_;
 	VPointCloud::Ptr pcl_in_;
+	VPointCloud::Ptr pcl_ground_plane_;
+	VPointCloud::Ptr pcl_ground_;
+	VPointCloud::Ptr pcl_elevated_;
+	VPointCloud::Ptr pcl_voxel_ground_;
+	VPointCloud::Ptr pcl_voxel_elevated_;
 	std::vector< std::vector<PolarCell> > polar_grid_;
 	nav_msgs::OccupancyGrid::Ptr occ_grid_;
+	int time_frame_;
 
-	// Publisher & Subscriber
+	// Subscriber
 	ros::Subscriber cloud_sub_;
-	//ros::Subscriber image_sub_;
-	ros::Publisher cloud_pub_;
-	ros::Publisher occ_grid_pub_;
+	ros::Subscriber image_sub_;
+
+	// Publisher
+	ros::Publisher cloud_filtered_pub_;
+	ros::Publisher cloud_ground_plane_pub_;
+	ros::Publisher cloud_ground_pub_;
+	ros::Publisher cloud_elevated_pub_;
+	ros::Publisher voxel_ground_pub_;
+	ros::Publisher voxel_elevated_pub_;
+	ros::Publisher grid_occupancy_pub_;
 
 	// Conversion functions
 	void fromVeloCoordsToPolarCell(const float x, const float y,
 		int & seg, int & bin);
+	void fromPolarCellToVeloCoords(const int seg, const int bin,
+		float & x, float & y);
 };
 
 } // namespace sensor_processing

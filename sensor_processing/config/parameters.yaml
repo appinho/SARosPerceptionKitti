@@ -1,7 +1,11 @@
 grid_min_range: 3.0
-grid_max_range: 61.0
-grid_cell_size: 0.2
-grid_segments: 60
+grid_max_range: 75.0
+grid_cell_size: 0.25
+grid_segments: 120
+grid_min_height: 0.15
+
+ransac_tolerance: 0.01
+ransac_iterations: 50
 
 lidar_height: -1.73
-lidar_min_height: -1.4
+lidar_min_height: -2.4
