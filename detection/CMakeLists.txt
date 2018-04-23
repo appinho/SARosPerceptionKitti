@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(sensor_processing)
+project(detection)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -128,7 +128,7 @@ include_directories(
 ## Declare a C++ library
 add_library(
   ${PROJECT_NAME}_lib
-  src/${PROJECT_NAME}_lib/sensor_fusion.cpp
+  src/${PROJECT_NAME}_lib/dbscan.cpp
 )
 
 ## Specify libraries to link a library or executable target against
@@ -146,14 +146,14 @@ target_link_libraries(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 
-# Sensor setup nodelet
-add_library( sensor_setup_nodelet src/sensor_setup_nodelet.cpp )
-target_link_libraries( sensor_setup_nodelet ${PROJECT_NAME}_lib )
+# Detection nodelet
+add_library( detection_nodelet src/detection_nodelet.cpp )
+target_link_libraries( detection_nodelet ${PROJECT_NAME}_lib )
 
-# Sensor setup node
-add_executable(sensor_setup src/sensor_setup_node.cpp
+# Detection node
+add_executable(detection src/detection_node.cpp
                             ../helpers/tools.cpp)
-target_link_libraries( sensor_setup ${PROJECT_NAME}_lib )
+target_link_libraries( detection ${PROJECT_NAME}_lib )
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

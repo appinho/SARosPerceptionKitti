@@ -7,7 +7,7 @@
 
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
-#include <sensor_processing/sensor_fusion.h>
+#include <sensor_processing_lib/sensor_fusion.h>
 
 namespace sensor_processing{
 

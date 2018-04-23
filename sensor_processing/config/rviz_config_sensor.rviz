@@ -3,7 +3,8 @@ Panels:
     Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /PointCloud28
       Splitter Ratio: 0.439560443
     Tree Height: 443
   - Class: rviz/Selection
@@ -283,7 +284,7 @@ Visualization Manager:
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.300000012
+      Size (m): 0.100000001
       Style: Spheres
       Topic: /sensor/cloud_semantic
       Unreliable: false
@@ -315,25 +316,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 81.4390411
+      Distance: 63.8147278
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 34.466938
-        Y: 7.36048365
-        Z: -19.8357716
+        X: 38.9857292
+        Y: 2.55838227
+        Z: -12.329752
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.819795728
+      Pitch: 1.13479543
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.30165076
+      Yaw: 3.17164993
     Saved: ~
 Window Geometry:
   Displays:

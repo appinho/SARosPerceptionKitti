@@ -1,16 +1,16 @@
 /******************************************************************************
  *
  * Author: Simon Appel (simonappel62@gmail.com)
- * Date: 19/04/2018
+ * Date: 23/04/2018
  *
  */
 
 #include <ros/ros.h>
-#include <sensor_processing_lib/sensor_fusion.h>
+#include <detection_lib/dbscan.h>
 
 int main(int argc, char **argv){
-	ros::init(argc, argv, "sensor_setup_node");
-	sensor_processing::SensorFusion sensor_setup(
+	ros::init(argc, argv, "detection_node");
+	detection::DbScan detector(
 		ros::NodeHandle(), ros::NodeHandle("~"));
 	ros::spin();
 
