@@ -22,7 +22,7 @@
 
 ## Pipeline
 
-## 0 Data acquisition
+### 0 Data acquisition
 
 * [Kitti Dataset to rosbag](https://github.com/tomas789/kitti2bag)
 
