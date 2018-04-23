@@ -28,6 +28,8 @@
 
 ### 1a) Sensor Fusion: Velodyne Point Cloud Processing
 
+* [Ground extraction & Free space estimation](http://wiki.ros.org/but_velodyne_proc)
+
 ### 1b) Sensor Fusion: Raw Image Processing
 
 * [Semantic segmentation](https://github.com/martinkersner/train-DeepLab)
