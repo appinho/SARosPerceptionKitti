@@ -102,6 +102,8 @@ private:
 	Parameters params_;
 	VPointCloud::Ptr pcl_in_;
 	VPointCloud::Ptr pcl_ground_plane_;
+	VPointCloud::Ptr pcl_ground_plane_inliers_;
+	VPointCloud::Ptr pcl_ground_plane_outliers_;
 	VPointCloud::Ptr pcl_ground_;
 	VPointCloud::Ptr pcl_elevated_;
 	VPointCloud::Ptr pcl_voxel_ground_;
@@ -112,7 +114,8 @@ private:
 
 	// Publisher
 	ros::Publisher cloud_filtered_pub_;
-	ros::Publisher cloud_ground_plane_pub_;
+	ros::Publisher cloud_ground_plane_inliers_pub_;
+	ros::Publisher cloud_ground_plane_outliers_pub_;
 	ros::Publisher cloud_ground_pub_;
 	ros::Publisher cloud_elevated_pub_;
 	ros::Publisher voxel_ground_pub_;

@@ -16,6 +16,8 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	private_nh_(private_nh),
 	pcl_in_(new VPointCloud),
 	pcl_ground_plane_(new VPointCloud),
+	pcl_ground_plane_inliers_(new VPointCloud),
+	pcl_ground_plane_outliers_(new VPointCloud),
 	pcl_ground_(new VPointCloud),
 	pcl_elevated_(new VPointCloud),
 	pcl_voxel_ground_(new VPointCloud),
@@ -101,8 +103,10 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	// Define Publisher 
 	cloud_filtered_pub_ = nh_.advertise<PointCloud2>(
 		"/sensor/cloud_filtered", 2);
-	cloud_ground_plane_pub_ = nh_.advertise<PointCloud2>(
-		"/sensor/cloud_groundplane", 2);
+	cloud_ground_plane_inliers_pub_ = nh_.advertise<PointCloud2>(
+		"/sensor/cloud_groundplane_inliers", 2);
+	cloud_ground_plane_outliers_pub_ = nh_.advertise<PointCloud2>(
+		"/sensor/cloud_groundplane_outliers", 2);
 	cloud_ground_pub_ = nh_.advertise<PointCloud2>(
 		"/sensor/cloud_ground", 2);
 	cloud_elevated_pub_ = nh_.advertise<PointCloud2>(
@@ -250,6 +254,17 @@ void SensorFusion::process(
 	segmentation.setInputCloud(pcl_ground_plane_->makeShared());
 	segmentation.segment(*inliers, *coefficients);
 
+	// Divide ground plane cloud in inlier cloud and outlier cloud
+	pcl_extractor.setInputCloud(pcl_ground_plane_);
+	pcl_extractor.setIndices(inliers);
+	pcl_extractor.setNegative(false);
+	pcl_extractor.filter(*pcl_ground_plane_inliers_);
+
+	pcl_extractor.setInputCloud(pcl_ground_plane_);
+	pcl_extractor.setIndices(inliers);
+	pcl_extractor.setNegative(true);
+	pcl_extractor.filter(*pcl_ground_plane_outliers_);
+
 	// Estimate ground height in the center of the polar map
 	float ground_height = -coefficients->values[3] / coefficients->values[2];
 
@@ -259,16 +274,21 @@ void SensorFusion::process(
 			"height [%f]", int(inliers->indices.size()), ground_height);
 	}
 
-	// Publish ground plane point cloud
-	pcl_ground_plane_->header.frame_id = cloud->header.frame_id;
-	pcl_ground_plane_->header.stamp = 
+	// Publish ground plane inliers and outliers point cloud
+	pcl_ground_plane_inliers_->header.frame_id = cloud->header.frame_id;
+	pcl_ground_plane_inliers_->header.stamp = 
 		pcl_conversions::toPCL(cloud->header.stamp);
-	cloud_ground_plane_pub_.publish(pcl_ground_plane_);
+	cloud_ground_plane_inliers_pub_.publish(pcl_ground_plane_inliers_);
+
+	pcl_ground_plane_outliers_->header.frame_id = cloud->header.frame_id;
+	pcl_ground_plane_outliers_->header.stamp = 
+		pcl_conversions::toPCL(cloud->header.stamp);
+	cloud_ground_plane_outliers_pub_.publish(pcl_ground_plane_outliers_);
 
 	// Print
 	ROS_INFO("Ground plane estimation [%d] # Points [%d] # Inliers [%d] Lidar "
 		" height [%f], C [%f][%f][%f][%f]",	time_frame_, 
-		int(pcl_ground_plane_->size()),	int(inliers->indices.size()), 
+		int(pcl_ground_plane_->size()),	int(pcl_ground_plane_inliers_->size()), 
 		ground_height, coefficients->values[0], coefficients->values[1],
 		coefficients->values[2], coefficients->values[3]);
 

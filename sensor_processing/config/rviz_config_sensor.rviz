@@ -73,8 +73,8 @@ Visualization Manager:
     - Alpha: 0.400000006
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 2.68445921
-        Min Value: -1.68609703
+        Max Value: 2.64796686
+        Min Value: -1.66111887
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -82,7 +82,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: AxisColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -99,12 +99,12 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 0.100000001
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: -0.695798993
-        Min Value: -1.74585021
+        Max Value: -0.900568366
+        Min Value: -1.71445799
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -142,7 +142,7 @@ Visualization Manager:
       Color: 0; 255; 0
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 0; 0; 255
       Max Intensity: 4096
@@ -159,7 +159,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -202,7 +202,7 @@ Visualization Manager:
       Color: 0; 0; 255
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -219,7 +219,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -275,25 +275,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 106.207619
+      Distance: 79.4638519
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 49.3027306
-        Y: -6.6900506
-        Z: 0.0954312086
+        X: 48.9765816
+        Y: -4.77776575
+        Z: -0.941468179
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.219796464
+      Pitch: 0.364795804
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.11665487
+      Yaw: 3.08165097
     Saved: ~
 Window Geometry:
   Displays:
