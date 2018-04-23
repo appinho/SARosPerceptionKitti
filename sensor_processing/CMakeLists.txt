@@ -149,7 +149,8 @@ add_library( sensor_setup_nodelet src/sensor_setup_nodelet.cpp )
 target_link_libraries( sensor_setup_nodelet ${PROJECT_NAME} )
 
 # Sensor setup node
-add_executable(sensor_setup src/sensor_setup_node.cpp)
+add_executable(sensor_setup src/sensor_setup_node.cpp
+                            ../helpers/tools.cpp)
 target_link_libraries( sensor_setup ${PROJECT_NAME} )
 
 ## Rename C++ executable without prefix

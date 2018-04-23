@@ -20,6 +20,9 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
+#include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <../../helpers/tools.h>
 
 // Types of point and cloud to work with
 typedef pcl::PointXYZ VPoint;
@@ -34,6 +37,8 @@ using namespace message_filters;
 
 // Parameter handler
 struct Parameters{
+
+	std::string scenario;
 
 	float grid_min_range;
 	float grid_max_range;
@@ -100,6 +105,7 @@ private:
 
 	// Class members
 	Parameters params_;
+
 	VPointCloud::Ptr pcl_in_;
 	VPointCloud::Ptr pcl_ground_plane_;
 	VPointCloud::Ptr pcl_ground_plane_inliers_;
@@ -110,6 +116,11 @@ private:
 	VPointCloud::Ptr pcl_voxel_elevated_;
 	std::vector< std::vector<PolarCell> > polar_grid_;
 	OccupancyGrid::Ptr occ_grid_;
+
+	cv::Mat sem_image_;
+
+	Tools tools_;
+
 	int time_frame_;
 
 	// Publisher
@@ -122,11 +133,18 @@ private:
 	ros::Publisher voxel_elevated_pub_;
 	ros::Publisher grid_occupancy_pub_;
 
+	ros::Publisher image_semantic_pub_;
+
 	// Subscriber
 	Subscriber<PointCloud2> cloud_sub_;
 	Subscriber<Image> image_sub_;
 	typedef sync_policies::ExactTime<PointCloud2, Image> MySyncPolicy;
 	Synchronizer<MySyncPolicy> sync_;
+
+	// Class functions
+	void processPointCloud(const PointCloud2::ConstPtr & cloud);
+	void processImage(const Image::ConstPtr & image);
+	void mapPointCloudIntoImage();
 
 	// Conversion functions
 	void fromVeloCoordsToPolarCell(const float x, const float y,

@@ -26,6 +26,17 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	image_sub_(nh,	"/kitti/camera_color_left/image_raw", 2),
 	sync_(MySyncPolicy(10), cloud_sub_, image_sub_){
 
+	// Get scenario parameter
+	int scenario;
+	if(ros::param::get("~scenario", scenario)){
+		std::ostringstream scenario_stream;
+		scenario_stream << std::setfill('0') << std::setw(4) << scenario;
+		params_.scenario = scenario_stream.str();
+	}
+	else{
+		ROS_ERROR("Failed to read scenario");
+	}
+
 	// Define lidar parameters
 	private_nh_.param("lidar_height", params_.lidar_height,
 		params_.lidar_height);
@@ -60,6 +71,7 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	params_.inv_radial_res = 1.0f / params_.grid_cell_size;
 
 	// Print parameters
+	ROS_INFO_STREAM("scenario " << params_.scenario);
 	ROS_INFO_STREAM("grid_height " << params_.grid_height);
 	ROS_INFO_STREAM("grid_width " << params_.grid_width);
 	ROS_INFO_STREAM("grid_cell_size " << params_.grid_cell_size);
@@ -118,6 +130,9 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	grid_occupancy_pub_ = nh_.advertise<OccupancyGrid>(
 		"/sensor/grid_occupancy", 2);
 
+	image_semantic_pub_ = nh_.advertise<Image>(
+		"/sensor/image_semantic", 2);
+
 	// Define Subscriber
 	sync_.registerCallback(boost::bind(&SensorFusion::process, this, _1, _2));
 
@@ -133,6 +148,28 @@ void SensorFusion::process(
 		const PointCloud2::ConstPtr & cloud,
 		const Image::ConstPtr & image
 	){
+
+	// Preprocess point cloud
+	processPointCloud(cloud);
+
+	// Preprocess image
+	processImage(image);
+
+	// Fuse sensors by mapping elevated point cloud into semantic segmentated
+	// image
+	mapPointCloudIntoImage();
+
+	// Print sensor fusion
+	ROS_INFO("Publishing Sensor Fusion [%d]: # PCL points [%d] # Elevated [%d]"
+		" # Ground [%d] ", time_frame_,	int(pcl_in_->size()), 
+		int(pcl_elevated_->size()), int(pcl_ground_->size()));
+
+	// Increment time frame
+	time_frame_++;
+
+}
+
+void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 
 /******************************************************************************
  * 1. Filter point cloud to only consider points in the front that can also be
@@ -463,15 +500,48 @@ void SensorFusion::process(
 	occ_grid_->header.frame_id = cloud->header.frame_id;
 	occ_grid_->info.map_load_time = occ_grid_->header.stamp;
 	grid_occupancy_pub_.publish(occ_grid_);
+}
 
-	// Print sensor fusion
-	ROS_INFO("Publishing Sensor Fusion [%d]: # PCL points [%d] # Elevated [%d]"
-		" # Ground [%d] ", time_frame_,	int(pcl_in_->size()), 
-		int(pcl_elevated_->size()), int(pcl_ground_->size()));
-	ROS_INFO("Image [%d][%d]", image->width, image->height);
+void SensorFusion::processImage(const Image::ConstPtr & image){
 
-	// Increment time frame
-	time_frame_++;
+/******************************************************************************
+ * 1. Load precalculated semantic segmentated images to ensure online
+ * performance
+ */
+
+	// Define path
+	std::ostringstream path_name;
+	path_name << "/home/simonappel/kitti_data/"
+		<< params_.scenario 
+		<< "/segmented_semantic_images/"
+		<< std::setfill('0') << std::setw(10)	<< time_frame_ << ".png";
+
+	// Load semantic segmentated image
+	sem_image_ = cv::imread(path_name.str(), CV_LOAD_IMAGE_COLOR);
+
+	// Sanity check if image is loaded correctly
+	if(sem_image_.cols == 0 || sem_image_.rows == 0){
+		ROS_WARN("Semantic image not read properly!");
+		return;
+	}
+
+	// Publish
+	cv_bridge::CvImage cv_semantic_image;
+	cv_semantic_image.image = sem_image_;
+	cv_semantic_image.encoding = "bgr8";
+	cv_semantic_image.header.stamp = image->header.stamp;
+	image_semantic_pub_.publish(cv_semantic_image.toImageMsg());
+
+	// Print
+	ROS_INFO("Image [%d][%d]", sem_image_.cols, sem_image_.rows);
+}
+
+void SensorFusion::mapPointCloudIntoImage(){
+
+/******************************************************************************
+ * 1. Convert velodyne points into image space
+ */
+	
 }
 
 void SensorFusion::fromVeloCoordsToPolarCell(const float x, const float y,
