@@ -18,13 +18,21 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
 
 // Types of point and cloud to work with
 typedef pcl::PointXYZ VPoint;
 typedef pcl::PointCloud<VPoint> VPointCloud;
 
+// Namespaces
 namespace sensor_processing{
 
+using namespace sensor_msgs;
+using namespace nav_msgs;
+using namespace message_filters;
+
+// Parameter handler
 struct Parameters{
 
 	float grid_min_range;
@@ -48,6 +56,7 @@ struct Parameters{
 
 };
 
+// Attributes of cell from polar grid
 struct PolarCell{
 
 	enum Indexes { NOT_SET = 0, FREE = 1, UNKNOWN = 2, OCCUPIED = 3 };
@@ -79,8 +88,8 @@ public:
 	// Processes 3D Velodyne point cloud together with raw camera image
 	// and publishes the output grid message
 	virtual void process(
-		const sensor_msgs::PointCloud2::ConstPtr & cloud
-		//const sensor_msgs::Image::ConstPtr & image
+		const sensor_msgs::PointCloud2::ConstPtr & cloud,
+		const sensor_msgs::Image::ConstPtr & image
 	);
 
 
@@ -98,12 +107,8 @@ private:
 	VPointCloud::Ptr pcl_voxel_ground_;
 	VPointCloud::Ptr pcl_voxel_elevated_;
 	std::vector< std::vector<PolarCell> > polar_grid_;
-	nav_msgs::OccupancyGrid::Ptr occ_grid_;
+	OccupancyGrid::Ptr occ_grid_;
 	int time_frame_;
-
-	// Subscriber
-	ros::Subscriber cloud_sub_;
-	ros::Subscriber image_sub_;
 
 	// Publisher
 	ros::Publisher cloud_filtered_pub_;
@@ -113,6 +118,12 @@ private:
 	ros::Publisher voxel_ground_pub_;
 	ros::Publisher voxel_elevated_pub_;
 	ros::Publisher grid_occupancy_pub_;
+
+	// Subscriber
+	Subscriber<PointCloud2> cloud_sub_;
+	Subscriber<Image> image_sub_;
+	typedef sync_policies::ExactTime<PointCloud2, Image> MySyncPolicy;
+	Synchronizer<MySyncPolicy> sync_;
 
 	// Conversion functions
 	void fromVeloCoordsToPolarCell(const float x, const float y,

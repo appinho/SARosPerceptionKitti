@@ -19,7 +19,10 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	pcl_ground_(new VPointCloud),
 	pcl_elevated_(new VPointCloud),
 	pcl_voxel_ground_(new VPointCloud),
-	pcl_voxel_elevated_(new VPointCloud){
+	pcl_voxel_elevated_(new VPointCloud),
+	cloud_sub_(nh, "/kitti/velo/pointcloud", 2),
+	image_sub_(nh,	"/kitti/camera_color_left/image_raw", 2),
+	sync_(MySyncPolicy(10), cloud_sub_, image_sub_){
 
 	// Define lidar parameters
 	private_nh_.param("lidar_height", params_.lidar_height,
@@ -71,7 +74,7 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		std::vector<PolarCell>(params_.grid_bins));
 
 	// Define occupancy grid
-	occ_grid_ = boost::make_shared<nav_msgs::OccupancyGrid>();
+	occ_grid_ = boost::make_shared<OccupancyGrid>();
 	occ_grid_->data.resize(params_.grid_width * params_.grid_height);
 	occ_grid_->info.width = uint32_t(params_.grid_width);
 	occ_grid_->info.height = uint32_t(params_.grid_height);
@@ -96,26 +99,23 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	}
 
 	// Define Publisher 
-	cloud_filtered_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(
+	cloud_filtered_pub_ = nh_.advertise<PointCloud2>(
 		"/sensor/cloud_filtered", 2);
-	cloud_ground_plane_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(
+	cloud_ground_plane_pub_ = nh_.advertise<PointCloud2>(
 		"/sensor/cloud_groundplane", 2);
-	cloud_ground_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(
+	cloud_ground_pub_ = nh_.advertise<PointCloud2>(
 		"/sensor/cloud_ground", 2);
-	cloud_elevated_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(
+	cloud_elevated_pub_ = nh_.advertise<PointCloud2>(
 		"/sensor/cloud_elevated", 2);
-	voxel_ground_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(
+	voxel_ground_pub_ = nh_.advertise<PointCloud2>(
 		"/sensor/voxel_ground", 2);
-	voxel_elevated_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(
+	voxel_elevated_pub_ = nh_.advertise<PointCloud2>(
 		"/sensor/voxel_elevated", 2);
-	grid_occupancy_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>(
+	grid_occupancy_pub_ = nh_.advertise<OccupancyGrid>(
 		"/sensor/grid_occupancy", 2);
 
 	// Define Subscriber
-	cloud_sub_ = nh_.subscribe<sensor_msgs::PointCloud2>(
-		"/kitti/velo/pointcloud", 2, &SensorFusion::process, this);
-	//image_sub_ = nh_.subscribe<sensor_msgs::Image>(
-	//	"/kitti/camera_color_left/image_raw", 2, &SensorFusion::process, this);
+	sync_.registerCallback(boost::bind(&SensorFusion::process, this, _1, _2));
 
 	// Init counter for publishing
 	time_frame_ = 0;
@@ -126,8 +126,8 @@ SensorFusion::~SensorFusion(){
 }
 
 void SensorFusion::process(
-		const sensor_msgs::PointCloud2::ConstPtr & cloud
-		//const sensor_msgs::Image::ConstPtr & image
+		const PointCloud2::ConstPtr & cloud,
+		const Image::ConstPtr & image
 	){
 
 /******************************************************************************
@@ -448,6 +448,7 @@ void SensorFusion::process(
 	ROS_INFO("Publishing Sensor Fusion [%d]: # PCL points [%d] # Elevated [%d]"
 		" # Ground [%d] ", time_frame_,	int(pcl_in_->size()), 
 		int(pcl_elevated_->size()), int(pcl_ground_->size()));
+	ROS_INFO("Image [%d][%d]", image->width, image->height);
 
 	// Increment time frame
 	time_frame_++;
