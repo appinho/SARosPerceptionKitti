@@ -22,6 +22,7 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	pcl_elevated_(new VPointCloud),
 	pcl_voxel_ground_(new VPointCloud),
 	pcl_voxel_elevated_(new VPointCloud),
+	pcl_semantic_(new VRGBPointCloud),
 	cloud_sub_(nh, "/kitti/velo/pointcloud", 2),
 	image_sub_(nh,	"/kitti/camera_color_left/image_raw", 2),
 	sync_(MySyncPolicy(10), cloud_sub_, image_sub_){
@@ -132,6 +133,8 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 
 	image_semantic_pub_ = nh_.advertise<Image>(
 		"/sensor/image_semantic", 2);
+	cloud_semantic_pub_ = nh_.advertise<PointCloud2>(
+		"/sensor/cloud_semantic", 2);
 
 	// Define Subscriber
 	sync_.registerCallback(boost::bind(&SensorFusion::process, this, _1, _2));
@@ -157,12 +160,13 @@ void SensorFusion::process(
 
 	// Fuse sensors by mapping elevated point cloud into semantic segmentated
 	// image
-	mapPointCloudIntoImage();
+	mapPointCloudIntoImage(pcl_elevated_);
 
 	// Print sensor fusion
-	ROS_INFO("Publishing Sensor Fusion [%d]: # PCL points [%d] # Elevated [%d]"
-		" # Ground [%d] ", time_frame_,	int(pcl_in_->size()), 
-		int(pcl_elevated_->size()), int(pcl_ground_->size()));
+	ROS_INFO("Publishing Sensor Fusion [%d]: # PCL points [%d] # Ground [%d]"
+		" # Elevated [%d] # Semantic [%d] ", time_frame_, int(pcl_in_->size()), 
+		int(pcl_ground_->size()), int(pcl_elevated_->size()), 
+		int(pcl_semantic_->size()));
 
 	// Increment time frame
 	time_frame_++;
@@ -531,17 +535,69 @@ void SensorFusion::processImage(const Image::ConstPtr & image){
 	cv_semantic_image.encoding = "bgr8";
 	cv_semantic_image.header.stamp = image->header.stamp;
 	image_semantic_pub_.publish(cv_semantic_image.toImageMsg());
-
-	// Print
-	ROS_INFO("Image [%d][%d]", sem_image_.cols, sem_image_.rows);
 }
 
-void SensorFusion::mapPointCloudIntoImage(){
+void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud){
 
 /******************************************************************************
  * 1. Convert velodyne points into image space
  */
-	
+
+	// Define matrix to write velodyne points into
+	MatrixXf matrix_velodyne_points = MatrixXf::Zero(4, cloud->size());
+	for(int i = 0; i < cloud->size(); ++i){
+		matrix_velodyne_points(0,i) = cloud->points[i].x;
+		matrix_velodyne_points(1,i) = cloud->points[i].y;
+		matrix_velodyne_points(2,i) = cloud->points[i].z;
+		matrix_velodyne_points(3,i) = 1;
+	}
+
+	// Project the matrix from velodyne coordinates to the image plane
+	MatrixXf matrix_image_points = 
+		tools_.transformVeloToImage(matrix_velodyne_points);
+
+	// Get image format
+	int img_width = sem_image_.cols;
+	int img_height = sem_image_.rows;
+
+	// Clear semantic cloud
+	pcl_semantic_->points.clear();
+
+	// Loop over image points
+	for(int i = 0; i < matrix_image_points.cols(); i++){
+
+		// Check if image point is valid
+		const int & img_x = matrix_image_points(0, i);
+		const int & img_y = matrix_image_points(1, i);
+		const int & img_z = matrix_image_points(2, i);
+
+		if( (img_x >= 0 && img_x < img_width) &&
+			(img_y >= 0 && img_y < img_height) &&
+			(img_z >= 0)){
+
+			// Get R G B values of semantic image
+			uint8_t r = sem_image_.at<cv::Vec3b>(img_y,img_x)[2];
+			uint8_t g = sem_image_.at<cv::Vec3b>(img_y,img_x)[1];
+			uint8_t b = sem_image_.at<cv::Vec3b>(img_y,img_x)[0];
+
+			// Create new point and fill it
+			VRGBPoint point;
+			point.x = cloud->points[i].x;
+			point.y = cloud->points[i].y;
+			point.z = cloud->points[i].z;
+			point.r = r;
+			point.g = g;
+			point.b = b;
+
+			// Push back point
+			pcl_semantic_->points.push_back(point);
+		}
+	}
+
+	// Publish semantic cloud
+	pcl_semantic_->header.frame_id = cloud->header.frame_id;
+	pcl_semantic_->header.stamp = cloud->header.stamp;
+	cloud_semantic_pub_.publish(pcl_semantic_);
 }
 
 void SensorFusion::fromVeloCoordsToPolarCell(const float x, const float y,

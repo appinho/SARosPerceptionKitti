@@ -27,6 +27,8 @@
 // Types of point and cloud to work with
 typedef pcl::PointXYZ VPoint;
 typedef pcl::PointCloud<VPoint> VPointCloud;
+typedef pcl::PointXYZRGB VRGBPoint;
+typedef pcl::PointCloud<VRGBPoint> VRGBPointCloud;
 
 // Namespaces
 namespace sensor_processing{
@@ -119,6 +121,8 @@ private:
 
 	cv::Mat sem_image_;
 
+	VRGBPointCloud::Ptr pcl_semantic_;
+
 	Tools tools_;
 
 	int time_frame_;
@@ -134,6 +138,7 @@ private:
 	ros::Publisher grid_occupancy_pub_;
 
 	ros::Publisher image_semantic_pub_;
+	ros::Publisher cloud_semantic_pub_;
 
 	// Subscriber
 	Subscriber<PointCloud2> cloud_sub_;
@@ -144,7 +149,7 @@ private:
 	// Class functions
 	void processPointCloud(const PointCloud2::ConstPtr & cloud);
 	void processImage(const Image::ConstPtr & image);
-	void mapPointCloudIntoImage();
+	void mapPointCloudIntoImage(const VPointCloud::Ptr cloud);
 
 	// Conversion functions
 	void fromVeloCoordsToPolarCell(const float x, const float y,

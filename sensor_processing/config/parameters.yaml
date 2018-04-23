@@ -1,5 +1,5 @@
 grid_min_range: 3.0
-grid_max_range: 75.0
+grid_max_range: 60.0
 grid_cell_size: 0.25
 grid_segments: 120
 grid_min_height: 0.15
