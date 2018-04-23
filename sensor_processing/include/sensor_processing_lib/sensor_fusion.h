@@ -95,8 +95,8 @@ public:
 	// Processes 3D Velodyne point cloud together with raw camera image
 	// and publishes the output grid message
 	virtual void process(
-		const sensor_msgs::PointCloud2::ConstPtr & cloud,
-		const sensor_msgs::Image::ConstPtr & image
+		const PointCloud2::ConstPtr & cloud,
+		const Image::ConstPtr & image
 	);
 
 
@@ -120,8 +120,10 @@ private:
 	OccupancyGrid::Ptr occ_grid_;
 
 	cv::Mat sem_image_;
+	cv::Mat detection_grid_;
 
 	VRGBPointCloud::Ptr pcl_semantic_;
+	VRGBPointCloud::Ptr pcl_sparse_semantic_;
 
 	Tools tools_;
 
@@ -139,6 +141,8 @@ private:
 
 	ros::Publisher image_semantic_pub_;
 	ros::Publisher cloud_semantic_pub_;
+	ros::Publisher cloud_semantic_sparse_pub_;
+	ros::Publisher image_detection_grid_pub_;
 
 	// Subscriber
 	Subscriber<PointCloud2> cloud_sub_;
@@ -156,6 +160,10 @@ private:
 		int & seg, int & bin);
 	void fromPolarCellToVeloCoords(const int seg, const int bin,
 		float & x, float & y);
+	void fromVeloCoordsToCartesianCell(const float x, const float y,
+		int & grid_x, int & grid_y);
+	void fromCartesianCellToVeloCoords(const int grid_x,
+		const int grid_y, float & x, float & y);
 };
 
 } // namespace sensor_processing

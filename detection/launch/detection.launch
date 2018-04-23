@@ -15,6 +15,14 @@
     <param name="scenario" value="$(arg scenario)" />
   </node>
 
+  <!-- Run the detection node -->
+  <node pkg="detection" type="detection" name="detection_node" output="screen">
+
+    <!-- Get parameters from parameter.yaml file -->
+    <rosparam file="$(find detection)/config/parameters.yaml" command="load" />
+    
+  </node>
+
   <!-- Launch rviz for visualization -->
   <node pkg="rviz" type="rviz" name="my_rviz"
 	args="-d $(find sensor_processing)config/rviz_config_sensor.rviz"/>

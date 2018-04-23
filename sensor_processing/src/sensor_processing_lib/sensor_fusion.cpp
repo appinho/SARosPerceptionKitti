@@ -23,6 +23,7 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	pcl_voxel_ground_(new VPointCloud),
 	pcl_voxel_elevated_(new VPointCloud),
 	pcl_semantic_(new VRGBPointCloud),
+	pcl_sparse_semantic_(new VRGBPointCloud),
 	cloud_sub_(nh, "/kitti/velo/pointcloud", 2),
 	image_sub_(nh,	"/kitti/camera_color_left/image_raw", 2),
 	sync_(MySyncPolicy(10), cloud_sub_, image_sub_){
@@ -135,6 +136,10 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		"/sensor/image_semantic", 2);
 	cloud_semantic_pub_ = nh_.advertise<PointCloud2>(
 		"/sensor/cloud_semantic", 2);
+	cloud_semantic_sparse_pub_ = nh_.advertise<PointCloud2>(
+		"/sensor/cloud_semantic_sparse", 2);
+	image_detection_grid_pub_ = nh_.advertise<Image>(
+		"/sensor/image_detection_grid", 2);
 
 	// Define Subscriber
 	sync_.registerCallback(boost::bind(&SensorFusion::process, this, _1, _2));
@@ -164,9 +169,10 @@ void SensorFusion::process(
 
 	// Print sensor fusion
 	ROS_INFO("Publishing Sensor Fusion [%d]: # PCL points [%d] # Ground [%d]"
-		" # Elevated [%d] # Semantic [%d] ", time_frame_, int(pcl_in_->size()), 
-		int(pcl_ground_->size()), int(pcl_elevated_->size()), 
-		int(pcl_semantic_->size()));
+		" # Elevated [%d] # Semantic [%d] # Sparse Semantic [%d]", time_frame_,
+		int(pcl_in_->size()), int(pcl_ground_->size()),
+		int(pcl_elevated_->size()), int(pcl_semantic_->size()),
+		int(pcl_sparse_semantic_->size()));
 
 	// Increment time frame
 	time_frame_++;
@@ -306,13 +312,12 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 	pcl_extractor.setNegative(true);
 	pcl_extractor.filter(*pcl_ground_plane_outliers_);
 
-	// Estimate ground height in the center of the polar map
-	float ground_height = -coefficients->values[3] / coefficients->values[2];
-
 	// Sanity check
-	if(inliers->indices.empty() || ground_height < -2 || ground_height > -1.5){
+	if(inliers->indices.empty() || coefficients->values[3] > 2 || 
+		coefficients->values[3] < 1.5){
 		ROS_WARN("Bad ground plane estimation! # Ransac Inliers [%d] # Lidar "
-			"height [%f]", int(inliers->indices.size()), ground_height);
+			"height [%f]", int(inliers->indices.size()),
+			coefficients->values[3]);
 	}
 
 	// Publish ground plane inliers and outliers point cloud
@@ -327,10 +332,10 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 	cloud_ground_plane_outliers_pub_.publish(pcl_ground_plane_outliers_);
 
 	// Print
-	ROS_INFO("Ground plane estimation [%d] # Points [%d] # Inliers [%d] Lidar "
-		" height [%f], C [%f][%f][%f][%f]",	time_frame_, 
+	ROS_INFO("Ground plane estimation [%d] # Points [%d] # Inliers [%d] "
+		" C [%f][%f][%f][%f]",	time_frame_, 
 		int(pcl_ground_plane_->size()),	int(pcl_ground_plane_inliers_->size()), 
-		ground_height, coefficients->values[0], coefficients->values[1],
+		coefficients->values[0], coefficients->values[1],
 		coefficients->values[2], coefficients->values[3]);
 
 /******************************************************************************
@@ -594,10 +599,114 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud){
 		}
 	}
 
+	// Sanity check
+	if(pcl_semantic_->empty()){
+		ROS_WARN("Empty semantic point cloud!");
+		return;
+	}
+
 	// Publish semantic cloud
 	pcl_semantic_->header.frame_id = cloud->header.frame_id;
 	pcl_semantic_->header.stamp = cloud->header.stamp;
 	cloud_semantic_pub_.publish(pcl_semantic_);
+
+/******************************************************************************
+ * 2. Gather in each cartesian grid cell the semantic labels
+ */	
+
+	// Define hash table to remember points of semantic point cloud in each cell
+	std::map<int, std::map<int,int> > cell_hash_table;
+
+	// Loop through semantic point cloud
+	for(int i = 0; i < pcl_semantic_->size(); ++i){
+
+		// Read current point
+		VRGBPoint & point = pcl_semantic_->at(i);
+
+		// Buffer variables
+		int grid_x, grid_y;
+
+		// Get cartesian grid indices
+		fromVeloCoordsToCartesianCell(point.x, point.y, grid_x, grid_y);
+		int grid_occ = grid_y * params_.grid_width + grid_x;
+
+		// Get semantic class
+		int semantic_class = tools_.SEMANTIC_COLOR_TO_CLASS[
+			point.r + point.g + point.b];
+
+		// Increment hash table counter for this grid cell
+		cell_hash_table[grid_occ][semantic_class]++;
+	}
+
+/******************************************************************************
+ * 3. Fill detection grid image and sparse semantic point cloud
+ */	
+
+	// Init image
+	detection_grid_ = cv::Mat(params_.grid_height, params_.grid_width, CV_32FC3,
+		cv::Scalar(-2.0, 0.0, 0.0));
+
+	// Init  sparse semantic point cloud
+	pcl_sparse_semantic_->points.clear();
+
+	// Loop over hash table to find most dominant semantic label
+	std::map<int, std::map<int,int> >::iterator it;
+	for(it = cell_hash_table.begin(); it != cell_hash_table.end(); it++ ){
+
+		// Loop through all hits in cell and determine best semantic label
+		std::map<int,int>::iterator it2;
+		int max_semantic_counter = -1;
+		int max_class;
+		for(it2 = it->second.begin(); it2 != it->second.end(); it2++ ){
+
+			if(it2->second > max_semantic_counter){
+				max_semantic_counter = it2->second;
+				max_class = it2->first;
+			}
+		}
+
+		// Determine cartesian grid indices
+		int grid_x = it->first % params_.grid_width;
+		int grid_y = it->first / params_.grid_width;
+
+		// Buffer variables
+		float x, y;
+		int seg, bin;
+
+		// Calculate velodyne coordinates
+		fromCartesianCellToVeloCoords(grid_x, grid_y, x, y);
+
+		// Calculate polar grid indices to grab polar cell
+		fromVeloCoordsToPolarCell(x, y, seg, bin);
+		PolarCell & cell = polar_grid_[seg][bin];
+
+		// Write point to sparse point cloud
+		VRGBPoint point;
+		point.x = x;
+		point.y = y;
+		point.z = cell.ground;
+		point.r = tools_.SEMANTIC_CLASS_TO_COLOR(max_class,0);
+		point.g = tools_.SEMANTIC_CLASS_TO_COLOR(max_class,1);
+		point.b = tools_.SEMANTIC_CLASS_TO_COLOR(max_class,2);
+		pcl_sparse_semantic_->points.push_back(point);
+
+		// Fill detection grid with semantic class
+		detection_grid_.at<cv::Vec3f>(grid_y,grid_x)[0] = max_class;
+		detection_grid_.at<cv::Vec3f>(grid_y, grid_x)[1] = cell.ground;
+		detection_grid_.at<cv::Vec3f>(grid_y, grid_x)[2] = cell.height;
+	}
+
+	// Publish sparse semantic cloud
+	pcl_sparse_semantic_->header.frame_id = cloud->header.frame_id;
+	pcl_sparse_semantic_->header.stamp = cloud->header.stamp;
+	cloud_semantic_sparse_pub_.publish(pcl_sparse_semantic_);
+
+	// Publish detection grid
+	cv_bridge::CvImage cv_detection_grid_image;
+	cv_detection_grid_image.image = detection_grid_;
+	cv_detection_grid_image.encoding = image_encodings::TYPE_32FC3;
+	cv_detection_grid_image.header.stamp = ros::Time::now();
+	image_detection_grid_pub_.publish(cv_detection_grid_image.toImageMsg());
 }
 
 void SensorFusion::fromVeloCoordsToPolarCell(const float x, const float y,
@@ -622,5 +731,20 @@ void SensorFusion::fromPolarCellToVeloCoords(const int seg, const int bin,
 	x = std::cos(ang) * mag;
 }
 
+void SensorFusion::fromVeloCoordsToCartesianCell(const float x, const float y,
+		int & grid_x, int & grid_y){
+
+	grid_y = params_.grid_height - x / params_.grid_cell_size;
+	grid_x = - y / params_.grid_cell_size + params_.grid_height;
+}
+
+void SensorFusion::fromCartesianCellToVeloCoords(const int grid_x,
+	const int grid_y, float & x, float & y){
+
+	x = (params_.grid_height - grid_y) * params_.grid_cell_size - 
+		params_.grid_cell_size / 2;
+	y = (params_.grid_height - grid_x) * params_.grid_cell_size -
+		params_.grid_cell_size / 2;
+}
 
 } // namespace sensor_processing

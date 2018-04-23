@@ -11,9 +11,12 @@
 
 // Includes
 #include <ros/ros.h>
+#include <sensor_msgs/Image.h>
 
 // Namespaces
 namespace detection{
+
+using namespace sensor_msgs;
 
 class DbScan{
 
@@ -25,7 +28,7 @@ public:
 	// Virtual destructor
 	virtual ~DbScan();
 
-	virtual void process();
+	virtual void process(const Image::ConstPtr & detection_grid);
 
 
 private:
@@ -35,6 +38,9 @@ private:
 
 	// Class member
 	int time_frame_;
+
+	// Subscriber
+	ros::Subscriber image_detection_grid_sub_;
 };
 
 } // namespace detection
