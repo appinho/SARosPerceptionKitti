@@ -1,5 +1,7 @@
 # ROS package for Perception of the KITTI dataset
 
+## Result
+
 <p align="center">
   <img src="./videos/semantic.gif">
 </p>
@@ -8,7 +10,7 @@
   <img src="./videos/rviz.gif">
 </p>
 
-## Evaluation Result for Scenario 0060
+## Evaluation for Scenario 0060
 
 | Class        | CAR           | PEDESTRIAN  |
 | ------------ |:-------------:|:-----------:|
@@ -20,5 +22,19 @@
 
 ## Pipeline
 
-* [Semantic segmentation](https://github.com/martinkersner/train-DeepLab)
+## 0 Data acquisition
+
 * [Kitti Dataset to rosbag](https://github.com/tomas789/kitti2bag)
+
+### 1a) Sensor Fusion: Velodyne Point Cloud Processing
+
+### 1b) Sensor Fusion: Raw Image Processing
+
+* [Semantic segmentation](https://github.com/martinkersner/train-DeepLab)
+
+### 1c) Sensor Fusion: Mapping Point Cloud and Image
+
+### 2 Detection: DBSCAN Clustering
+
+### 3 Tracking: UKF Tracker
+
