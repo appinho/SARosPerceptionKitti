@@ -3,8 +3,7 @@ Panels:
     Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /PointCloud28
+      Expanded: ~
       Splitter Ratio: 0.439560443
     Tree Height: 443
   - Class: rviz/Selection
@@ -62,7 +61,7 @@ Visualization Manager:
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.300000012
+      Size (m): 0.100000001
       Style: Spheres
       Topic: /sensor/cloud_filtered
       Unreliable: false
@@ -72,8 +71,8 @@ Visualization Manager:
     - Alpha: 0.400000006
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 2.17726088
-        Min Value: -1.68577731
+        Max Value: 2.69988942
+        Min Value: -2.23688078
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -273,7 +272,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -287,6 +286,36 @@ Visualization Manager:
       Size (m): 0.100000001
       Style: Spheres
       Topic: /sensor/cloud_semantic
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.25
+      Style: Boxes
+      Topic: /sensor/cloud_semantic_sparse
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -316,25 +345,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 63.8147278
+      Distance: 164.900085
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 38.9857292
-        Y: 2.55838227
-        Z: -12.329752
+        X: 60.6117783
+        Y: -3.02430654
+        Z: -66.6697159
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.13479543
+      Pitch: 1.2847966
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.17164993
+      Yaw: 3.1216495
     Saved: ~
 Window Geometry:
   Displays:
@@ -355,4 +384,4 @@ Window Geometry:
     collapsed: true
   Width: 1855
   X: 65
-  Y: 24
+  Y: 28

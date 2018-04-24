@@ -1,1 +1,19 @@
-min_obj: 3.0
+pedestrian:
+  side:
+    min: 0.55
+    max: 2.10
+  height:
+    min: 1.10
+    max: 2.25
+  semantic:
+    min: 0.80
+
+car:
+  side:
+    min: 1.30
+    max: 6.00
+  height:
+    min: 1.10
+    max: 2.5
+  semantic:
+    min: 0.60

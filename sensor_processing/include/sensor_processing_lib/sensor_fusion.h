@@ -42,21 +42,21 @@ struct Parameters{
 
 	std::string scenario;
 
-	float grid_min_range;
-	float grid_max_range;
+	float grid_range_min;
+	float grid_range_max;
 	float grid_cell_size;
 	int grid_width;
 	int grid_height;
 	int grid_segments;
 	int grid_bins;
-	float grid_min_height;
+	float grid_cell_height;
 
 	double inv_angular_res;
 	double inv_radial_res;
 
 	float lidar_height;
 	float lidar_opening_angle;
-	float lidar_min_height;
+	float lidar_z_min;
 
 	double ransac_tolerance;
 	int ransac_iterations;

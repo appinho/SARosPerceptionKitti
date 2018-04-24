@@ -65,10 +65,29 @@ Tools::Tools(){
 		  0,  80, 100, // Train
 		  0,   0, 230, // Motocycle
 		119,  11,  32;  // Bicycle
+
+	SEMANTIC_KERNEL_SIZE = VectorXi::Zero(8);	
+	SEMANTIC_KERNEL_SIZE <<
+		1, // Pedestrian
+		2, // Rider
+		3, // Car
+		4, // Truck
+		5, // Bus
+		5, // Train
+		2, // Motocycle
+		2; // Bicycle
 }
 
 Tools::~Tools(){
 
+}
+
+int Tools::getClusterKernel(const int semantic){
+
+	if(semantic > 10)
+		return SEMANTIC_KERNEL_SIZE(semantic - 11);
+	else
+		return -1;
 }
 
 MatrixXf Tools::getImage2DBoundingBox(

@@ -40,32 +40,32 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	}
 
 	// Define lidar parameters
-	private_nh_.param("lidar_height", params_.lidar_height,
+	private_nh_.param("lidar/height", params_.lidar_height,
 		params_.lidar_height);
-	private_nh_.param("lidar_min_height", params_.lidar_min_height,
-		params_.lidar_min_height);
+	private_nh_.param("lidar/z_min", params_.lidar_z_min,
+		params_.lidar_z_min);
 	params_.lidar_opening_angle = M_PI / 4;
 
 	// Define grid parameters
-	private_nh_.param("grid_min_range", params_.grid_min_range,
-		params_.grid_min_range);
-	private_nh_.param("grid_max_range", params_.grid_max_range,
-		params_.grid_max_range);
-	private_nh_.param("grid_cell_size", params_.grid_cell_size,
+	private_nh_.param("grid/range/min", params_.grid_range_min,
+		params_.grid_range_min);
+	private_nh_.param("grid/range/max", params_.grid_range_max,
+		params_.grid_range_max);
+	private_nh_.param("grid/cell/size", params_.grid_cell_size,
 		params_.grid_cell_size);
-	private_nh_.param("grid_min_height", params_.grid_min_height,
-		params_.grid_min_height);
-	private_nh_.param("grid_segments", params_.grid_segments,
+	private_nh_.param("grid/cell/height", params_.grid_cell_height,
+		params_.grid_cell_height);
+	private_nh_.param("grid/segments", params_.grid_segments,
 		params_.grid_segments);
-	params_.grid_height = params_.grid_max_range / params_.grid_cell_size ;
+	params_.grid_height = params_.grid_range_max / params_.grid_cell_size ;
 	params_.grid_width = params_.grid_height * 2;
-	params_.grid_bins = (params_.grid_max_range * std::sqrt(2)) /
+	params_.grid_bins = (params_.grid_range_max * std::sqrt(2)) /
 		params_.grid_cell_size + 1;
 
 	// Define ransac ground plane parameters
-	private_nh_.param("ransac_tolerance", params_.ransac_tolerance,
+	private_nh_.param("ransac/tolerance", params_.ransac_tolerance,
 		params_.ransac_tolerance);
-	private_nh_.param("ransac_iterations", params_.ransac_iterations,
+	private_nh_.param("ransac/iterations", params_.ransac_iterations,
 		params_.ransac_iterations);
 
 	// Define static conversion values
@@ -74,10 +74,14 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 
 	// Print parameters
 	ROS_INFO_STREAM("scenario " << params_.scenario);
+	ROS_INFO_STREAM("lidar_height " << params_.lidar_height);
+	ROS_INFO_STREAM("lidar_z_min " << params_.lidar_z_min);
+	ROS_INFO_STREAM("grid_range_min " << params_.grid_range_min);
+	ROS_INFO_STREAM("grid_range_max " << params_.grid_range_max);
 	ROS_INFO_STREAM("grid_height " << params_.grid_height);
 	ROS_INFO_STREAM("grid_width " << params_.grid_width);
 	ROS_INFO_STREAM("grid_cell_size " << params_.grid_cell_size);
-	ROS_INFO_STREAM("grid_min_height " << params_.grid_min_height);
+	ROS_INFO_STREAM("grid_cell_height " << params_.grid_cell_height);
 	ROS_INFO_STREAM("grid_bins " << params_.grid_bins);
 	ROS_INFO_STREAM("grid_segments " << params_.grid_segments);
 	ROS_INFO_STREAM("ransac_tolerance " << params_.ransac_tolerance);
@@ -95,8 +99,8 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	occ_grid_->info.width = uint32_t(params_.grid_width);
 	occ_grid_->info.height = uint32_t(params_.grid_height);
 	occ_grid_->info.resolution = float(params_.grid_cell_size);
-	occ_grid_->info.origin.position.x = params_.grid_max_range;
-	occ_grid_->info.origin.position.y = params_.grid_max_range;
+	occ_grid_->info.origin.position.x = params_.grid_range_max;
+	occ_grid_->info.origin.position.y = params_.grid_range_max;
 	occ_grid_->info.origin.position.z = params_.lidar_height;
 	occ_grid_->info.origin.orientation.w = 0;
 	occ_grid_->info.origin.orientation.x = 0.707;
@@ -209,11 +213,11 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 
 			// Determine range of lidar point and check
 			float range = std::sqrt(point.x * point.x + point.y * point.y);
-			if(range > params_.grid_min_range &&
-				range < params_.grid_max_range){
+			if(range > params_.grid_range_min &&
+				range < params_.grid_range_max){
 
 				// Check height of lidar point
-				if(point.z > params_.lidar_min_height){
+				if(point.z > params_.lidar_z_min){
 
 					// Add index for filtered point cloud
 					pcl_inliers->indices.push_back(i);
@@ -278,7 +282,7 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 
 			// Check if cell can be ground cell
 			if(cell.count > 0 &&
-				(cell.z_max - cell.z_min < params_.grid_min_height)){
+				(cell.z_max - cell.z_min < params_.grid_cell_height)){
 
 				// Push back cell attributes to ground plane cloud
 				pcl_ground_plane_->points.push_back(
@@ -384,7 +388,7 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 				cell.height = polar_grid_[s][b].z_max - cell.ground;
 
 				// If cell height big enough fill cell as occupied
-				if(cell.height > params_.grid_min_height){
+				if(cell.height > params_.grid_cell_height){
 
 					cell.idx = PolarCell::OCCUPIED;
 
@@ -423,7 +427,7 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 		// Grab cell
 		PolarCell & cell = polar_grid_[seg][bin];
 
-		if(point.z > cell.ground && cell.height > params_.grid_min_height){
+		if(point.z > cell.ground && cell.height > params_.grid_cell_height){
 			pcl_elevated_->points.push_back(point);
 		}
 		else{
@@ -449,7 +453,7 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 	pcl_voxel_ground_->points.clear();
 
 	// Go through cartesian grid
-	float x = params_.grid_max_range - params_.grid_cell_size / 2;
+	float x = params_.grid_range_max - params_.grid_cell_size / 2;
 	for(int j = 0; j < params_.grid_height; ++j, x -= params_.grid_cell_size){
 		float y = x;
 		for(int i = j; i < params_.grid_width - j; ++i,
@@ -644,7 +648,7 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud){
 
 	// Init image
 	detection_grid_ = cv::Mat(params_.grid_height, params_.grid_width, CV_32FC3,
-		cv::Scalar(-2.0, 0.0, 0.0));
+		cv::Scalar(-100.0, 0.0, 0.0));
 
 	// Init  sparse semantic point cloud
 	pcl_sparse_semantic_->points.clear();
@@ -691,9 +695,9 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud){
 		pcl_sparse_semantic_->points.push_back(point);
 
 		// Fill detection grid with semantic class
-		detection_grid_.at<cv::Vec3f>(grid_y,grid_x)[0] = max_class;
+		detection_grid_.at<cv::Vec3f>(grid_y, grid_x)[0] = max_class;
 		detection_grid_.at<cv::Vec3f>(grid_y, grid_x)[1] = cell.ground;
-		detection_grid_.at<cv::Vec3f>(grid_y, grid_x)[2] = cell.height;
+		detection_grid_.at<cv::Vec3f>(grid_y, grid_x)[2] = cell.ground + cell.height;
 	}
 
 	// Publish sparse semantic cloud

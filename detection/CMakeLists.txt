@@ -152,7 +152,7 @@ target_link_libraries( detection_nodelet ${PROJECT_NAME}_lib )
 
 # Detection node
 add_executable(detection src/detection_node.cpp
-                            ../helpers/tools.cpp)
+                         ../helpers/tools.cpp)
 target_link_libraries( detection ${PROJECT_NAME}_lib )
 
 ## Rename C++ executable without prefix
