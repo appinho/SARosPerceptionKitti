@@ -22,7 +22,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
-#include <../../helpers/tools.h>
+#include <perception_msgs/tools.h>
 
 // Types of point and cloud to work with
 typedef pcl::PointXYZ VPoint;
@@ -153,7 +153,8 @@ private:
 	// Class functions
 	void processPointCloud(const PointCloud2::ConstPtr & cloud);
 	void processImage(const Image::ConstPtr & image);
-	void mapPointCloudIntoImage(const VPointCloud::Ptr cloud);
+	void mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
+		const Image::ConstPtr & image);
 
 	// Conversion functions
 	void fromVeloCoordsToPolarCell(const float x, const float y,

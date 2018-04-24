@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   pcl_ros
   nav_msgs
+  perception_msgs
 )
 
 find_package( OpenCV REQUIRED )
@@ -108,9 +109,9 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES perception
-  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs perception_msgs
 #  DEPENDS system_lib
 )
 
@@ -123,6 +124,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${perception_msgs_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -148,12 +150,11 @@ target_link_libraries(
 
 # Detection nodelet
 add_library( detection_nodelet src/detection_nodelet.cpp )
-target_link_libraries( detection_nodelet ${PROJECT_NAME}_lib )
+target_link_libraries( detection_nodelet ${PROJECT_NAME}_lib perception_msgs)
 
 # Detection node
-add_executable(detection src/detection_node.cpp
-                         ../helpers/tools.cpp)
-target_link_libraries( detection ${PROJECT_NAME}_lib )
+add_executable(detection src/detection_node.cpp)
+target_link_libraries( detection ${PROJECT_NAME}_lib perception_msgs)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

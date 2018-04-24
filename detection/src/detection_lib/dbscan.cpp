@@ -13,7 +13,10 @@ namespace detection{
 
 DbScan::DbScan(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	nh_(nh),
-	private_nh_(private_nh)
+	private_nh_(private_nh),
+	image_detection_grid_sub_(nh, "/sensor/image_detection_grid", 2),
+	image_raw_left_sub_(nh,	"/kitti/camera_color_left/image_raw", 2),
+	sync_(MySyncPolicy(10), image_detection_grid_sub_, image_raw_left_sub_)
 	{
 
 	// Get parameter
@@ -45,21 +48,31 @@ DbScan::DbScan(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	// Init counter for publishing
 	time_frame_ = 0;
 
-	image_detection_grid_sub_ = nh.subscribe("/sensor/image_detection_grid", 2,
-		&DbScan::process, this);
+	// Define Subscriber
+	sync_.registerCallback(boost::bind(&DbScan::process, this, _1, _2));
+
+	// Define Publisher
+	object_array_pub_ = nh_.advertise<ObjectArray>(
+		"/detection/objects", 2);
+	image_detection_pub_ = nh_.advertise<Image>(
+		"/detection/image", 2);
 }
 
 DbScan::~DbScan(){
 
 }
 
-void DbScan::process(const Image::ConstPtr & detection_grid){
+void DbScan::process(const Image::ConstPtr & image_detection_grid,
+	const Image::ConstPtr & image_raw_left){
 
 	// Convert image detection grid to cv mat detection grid
-	cv_bridge::CvImagePtr cv_det_ptr;
+	cv_bridge::CvImagePtr cv_det_grid_ptr;
+	cv_bridge::CvImagePtr cv_raw_left_ptr;
 	try{
-		cv_det_ptr = 
-			cv_bridge::toCvCopy(detection_grid, image_encodings::TYPE_32FC3);
+		cv_det_grid_ptr = cv_bridge::toCvCopy(image_detection_grid, 
+			image_encodings::TYPE_32FC3);
+		cv_raw_left_ptr = cv_bridge::toCvCopy(image_raw_left, 
+			"rgb8");
 	}
 	catch (cv_bridge::Exception& e){
 		ROS_ERROR("cv_bridge exception: %s", e.what());
@@ -67,17 +80,27 @@ void DbScan::process(const Image::ConstPtr & detection_grid){
 	}
 
 	// Run DbScan algorithm
-	cv::Mat grid = cv_det_ptr->image.clone(); 
+	cv::Mat grid = cv_det_grid_ptr->image.clone(); 
 	runDbScan(grid);
 
 	// Determine cluster information
-	getClusterDetails(cv_det_ptr->image);
+	getClusterDetails(cv_det_grid_ptr->image);
+
+	// Publish object list
+	createObjectList();
+	object_array_.header = image_raw_left->header;
+	object_array_pub_.publish(object_array_);
+
+	// Publish image
+	createDetectionImage(cv_raw_left_ptr->image);
+	cv_bridge::CvImage cv_raw_image;
+	cv_raw_image.image = cv_raw_left_ptr->image;
+	cv_raw_image.encoding = "rgb8";
+	cv_raw_image.header.stamp = image_raw_left->header.stamp;
+	image_detection_pub_.publish(cv_raw_image.toImageMsg());
 
 	// Print cluster info
-	for(int i = 0; i < number_of_clusters_; ++i){
-		printCluster(clusters_[i]);
-	}
-	std::cout << std::endl << " Tracks " << std::endl << std::endl;
+	std::cout << std::endl << "Tracks " << std::endl << std::endl;
 	for(int i = 0; i < number_of_clusters_; ++i){
 		if(clusters_[i].is_new_track)
 			printCluster(clusters_[i]);
@@ -104,7 +127,7 @@ void DbScan::runDbScan(cv::Mat grid){
 			int semantic_class = grid.at<cv::Vec3f>(y,x)[0];
 
 			// If not valid semantic continue
-			if(!isValidSemantic(semantic_class)){
+			if(!isKittiValidSemantic(semantic_class)){
 				continue;
 			}
 				
@@ -162,7 +185,7 @@ void DbScan::runDbScan(cv::Mat grid){
 
 							}
 							// If non aimed semantic has hit
-							else if(!isValidSemantic(n_semantic_class) &&
+							else if(!isKittiValidSemantic(n_semantic_class) &&
 								n_semantic_class >= 0){
 
 								// Flag cell temporarily as visited
@@ -270,6 +293,121 @@ void DbScan::getClusterDetails(const cv::Mat grid){
 	}
 }
 
+void DbScan::createObjectList(){
+
+	// Clear buffer
+	object_array_.list.clear();
+
+	// Loop through clusters to obtain object information
+	for(int i = 0; i < number_of_clusters_; ++i){
+
+		addObject(clusters_[i]);
+	}
+
+	// Transform objects in camera and world frame
+	try{
+		for(int i = 0; i < object_array_.list.size(); ++i){
+
+			listener_.transformPoint("world",
+				object_array_.list[i].velo_pose,
+				object_array_.list[i].world_pose);
+
+			listener_.transformPoint("camera_color_left",
+				object_array_.list[i].velo_pose,
+				object_array_.list[i].cam_pose);
+		}
+	}
+	catch(tf::TransformException& ex){
+		ROS_ERROR("Received an exception trying to transform a point from"
+			"\"velo_link\" to \"world\": %s", ex.what());
+	}
+}
+
+void DbScan::addObject(const Cluster & c){
+
+	// Create object
+	Object object;
+	object.id = c.id;
+
+	// Pose in velo frame
+	object.velo_pose.header.frame_id = "velo_link";
+	object.velo_pose.point.x = c.geometric.x;
+	object.velo_pose.point.y = c.geometric.y;
+	object.velo_pose.point.z = c.geometric.ground_level;
+
+	// Geometry
+	object.width = c.geometric.width;
+	object.length = c.geometric.length;
+	object.height = c.geometric.height;
+	object.orientation = c.geometric.orientation;
+
+	// Semantic
+	object.semantic_id = c.semantic.id;
+	object.semantic_confidence = c.semantic.confidence;
+	object.semantic_name = c.semantic.name;
+
+	// Color
+	object.r = c.color[2];
+	object.g = c.color[1];
+	object.b = c.color[0];
+
+	// Tracking
+	object.is_new_track = c.is_new_track;
+
+	// Push back object to list
+	object_array_.list.push_back(object);
+}
+
+void DbScan::createDetectionImage(cv::Mat image_raw_left){
+
+	// OpenCV Viz parameters
+	int linewidth = 5; // negative for filled
+	int fontface =  cv::FONT_HERSHEY_SIMPLEX;
+	double fontscale = 0.7;
+	int thickness = 3;
+
+	// Loop through clusters
+	for(int i = 0; i < object_array_.list.size(); ++i){
+
+		// Grab object
+		Object & o = object_array_.list[i];
+
+		if(!o.is_new_track)
+			continue;
+		
+		MatrixXf image_points = tools_.getImage2DBoundingBox(o);
+
+		// Draw box
+		cv::Point top_left = cv::Point(image_points(0,0), image_points(1,0));
+		cv::Point bot_right = cv::Point(image_points(0,1), image_points(1,1));
+
+		cv::rectangle(image_raw_left, top_left, bot_right,
+			clusters_[o.id].color, linewidth, 8);
+
+		// Draw text
+		std::stringstream ss;
+		ss 	<< o.id << "," 
+			<< std::setprecision(1) << o.width << ","
+			<< std::setprecision(1) << o.length << ","
+			<< std::setprecision(1) << o.height << ","
+			<< std::setprecision(3) << o.orientation;
+		std::string text = ss.str();
+		top_left.y -= 10;
+		top_left.x -= 50;
+		cv::putText(image_raw_left, text, top_left, fontface, fontscale,
+			clusters_[o.id].color,	thickness,	8);
+	}
+
+	/*
+	if(save_){
+		std::ostringstream filename;
+		filename << "/home/simonappel/kitti_data/" << scenario_name_ 
+		<< "/detection/00000" << setfill('0') << setw(5) << msg_counter_ << ".png";
+		cv::imwrite(filename.str(), raw_image);
+	}
+	*/
+}
+
 bool DbScan::hasShapeOfPed(const Cluster & c){
 	return (c.geometric.width > params_.ped_side_min ||
 		c.geometric.length > params_.ped_side_min)
@@ -319,10 +457,10 @@ void DbScan::printCluster(const Cluster & c){
 		<< " at (x,y,z) " << c.geometric.x 
 		<< "," << c.geometric.y
 		<< "," << c.geometric.ground_level
-		<< " along " << c.geometric.width
-		<< " ortho " << c.geometric.length
+		<< " ori " << c.geometric.orientation
+		<< " w/along " << c.geometric.width
+		<< " l/ortho " << c.geometric.length
 		<< " h " << c.geometric.height
-		<< " o " << c.geometric.orientation
 		<< std::endl;
 }
 

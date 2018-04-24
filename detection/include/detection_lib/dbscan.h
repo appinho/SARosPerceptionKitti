@@ -14,12 +14,18 @@
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 #include <queue>
-#include <../../helpers/tools.h>
+#include <perception_msgs/tools.h>
+#include <perception_msgs/ObjectArray.h>
+#include <tf/transform_listener.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
 
 // Namespaces
 namespace detection{
 
 using namespace sensor_msgs;
+using namespace message_filters;
+using namespace perception_msgs;
 
 struct Parameter{
 
@@ -96,7 +102,8 @@ public:
 	// Virtual destructor
 	virtual ~DbScan();
 
-	virtual void process(const Image::ConstPtr & detection_grid);
+	virtual void process(const Image::ConstPtr & image_detection_grid,
+		const Image::ConstPtr & image_raw_left);
 
 
 private:
@@ -106,17 +113,29 @@ private:
 
 	// Class member
 	std::vector<Cluster> clusters_;
+	ObjectArray object_array_;
 	int number_of_clusters_;
 	int time_frame_;
 	Parameter params_;
 	Tools tools_;
+	tf::TransformListener listener_;
 
 	// Subscriber
-	ros::Subscriber image_detection_grid_sub_;
+	Subscriber<Image> image_detection_grid_sub_;
+	Subscriber<Image> image_raw_left_sub_;
+	typedef sync_policies::ExactTime<Image, Image> MySyncPolicy;
+	Synchronizer<MySyncPolicy> sync_;
+
+	// Publisher
+	ros::Publisher object_array_pub_;
+	ros::Publisher image_detection_pub_;
 
 	// Class functions
 	void runDbScan(cv::Mat grid);
 	void getClusterDetails(const cv::Mat grid);
+	void createObjectList();
+	void addObject(const Cluster & c);
+	void createDetectionImage(cv::Mat image_raw_left);
 	bool hasShapeOfPed(const Cluster & c);
 	bool hasShapeOfCar(const Cluster & c);
 	bool isValidSemantic(const int semantic_class);

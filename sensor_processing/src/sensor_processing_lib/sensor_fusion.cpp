@@ -169,7 +169,7 @@ void SensorFusion::process(
 
 	// Fuse sensors by mapping elevated point cloud into semantic segmentated
 	// image
-	mapPointCloudIntoImage(pcl_elevated_);
+	mapPointCloudIntoImage(pcl_elevated_, image);
 
 	// Print sensor fusion
 	ROS_INFO("Publishing Sensor Fusion [%d]: # PCL points [%d] # Ground [%d]"
@@ -546,7 +546,8 @@ void SensorFusion::processImage(const Image::ConstPtr & image){
 	image_semantic_pub_.publish(cv_semantic_image.toImageMsg());
 }
 
-void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud){
+void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
+	const Image::ConstPtr & image){
 
 /******************************************************************************
  * 1. Convert velodyne points into image space
@@ -709,7 +710,7 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud){
 	cv_bridge::CvImage cv_detection_grid_image;
 	cv_detection_grid_image.image = detection_grid_;
 	cv_detection_grid_image.encoding = image_encodings::TYPE_32FC3;
-	cv_detection_grid_image.header.stamp = ros::Time::now();
+	cv_detection_grid_image.header.stamp = image->header.stamp;
 	image_detection_grid_pub_.publish(cv_detection_grid_image.toImageMsg());
 }
 
