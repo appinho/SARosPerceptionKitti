@@ -1,4 +1,4 @@
-#include <../../helpers/tools.h>
+#include <helper/tools.h>
 
 Tools::Tools(){
 
@@ -108,61 +108,61 @@ MatrixXf Tools::getImage2DBoundingBox(
 	return image_points;
 }
 
-/*
 MatrixXf Tools::getImage2DBoundingBox(
 	const Object o){
 
 	// Rotate top view box with velo orientation
-	float rad_ori = (o.orientation + 90) / 180 * M_PI;
-	float length = o.length / 2; // - 2 * GRID_CELL_SIZE;
-	float width = o.width / 2; // - 2 * GRID_CELL_SIZE;
+	float rad_ori = o.orientation / 180 * M_PI;
+
+	float half_length = o.length / 2;
+	float half_width = o.width / 2;
+	float cos_l = half_length * cos(rad_ori);
+	float sin_w = half_width * sin(rad_ori);
+	float sin_l = half_length * sin(rad_ori);
+	float cos_w = half_width * cos(rad_ori);
 
 	MatrixXf velo_points = MatrixXf::Zero(4,8);
-	velo_points(0,0) = o.velo_pose.point.x + length * cos(rad_ori) + width * sin(rad_ori);
-	velo_points(1,0) = o.velo_pose.point.y + length * sin(rad_ori) - width * cos(rad_ori);
+	velo_points(0,0) = o.velo_pose.point.x + cos_l + sin_w;
+	velo_points(1,0) = o.velo_pose.point.y + sin_l - cos_w;
 	velo_points(2,0) = o.velo_pose.point.z + o.height;
 	velo_points(3,0) = 1;
 
-	velo_points(0,1) = o.velo_pose.point.x + length * cos(rad_ori) - width * sin(rad_ori);
-	velo_points(1,1) = o.velo_pose.point.y + length * sin(rad_ori) + width * cos(rad_ori);
+	velo_points(0,1) = o.velo_pose.point.x + cos_l - sin_w;
+	velo_points(1,1) = o.velo_pose.point.y + sin_l + cos_w;
 	velo_points(2,1) = o.velo_pose.point.z + o.height;
 	velo_points(3,1) = 1;
 
-	velo_points(0,2) = o.velo_pose.point.x - length * cos(rad_ori) + width * sin(rad_ori);
-	velo_points(1,2) = o.velo_pose.point.y - length * sin(rad_ori) - width * cos(rad_ori);
+	velo_points(0,2) = o.velo_pose.point.x - cos_l + sin_w;
+	velo_points(1,2) = o.velo_pose.point.y - sin_l - cos_w;
 	velo_points(2,2) = o.velo_pose.point.z + o.height;
 	velo_points(3,2) = 1;
 
-	velo_points(0,3) = o.velo_pose.point.x - length * cos(rad_ori) - width * sin(rad_ori);
-	velo_points(1,3) = o.velo_pose.point.y - length * sin(rad_ori) + width * cos(rad_ori);
+	velo_points(0,3) = o.velo_pose.point.x - cos_l - sin_w;
+	velo_points(1,3) = o.velo_pose.point.y - sin_l + cos_w;
 	velo_points(2,3) = o.velo_pose.point.z + o.height;
 	velo_points(3,3) = 1;
 
-	velo_points(0,4) = o.velo_pose.point.x + length * cos(rad_ori) + width * sin(rad_ori);
-	velo_points(1,4) = o.velo_pose.point.y + length * sin(rad_ori) - width * cos(rad_ori);
+	velo_points(0,4) = o.velo_pose.point.x + cos_l + sin_w;
+	velo_points(1,4) = o.velo_pose.point.y + sin_l - cos_w;
 	velo_points(2,4) = o.velo_pose.point.z;
 	velo_points(3,4) = 1;
 
-	velo_points(0,5) = o.velo_pose.point.x + length * cos(rad_ori) - width * sin(rad_ori);
-	velo_points(1,5) = o.velo_pose.point.y + length * sin(rad_ori) + width * cos(rad_ori);
+	velo_points(0,5) = o.velo_pose.point.x + cos_l - sin_w;
+	velo_points(1,5) = o.velo_pose.point.y + sin_l + cos_w;
 	velo_points(2,5) = o.velo_pose.point.z;
 	velo_points(3,5) = 1;
 
-	velo_points(0,6) = o.velo_pose.point.x - length * cos(rad_ori) + width * sin(rad_ori);
-	velo_points(1,6) = o.velo_pose.point.y - length * sin(rad_ori) - width * cos(rad_ori);
+	velo_points(0,6) = o.velo_pose.point.x - cos_l + sin_w;
+	velo_points(1,6) = o.velo_pose.point.y - sin_l - cos_w;
 	velo_points(2,6) = o.velo_pose.point.z;
 	velo_points(3,6) = 1;
 
-	velo_points(0,7) = o.velo_pose.point.x - length * cos(rad_ori) - width * sin(rad_ori);
-	velo_points(1,7) = o.velo_pose.point.y - length * sin(rad_ori) + width * cos(rad_ori);
+	velo_points(0,7) = o.velo_pose.point.x - cos_l - sin_w;
+	velo_points(1,7) = o.velo_pose.point.y - sin_l + cos_w;
 	velo_points(2,7) = o.velo_pose.point.z;
 	velo_points(3,7) = 1;
 
-	//std::cout << velo_points << std::endl;
-
 	MatrixXf image_points = transformVeloToImage(velo_points);
-
-	//std::cout << image_points << std::endl;
 
 	float min_x = image_points(0,0);
 	float max_x = image_points(0,0);
@@ -178,12 +178,12 @@ MatrixXf Tools::getImage2DBoundingBox(
 	// Check bounding
 	if(min_x < 0)
 		min_x = 0.0;
-	if(max_x > 1241)
-		max_x = 1241.0;
+	if(max_x > 1237)
+		max_x = 1237.0;
 	if(min_y < 0)
 		min_y = 0.0;
-	if(max_y > 375)
-		max_y = 375.0;
+	if(max_y > 370)
+		max_y = 370.0;
 
 	MatrixXf box = MatrixXf::Zero(2,2);
 	box(0,0) = min_x;
@@ -191,11 +191,9 @@ MatrixXf Tools::getImage2DBoundingBox(
 	box(0,1) = max_x;
 	box(1,1) = max_y;
 
-	//std::cout << box << std::endl;
-
 	return box;
 }
-*/
+
 MatrixXf Tools::transformVeloToCam(const MatrixXf & velo_points){
 
 	return TRANS_VELO_TO_CAM * velo_points;

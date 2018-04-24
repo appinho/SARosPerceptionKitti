@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>perception_msgs</name>
+  <name>helper</name>
   <version>0.0.0</version>
-  <description>The perception_msgs package</description>
+  <description>The helper package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

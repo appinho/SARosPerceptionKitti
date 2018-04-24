@@ -267,7 +267,8 @@ void DbScan::getClusterDetails(const cv::Mat grid){
 		c.geometric.height = max_high_z - min_low_z;
 
 		// Get orientation of bounding box
-		c.geometric.orientation = rect.angle;
+		// Minus since opencv y,x is the opposite of the velodyne frame
+		c.geometric.orientation = - rect.angle;
 
 		// Store rect as back up
 		c.rect = rect;

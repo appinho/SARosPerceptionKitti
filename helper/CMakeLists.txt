@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(perception_msgs)
+project(helper)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -107,7 +107,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  #LIBRARIES perception_msgs
+  #LIBRARIES helper
   CATKIN_DEPENDS geometry_msgs message_generation std_msgs visualization_msgs
 #  DEPENDS system_lib
 )
@@ -136,7 +136,7 @@ add_library(${PROJECT_NAME}
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/perception_msgs_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/helper_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
