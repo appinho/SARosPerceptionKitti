@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /PointCloud22
       Splitter Ratio: 0.439560443
     Tree Height: 443
   - Class: rviz/Selection
@@ -32,9 +31,19 @@ Panels:
 Visualization Manager:
   Class: ""
   Displays:
+    - Alpha: 0.699999988
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /sensor/grid/occupancy
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /detection/image
+      Image Topic: /viz/image/detection
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -44,21 +53,11 @@ Visualization Manager:
       Transport Hint: raw
       Unreliable: false
       Value: true
-    - Alpha: 0.699999988
-      Class: rviz/Map
-      Color Scheme: map
-      Draw Behind: false
-      Enabled: true
-      Name: Map
-      Topic: /sensor/grid_occupancy
-      Unreliable: false
-      Use Timestamp: false
-      Value: true
     - Alpha: 0.5
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 2.63981414
-        Min Value: -2.58671045
+        Max Value: 2.78666639
+        Min Value: -1.66129661
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -79,7 +78,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.25
       Style: Boxes
-      Topic: /sensor/voxel_elevated
+      Topic: /sensor/voxel/elevated
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -109,7 +108,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.25
       Style: Boxes
-      Topic: /sensor/cloud_semantic_sparse
+      Topic: /sensor/cloud/semantic_sparse
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -139,16 +138,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 21.863163
+      Distance: 105.30912
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 14.2903099
-        Y: 1.37050462
-        Z: 0.665690958
+        X: 42.1738129
+        Y: -2.43468904
+        Z: 0.693514764
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false

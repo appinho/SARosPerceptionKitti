@@ -24,12 +24,16 @@
     
   </node>
 
-  <!-- Run the visualization node -->
-  <node pkg="visualization" type="visualization" name="visualization_node" output="screen">    
+  <!-- Run the tracking node -->
+  <node pkg="tracking" type="tracking" name="tracking_node" output="screen">
+
+    <!-- Get parameters from parameter.yaml file -->
+    <rosparam file="$(find tracking)/config/parameters.yaml" command="load" />
+    
   </node>
 
   <!-- Launch rviz for visualization -->
   <node pkg="rviz" type="rviz" name="my_rviz"
-	args="-d $(find detection)config/rviz_config_detection.rviz"/>
+	args="-d $(find tracking)config/rviz_config_tracking.rviz"/>
 
 </launch>

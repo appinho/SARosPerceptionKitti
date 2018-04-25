@@ -17,14 +17,11 @@
 #include <helper/tools.h>
 #include <helper/ObjectArray.h>
 #include <tf/transform_listener.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
 
 // Namespaces
 namespace detection{
 
 using namespace sensor_msgs;
-using namespace message_filters;
 using namespace helper;
 
 struct Parameter{
@@ -102,8 +99,7 @@ public:
 	// Virtual destructor
 	virtual ~DbScan();
 
-	virtual void process(const Image::ConstPtr & image_detection_grid,
-		const Image::ConstPtr & image_raw_left);
+	virtual void process(const Image::ConstPtr & image_detection_grid);
 
 
 private:
@@ -121,21 +117,16 @@ private:
 	tf::TransformListener listener_;
 
 	// Subscriber
-	Subscriber<Image> image_detection_grid_sub_;
-	Subscriber<Image> image_raw_left_sub_;
-	typedef sync_policies::ExactTime<Image, Image> MySyncPolicy;
-	Synchronizer<MySyncPolicy> sync_;
+	ros::Subscriber image_detection_grid_sub_;
 
 	// Publisher
 	ros::Publisher object_array_pub_;
-	ros::Publisher image_detection_pub_;
 
 	// Class functions
 	void runDbScan(cv::Mat grid);
 	void getClusterDetails(const cv::Mat grid);
 	void createObjectList();
 	void addObject(const Cluster & c);
-	void createDetectionImage(cv::Mat image_raw_left);
 	bool hasShapeOfPed(const Cluster & c);
 	bool hasShapeOfCar(const Cluster & c);
 	bool isValidSemantic(const int semantic_class);

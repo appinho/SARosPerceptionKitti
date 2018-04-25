@@ -1,0 +1,24 @@
+data_association:
+  ped:
+    dist:
+      position: 1.0
+      form: 2.0
+  car:
+    dist:
+      position: 2.0
+      form: 5.0
+
+tracking:
+  dim:
+    z: 2
+    x: 5
+    x_aug: 7
+  std:
+    lidar:
+      x: 0.15
+      y: 0.15
+    acc: 0.2
+    yaw_rate: 0.314
+  lambda: 2.0
+  aging:
+    bad: 2

@@ -120,30 +120,30 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 
 	// Define Publisher 
 	cloud_filtered_pub_ = nh_.advertise<PointCloud2>(
-		"/sensor/cloud_filtered", 2);
+		"/sensor/cloud/filtered", 2);
 	cloud_ground_plane_inliers_pub_ = nh_.advertise<PointCloud2>(
-		"/sensor/cloud_groundplane_inliers", 2);
+		"/sensor/cloud/groundplane/inliers", 2);
 	cloud_ground_plane_outliers_pub_ = nh_.advertise<PointCloud2>(
-		"/sensor/cloud_groundplane_outliers", 2);
+		"/sensor/cloud/groundplane/outliers", 2);
 	cloud_ground_pub_ = nh_.advertise<PointCloud2>(
-		"/sensor/cloud_ground", 2);
+		"/sensor/cloud/ground", 2);
 	cloud_elevated_pub_ = nh_.advertise<PointCloud2>(
-		"/sensor/cloud_elevated", 2);
+		"/sensor/cloud/elevated", 2);
 	voxel_ground_pub_ = nh_.advertise<PointCloud2>(
-		"/sensor/voxel_ground", 2);
+		"/sensor/voxel/ground", 2);
 	voxel_elevated_pub_ = nh_.advertise<PointCloud2>(
-		"/sensor/voxel_elevated", 2);
+		"/sensor/voxel/elevated", 2);
 	grid_occupancy_pub_ = nh_.advertise<OccupancyGrid>(
-		"/sensor/grid_occupancy", 2);
+		"/sensor/grid/occupancy", 2);
 
 	image_semantic_pub_ = nh_.advertise<Image>(
-		"/sensor/image_semantic", 2);
+		"/sensor/image/semantic", 2);
 	cloud_semantic_pub_ = nh_.advertise<PointCloud2>(
-		"/sensor/cloud_semantic", 2);
+		"/sensor/cloud/semantic", 2);
 	cloud_semantic_sparse_pub_ = nh_.advertise<PointCloud2>(
-		"/sensor/cloud_semantic_sparse", 2);
+		"/sensor/cloud/semantic_sparse", 2);
 	image_detection_grid_pub_ = nh_.advertise<Image>(
-		"/sensor/image_detection_grid", 2);
+		"/sensor/image/detection_grid", 2);
 
 	// Define Subscriber
 	sync_.registerCallback(boost::bind(&SensorFusion::process, this, _1, _2));

@@ -1,115 +1,92 @@
 /******************************************************************************
  *
  * Author: Simon Appel (simonappel62@gmail.com)
- * Date: 19/04/2018
+ * Date: 25/04/2018
  *
  */
 
-#include <detection_lib/dbscan.h>
+#include <tracking_lib/ukf.h>
 
-namespace detection{
+namespace tracking{
 
 /******************************************************************************/
 
-DbScan::DbScan(ros::NodeHandle nh, ros::NodeHandle private_nh):
+UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	nh_(nh),
 	private_nh_(private_nh)
 	{
 
-	// Get parameter
-	private_nh_.param("grid/range/max", params_.grid_range_max,
-		params_.grid_range_max);
-	private_nh_.param("grid/cell/size", params_.grid_cell_size,
-		params_.grid_cell_size);
-	private_nh_.param("pedestrian/side/min", params_.ped_side_min,
-		params_.ped_side_min);
-	private_nh_.param("pedestrian/side/max", params_.ped_side_max,
-		params_.ped_side_max);
-	private_nh_.param("pedestrian/height/min", params_.ped_height_min,
-		params_.ped_height_min);
-	private_nh_.param("pedestrian/height/max", params_.ped_height_max,
-		params_.ped_height_max);
-	private_nh_.param("pedestrian/semantic/min", params_.ped_semantic_min,
-		params_.ped_semantic_min);
-	private_nh_.param("car/side/min", params_.car_side_min,
-		params_.car_side_min);
-	private_nh_.param("car/side/max", params_.car_side_max,
-		params_.car_side_max);
-	private_nh_.param("car/height/min", params_.car_height_min,
-		params_.car_height_min);
-	private_nh_.param("car/height/max", params_.car_height_max,
-		params_.car_height_max);
-	private_nh_.param("car/semantic/min", params_.car_semantic_min,
-		params_.car_semantic_min);
+	private_nh_.param("data_association/ped/dist/position",
+		params_.da_ped_dist_pos, params_.da_ped_dist_pos);
+	private_nh_.param("data_association/ped/dist/form",
+		params_.da_ped_dist_form, params_.da_ped_dist_form);
+	private_nh_.param("data_association/car/dist/position",
+		params_.da_car_dist_pos, params_.da_car_dist_pos);
+	private_nh_.param("data_association/car/dist/form",
+		params_.da_car_dist_form, params_.da_car_dist_form);
+
+	private_nh_.param("tracking/dim/z", params_.tra_dim_z,
+		params_.tra_dim_z);
+	private_nh_.param("tracking/dim/x", params_.tra_dim_x,
+		params_.tra_dim_x);
+	private_nh_.param("tracking/dim/x_aug", params_.tra_dim_x_aug,
+		params_.tra_dim_x_aug);
+
+	private_nh_.param("tracking/std/lidar/x", params_.tra_std_lidar_x,
+		params_.tra_std_lidar_x);
+	private_nh_.param("tracking/std/lidar/y", params_.tra_std_lidar_y,
+		params_.tra_std_lidar_y);
+	private_nh_.param("tracking/std/acc", params_.tra_std_acc,
+		params_.tra_std_acc);
+	private_nh_.param("tracking/std/yaw_rate", params_.tra_std_yaw_rate,
+		params_.tra_std_yaw_rate);
+	private_nh_.param("tracking/lambda", params_.tra_lambda,
+		params_.tra_lambda);
+	private_nh_.param("tracking/aging/bad", params_.tra_aging_bad,
+		params_.tra_aging_bad);
 
 	// Print parameters
-	ROS_INFO_STREAM("ped_side_min " << params_.ped_side_min);
-	ROS_INFO_STREAM("ped_side_max " << params_.ped_side_max);
-	ROS_INFO_STREAM("ped_height_min " << params_.ped_height_min);
-	ROS_INFO_STREAM("ped_height_max " << params_.ped_height_max);
-	ROS_INFO_STREAM("ped_semantic_min " << params_.ped_semantic_min);
-	ROS_INFO_STREAM("car_side_min " << params_.car_side_min);
-	ROS_INFO_STREAM("car_side_max " << params_.car_side_max);
-	ROS_INFO_STREAM("car_height_min " << params_.car_height_min);
-	ROS_INFO_STREAM("car_height_max " << params_.car_height_max);
-	ROS_INFO_STREAM("car_semantic_min " << params_.car_semantic_min);
-
-	// Init counter for publishing
-	time_frame_ = 0;
+	ROS_INFO_STREAM("da_ped_dist_pos " << params_.da_ped_dist_pos);
+	ROS_INFO_STREAM("da_ped_dist_form " << params_.da_ped_dist_form);
+	ROS_INFO_STREAM("da_car_dist_pos " << params_.da_car_dist_pos);
+	ROS_INFO_STREAM("da_car_dist_form " << params_.da_car_dist_form);
+	ROS_INFO_STREAM("tra_dim_z " << params_.tra_dim_z);
+	ROS_INFO_STREAM("tra_dim_x " << params_.tra_dim_x);
+	ROS_INFO_STREAM("tra_dim_x_aug " << params_.tra_dim_x_aug);
+	ROS_INFO_STREAM("tra_std_lidar_x " << params_.tra_std_lidar_x);
+	ROS_INFO_STREAM("tra_std_lidar_y " << params_.tra_std_lidar_y);
+	ROS_INFO_STREAM("tra_std_acc " << params_.tra_std_acc);
+	ROS_INFO_STREAM("tra_std_yaw_rate " << params_.tra_std_yaw_rate);
+	ROS_INFO_STREAM("tra_lambda " << params_.tra_lambda);
+	ROS_INFO_STREAM("tra_aging_bad " << params_.tra_aging_bad);
 
 	// Define Subscriber
-	image_detection_grid_sub_ = nh.subscribe(
-		"/sensor/image/detection_grid", 2, &DbScan::process, this);
+	list_detected_objects_sub_ = nh.subscribe("/detection/objects", 2,
+		&UnscentedKF::process, this);
 
 	// Define Publisher
-	object_array_pub_ = nh_.advertise<ObjectArray>(
-		"/detection/objects", 2);
+	list_tracked_objects_pub_ = nh_.advertise<ObjectArray>(
+		"/tracking/objects", 2);
+		
+	// Init counter for publishing
+	time_frame_ = 0;
 }
 
-DbScan::~DbScan(){
+UnscentedKF::~UnscentedKF(){
 
 }
 
-void DbScan::process(const Image::ConstPtr & image_detection_grid){
-
-	// Convert image detection grid to cv mat detection grid
-	cv_bridge::CvImagePtr cv_det_grid_ptr;
-	try{
-		cv_det_grid_ptr = cv_bridge::toCvCopy(image_detection_grid, 
-			image_encodings::TYPE_32FC3);
-	}
-	catch (cv_bridge::Exception& e){
-		ROS_ERROR("cv_bridge exception: %s", e.what());
-		return;
-	}
-
-	// Run DbScan algorithm
-	cv::Mat grid = cv_det_grid_ptr->image.clone(); 
-	runDbScan(grid);
-
-	// Determine cluster information
-	getClusterDetails(cv_det_grid_ptr->image);
-
-	// Publish object list
-	createObjectList();
-	object_array_.header = image_detection_grid->header;
-	object_array_pub_.publish(object_array_);
-
-	// Print cluster info
-	for(int i = 0; i < number_of_clusters_; ++i){
-		if(clusters_[i].is_new_track)
-			printCluster(clusters_[i]);
-	}
+void UnscentedKF::process(const ObjectArrayConstPtr & detected_objects){
 
 	// Print sensor fusion
-	ROS_INFO("Publishing Detection [%d]: # Clusters[%d]", time_frame_,
-		number_of_clusters_);
+	ROS_INFO("Publishing Tracking [%d]: # Tracks", time_frame_);
 
 	// Increment time frame
 	time_frame_++;
 }
 
-void DbScan::runDbScan(cv::Mat grid){
+/*
+void UnscentedKF::runUnscentedKF(cv::Mat grid){
 
 	// Clear previous Clusters
 	clusters_.clear();
@@ -217,7 +194,7 @@ void DbScan::runDbScan(cv::Mat grid){
 	number_of_clusters_ = clusters_.size();
 }
 
-void DbScan::getClusterDetails(const cv::Mat grid){
+void UnscentedKF::getClusterDetails(const cv::Mat grid){
 
 	// Loop through clusters
 	for(int i = 0; i < clusters_.size(); i++){
@@ -289,7 +266,7 @@ void DbScan::getClusterDetails(const cv::Mat grid){
 	}
 }
 
-void DbScan::createObjectList(){
+void UnscentedKF::createObjectList(){
 
 	// Clear buffer
 	object_array_.list.clear();
@@ -319,7 +296,7 @@ void DbScan::createObjectList(){
 	}
 }
 
-void DbScan::addObject(const Cluster & c){
+void UnscentedKF::addObject(const Cluster & c){
 
 	// Create object
 	Object object;
@@ -354,7 +331,57 @@ void DbScan::addObject(const Cluster & c){
 	object_array_.list.push_back(object);
 }
 
-bool DbScan::hasShapeOfPed(const Cluster & c){
+void UnscentedKF::createDetectionImage(cv::Mat image_raw_left){
+
+	// OpenCV Viz parameters
+	int linewidth = 5; // negative for filled
+	int fontface =  cv::FONT_HERSHEY_SIMPLEX;
+	double fontscale = 0.7;
+	int thickness = 3;
+
+	// Loop through clusters
+	for(int i = 0; i < object_array_.list.size(); ++i){
+
+		// Grab object
+		Object & o = object_array_.list[i];
+
+		if(!o.is_new_track)
+			continue;
+		
+		MatrixXf image_points = tools_.getImage2DBoundingBox(o);
+
+		// Draw box
+		cv::Point top_left = cv::Point(image_points(0,0), image_points(1,0));
+		cv::Point bot_right = cv::Point(image_points(0,1), image_points(1,1));
+
+		cv::rectangle(image_raw_left, top_left, bot_right,
+			clusters_[o.id].color, linewidth, 8);
+
+		// Draw text
+		std::stringstream ss;
+		ss 	<< o.id << "," 
+			<< std::setprecision(1) << o.width << ","
+			<< std::setprecision(1) << o.length << ","
+			<< std::setprecision(1) << o.height << ","
+			<< std::setprecision(3) << o.orientation;
+		std::string text = ss.str();
+		top_left.y -= 10;
+		top_left.x -= 50;
+		cv::putText(image_raw_left, text, top_left, fontface, fontscale,
+			clusters_[o.id].color,	thickness,	8);
+	}
+
+	/*
+	if(save_){
+		std::ostringstream filename;
+		filename << "/home/simonappel/kitti_data/" << scenario_name_ 
+		<< "/detection/00000" << setfill('0') << setw(5) << msg_counter_ << ".png";
+		cv::imwrite(filename.str(), raw_image);
+	}
+
+}
+
+bool UnscentedKF::hasShapeOfPed(const Cluster & c){
 	return (c.geometric.width > params_.ped_side_min ||
 		c.geometric.length > params_.ped_side_min)
 		&&
@@ -367,7 +394,7 @@ bool DbScan::hasShapeOfPed(const Cluster & c){
 		(c.semantic.confidence > params_.ped_semantic_min);
 }
 
-bool DbScan::hasShapeOfCar(const Cluster & c){
+bool UnscentedKF::hasShapeOfCar(const Cluster & c){
 	return (c.geometric.width > params_.car_side_min ||
 		c.geometric.length > params_.car_side_min)
 		&&
@@ -380,17 +407,17 @@ bool DbScan::hasShapeOfCar(const Cluster & c){
 		(c.semantic.confidence > params_.car_semantic_min);
 }
 
-bool DbScan::isValidSemantic(const int semantic_class){
+bool UnscentedKF::isValidSemantic(const int semantic_class){
 	return semantic_class > 10;
 }
 
-bool DbScan::isKittiValidSemantic(const int semantic_class){
+bool UnscentedKF::isKittiValidSemantic(const int semantic_class){
 
 	// Only allow Cars and Pedestrians
 	return (semantic_class == 11 || semantic_class == 13);
 }
 
-void DbScan::printCluster(const Cluster & c){
+void UnscentedKF::printCluster(const Cluster & c){
 
 	std::cout << std::fixed;
 	std::cout << "C " << std::setw(2)
@@ -409,5 +436,6 @@ void DbScan::printCluster(const Cluster & c){
 		<< " h " << c.geometric.height
 		<< std::endl;
 }
+*/
 
-} // namespace detection
+} // namespace tracking

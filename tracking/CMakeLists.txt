@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(detection)
+project(tracking)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -108,8 +108,8 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES perception
-  CATKIN_DEPENDS roscpp rospy std_msgs helper
+#  LIBRARIES tracking
+  CATKIN_DEPENDS roscpp std_msgs helper
 #  DEPENDS system_lib
 )
 
@@ -128,7 +128,7 @@ include_directories(
 ## Declare a C++ library
 add_library(
   ${PROJECT_NAME}_lib
-  src/${PROJECT_NAME}_lib/dbscan.cpp
+  src/${PROJECT_NAME}_lib/ukf.cpp
 )
 
 ## Specify libraries to link a library or executable target against
@@ -146,13 +146,13 @@ target_link_libraries(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 
-# Detection nodelet
-add_library( detection_nodelet src/detection_nodelet.cpp )
-target_link_libraries( detection_nodelet ${PROJECT_NAME}_lib helper)
+# tracking nodelet
+add_library( tracking_nodelet src/tracking_nodelet.cpp )
+target_link_libraries( tracking_nodelet ${PROJECT_NAME}_lib helper)
 
-# Detection node
-add_executable(detection src/detection_node.cpp)
-target_link_libraries( detection ${PROJECT_NAME}_lib helper)
+# tracking node
+add_executable(tracking src/tracking_node.cpp)
+target_link_libraries( tracking ${PROJECT_NAME}_lib helper)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
