@@ -16,6 +16,7 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	private_nh_(private_nh)
 	{
 
+	// Define parameters
 	private_nh_.param("data_association/ped/dist/position",
 		params_.da_ped_dist_pos, params_.da_ped_dist_pos);
 	private_nh_.param("data_association/ped/dist/form",
@@ -60,6 +61,25 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	ROS_INFO_STREAM("tra_lambda " << params_.tra_lambda);
 	ROS_INFO_STREAM("tra_aging_bad " << params_.tra_aging_bad);
 
+	// Set initialized to false at the beginning
+	is_initialized_ = false;
+
+	// Measurement covariance
+	R_laser_ = MatrixXd(params_.tra_dim_z, params_.tra_dim_z);
+  	R_laser_ << params_.tra_std_lidar_x * params_.tra_std_lidar_x, 0,
+		0, params_.tra_std_lidar_y * params_.tra_std_lidar_y;
+
+	// Define weights for UKF
+	weights_ = VectorXd(2 * params_.tra_dim_x_aug + 1);
+	weights_(0) = params_.tra_lambda /
+		(params_.tra_lambda + params_.tra_dim_x_aug);
+	for (int i = 1; i < 2 * params_.tra_dim_x_aug + 1; i++) {
+		weights_(i) = 0.5 / (params_.tra_dim_x_aug + params_.tra_lambda);
+	}
+
+	// Start ids for track with 0
+	track_id_counter_ = 0;
+
 	// Define Subscriber
 	list_detected_objects_sub_ = nh.subscribe("/detection/objects", 2,
 		&UnscentedKF::process, this);
@@ -67,6 +87,9 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	// Define Publisher
 	list_tracked_objects_pub_ = nh_.advertise<ObjectArray>(
 		"/tracking/objects", 2);
+
+	// Random color for track
+	rng_(2345);
 		
 	// Init counter for publishing
 	time_frame_ = 0;
@@ -78,364 +101,465 @@ UnscentedKF::~UnscentedKF(){
 
 void UnscentedKF::process(const ObjectArrayConstPtr & detected_objects){
 
-	// Print sensor fusion
-	ROS_INFO("Publishing Tracking [%d]: # Tracks", time_frame_);
+	// Read current time
+	double time_stamp = detected_objects->header.stamp.toSec();
+
+	// All other frames
+	if(is_initialized_){
+
+		// Calculate time difference between frames
+		double delta_t = time_stamp - last_time_stamp_;
+
+		// Prediction
+		Prediction(delta_t);
+
+		// Data association
+		//DataAssociation(detected_objects);
+
+		// Update
+		Update(detected_objects);
+
+		// Track management
+		TrackManagement(detected_objects);
+
+	}
+	// First frame
+	else{
+
+		// Initialize tracks
+		for(int i = 0; i < detected_objects->list.size(); ++i){
+			initTrack(detected_objects->list[i]);
+		}
+
+		// Set initialized to true
+		is_initialized_ = true;
+	}
+
+	// Store time stamp for next frame
+	last_time_stamp_ = time_stamp;
+
+	// Print Tracks
+	printTracks();
+
+	// Publish and print
+	publishTracks(detected_objects->header);
 
 	// Increment time frame
 	time_frame_++;
 }
-
-/*
-void UnscentedKF::runUnscentedKF(cv::Mat grid){
-
-	// Clear previous Clusters
-	clusters_.clear();
-
-	// Loop through image
-	for(int y = 0; y < grid.rows; y++){
-		for(int x = y; y < grid.cols - x; x++){
-
-			// Get semantic
-			int semantic_class = grid.at<cv::Vec3f>(y,x)[0];
-
-			// If not valid semantic continue
-			if(!isKittiValidSemantic(semantic_class)){
-				continue;
-			}
-				
-			// Flag cell as visited
-			grid.at<cv::Vec3f>(y,x)[0] = -100.0;
-
-			// New cluster
-			Cluster c = Cluster();
-			c.kernel = tools_.getClusterKernel(semantic_class);
-
-			// Init neighbor queue and add cell
-			std::queue<cv::Point> neighbor_queue;
-			neighbor_queue.push(cv::Point(x,y));
-
-			// Init non neighbor list
-			std::vector<cv::Point> non_neighbor_list;
-
-			// Search for neighbor cells with same semantic until queue is empty
-			while(!neighbor_queue.empty()){
-
-				// Store cell
-				c.geometric.cells.push_back(neighbor_queue.front());
-				int c_x = neighbor_queue.front().x;
-				int c_y = neighbor_queue.front().y;
-				neighbor_queue.pop();
-
-				// Look for equal semantic information within kernel
-				for(int k = -c.kernel; k <= c.kernel; ++k){
-					for(int l = -c.kernel; l <= c.kernel; ++l){
-
-						// Dont check the center cell itself
-						if(k == 0 && l == 0)
-							continue;
-
-						// Calculate neighbor cell indices
-						int n_x = c_x + k;
-						int n_y = c_y + l;
-
-						// Check if neighbor cell is out of bounce
-						if(n_x >= 0 && n_x < grid.cols &&
-							n_y >= 0 && n_y < grid.rows){
-
-							// Get semantic of neihbor cell
-							int n_semantic_class = 
-								grid.at<cv::Vec3f>(n_y,n_x)[0];
-
-							// If this semantic matches with cluster semantic
-							if(n_semantic_class == semantic_class){
-
-								// Flag neighbor cell as visited
-								grid.at<cv::Vec3f>(n_y,n_x)[0] -= 20;
-
-								// Add neighbor cell to neighbor queue
-								neighbor_queue.push(cv::Point(n_x,n_y));
-
-							}
-							// If non aimed semantic has hit
-							else if(!isKittiValidSemantic(n_semantic_class) &&
-								n_semantic_class >= 0){
-
-								// Flag cell temporarily as visited
-								grid.at<cv::Vec3f>(n_y,n_x)[0] -= 20;
-								non_neighbor_list.push_back(cv::Point(n_x,n_y));
-								c.semantic.diff_counter++;
-							}
-						}
-					}
-				}
-			}
-
-			// Write non neighbor list back to unvisited
-			for(int nn = 0; nn < non_neighbor_list.size(); ++nn){
-
-				int n_x = non_neighbor_list[nn].x;
-				int n_y = non_neighbor_list[nn].y;
-				grid.at<cv::Vec3f>(n_y,n_x)[0] += 20;
-			}
-
-			// Add semantic information
-			c.semantic.id = semantic_class;
-			c.geometric.num_cells = c.geometric.cells.size();
-			c.semantic.confidence = float(c.geometric.num_cells) / 
-				(c.geometric.num_cells + c.semantic.diff_counter);
-			c.semantic.name = tools_.SEMANTIC_NAMES[c.semantic.id];
-
-			// Push back cluster
-			clusters_.push_back(c);
-		}
-	}
-
-	// Determine number of clusters
-	number_of_clusters_ = clusters_.size();
-}
-
-void UnscentedKF::getClusterDetails(const cv::Mat grid){
-
-	// Loop through clusters
-	for(int i = 0; i < clusters_.size(); i++){
-
-		// Grab cluster
-		Cluster & c = clusters_[i];
-
-		// Fill id
-		c.id = i;
-		
-		// Fit minimum areal rectangular around cluster cells
-		cv::RotatedRect rect = cv::minAreaRect(cv::Mat(c.geometric.cells));
-
-		// Get center point of bounding box/cube
-		c.geometric.x = params_.grid_range_max -
-			(rect.center.y * params_.grid_cell_size)
-			- params_.grid_cell_size / 2;
-		c.geometric.y = params_.grid_range_max -
-			(rect.center.x * params_.grid_cell_size)
-			- params_.grid_cell_size / 2;
-
-		// Get width and length of cluster
-		c.geometric.width = (rect.size.width + 1) * params_.grid_cell_size;
-		c.geometric.length = (rect.size.height + 1) * params_.grid_cell_size;
-
-		// Find minimum and maximum in z coordinates
-		float min_low_z = grid.at<cv::Vec3f>(
-			c.geometric.cells[0].y,c.geometric.cells[0].x)[1];
-		float max_high_z = grid.at<cv::Vec3f>(
-			c.geometric.cells[0].y,c.geometric.cells[0].x)[2];
-		for(int j = 1; j < c.geometric.cells.size(); ++j){
-			float low_z = grid.at<cv::Vec3f>(
-				c.geometric.cells[j].y,c.geometric.cells[j].x)[1];
-			float high_z = grid.at<cv::Vec3f>(
-				c.geometric.cells[j].y,c.geometric.cells[j].x)[2];
-			min_low_z = (min_low_z < low_z) ? min_low_z : low_z;
-			max_high_z = (max_high_z > high_z) ? max_high_z : high_z;
-		}
-
-		// Get ground level and height of cluster
-		c.geometric.ground_level = min_low_z;
-		c.geometric.height = max_high_z - min_low_z;
-
-		// Get orientation of bounding box
-		// Minus since opencv y,x is the opposite of the velodyne frame
-		c.geometric.orientation = - rect.angle;
-
-		// Store rect as back up
-		c.rect = rect;
-
-		// Get color
-		int r = tools_.SEMANTIC_CLASS_TO_COLOR(c.semantic.id, 0);
-		int g = tools_.SEMANTIC_CLASS_TO_COLOR(c.semantic.id, 1);
-		int b = tools_.SEMANTIC_CLASS_TO_COLOR(c.semantic.id, 2);
-		c.color = cv::Scalar(r, g, b);
-
-		// Determine if cluster can be a new track
-		// Car
-		if(c.semantic.id == 13){
-			c.is_new_track = hasShapeOfCar(c);
-		}
-		// Pedestrian
-		else if(c.semantic.id == 11){
-			c.is_new_track = hasShapeOfPed(c);
-		}
-		else{
-			c.is_new_track = false;
-		}
-	}
-}
-
-void UnscentedKF::createObjectList(){
-
-	// Clear buffer
-	object_array_.list.clear();
-
-	// Loop through clusters to obtain object information
-	for(int i = 0; i < number_of_clusters_; ++i){
-
-		addObject(clusters_[i]);
-	}
-
-	// Transform objects in camera and world frame
-	try{
-		for(int i = 0; i < object_array_.list.size(); ++i){
-
-			listener_.transformPoint("world",
-				object_array_.list[i].velo_pose,
-				object_array_.list[i].world_pose);
-
-			listener_.transformPoint("camera_color_left",
-				object_array_.list[i].velo_pose,
-				object_array_.list[i].cam_pose);
-		}
-	}
-	catch(tf::TransformException& ex){
-		ROS_ERROR("Received an exception trying to transform a point from"
-			"\"velo_link\" to \"world\": %s", ex.what());
-	}
-}
-
-void UnscentedKF::addObject(const Cluster & c){
-
-	// Create object
-	Object object;
-	object.id = c.id;
-
-	// Pose in velo frame
-	object.velo_pose.header.frame_id = "velo_link";
-	object.velo_pose.point.x = c.geometric.x;
-	object.velo_pose.point.y = c.geometric.y;
-	object.velo_pose.point.z = c.geometric.ground_level;
-
-	// Geometry
-	object.width = c.geometric.width;
-	object.length = c.geometric.length;
-	object.height = c.geometric.height;
-	object.orientation = c.geometric.orientation;
-
-	// Semantic
-	object.semantic_id = c.semantic.id;
-	object.semantic_confidence = c.semantic.confidence;
-	object.semantic_name = c.semantic.name;
-
-	// Color
-	object.r = c.color[2];
-	object.g = c.color[1];
-	object.b = c.color[0];
-
-	// Tracking
-	object.is_new_track = c.is_new_track;
-
-	// Push back object to list
-	object_array_.list.push_back(object);
-}
-
-void UnscentedKF::createDetectionImage(cv::Mat image_raw_left){
-
-	// OpenCV Viz parameters
-	int linewidth = 5; // negative for filled
-	int fontface =  cv::FONT_HERSHEY_SIMPLEX;
-	double fontscale = 0.7;
-	int thickness = 3;
-
-	// Loop through clusters
-	for(int i = 0; i < object_array_.list.size(); ++i){
-
-		// Grab object
-		Object & o = object_array_.list[i];
-
-		if(!o.is_new_track)
-			continue;
-		
-		MatrixXf image_points = tools_.getImage2DBoundingBox(o);
-
-		// Draw box
-		cv::Point top_left = cv::Point(image_points(0,0), image_points(1,0));
-		cv::Point bot_right = cv::Point(image_points(0,1), image_points(1,1));
-
-		cv::rectangle(image_raw_left, top_left, bot_right,
-			clusters_[o.id].color, linewidth, 8);
-
-		// Draw text
-		std::stringstream ss;
-		ss 	<< o.id << "," 
-			<< std::setprecision(1) << o.width << ","
-			<< std::setprecision(1) << o.length << ","
-			<< std::setprecision(1) << o.height << ","
-			<< std::setprecision(3) << o.orientation;
-		std::string text = ss.str();
-		top_left.y -= 10;
-		top_left.x -= 50;
-		cv::putText(image_raw_left, text, top_left, fontface, fontscale,
-			clusters_[o.id].color,	thickness,	8);
-	}
+void UnscentedKF::Prediction(const double delta_t){
 
 	/*
-	if(save_){
-		std::ostringstream filename;
-		filename << "/home/simonappel/kitti_data/" << scenario_name_ 
-		<< "/detection/00000" << setfill('0') << setw(5) << msg_counter_ << ".png";
-		cv::imwrite(filename.str(), raw_image);
+	// Buffer variables
+	VectorXd x_aug = VectorXd(TRA_N_AUG);
+	MatrixXd P_aug = MatrixXd(TRA_N_AUG, TRA_N_AUG);
+	MatrixXd Xsig_aug = MatrixXd(TRA_N_AUG, 2 * TRA_N_AUG + 1);
+
+	// Loop through all tracks
+	for(int i = 0; i < tracks_.size(); ++i){
+
+		// Grab track
+		Track & track = tracks_[i];
+
+		// 1. Generate augmented sigma points
+		// Fill augmented mean state
+		x_aug.head(5) = track.sta.x;
+		x_aug(5) = 0;
+		x_aug(6) = 0;
+
+		// Fill augmented covariance matrix
+		P_aug.fill(0.0);
+		P_aug.topLeftCorner(5,5) = track.sta.P;
+		P_aug(5,5) = TRA_STD_A * TRA_STD_A;
+		P_aug(6,6) = TRA_STD_YAWDD * TRA_STD_YAWDD;
+
+		// Create square root matrix
+		MatrixXd L = P_aug.llt().matrixL();
+
+		// Create augmented sigma points
+		Xsig_aug.col(0)  = x_aug;
+		for(int j = 0; j < TRA_N_AUG; j++){
+			Xsig_aug.col(j + 1) = 
+				x_aug + sqrt(TRA_LAMBDA + TRA_N_AUG) * L.col(j);
+			Xsig_aug.col(j + 1 + TRA_N_AUG) = 
+				x_aug - sqrt(TRA_LAMBDA + TRA_N_AUG) * L.col(j);
+		}
+		//std::cout << "Generated sigma points " << std::endl << Xsig_aug
+		//	<< std::endl << std::endl;
+
+		// 2. Predict sigma points
+		for(int j = 0; j < 2 * TRA_N_AUG + 1; j++){
+
+			// Extract values for better readability
+			double p_x = Xsig_aug(0,j);
+			double p_y = Xsig_aug(1,j);
+			double v = Xsig_aug(2,j);
+			double yaw = Xsig_aug(3,j);
+			double yawd = Xsig_aug(4,j);
+			double nu_a = Xsig_aug(5,j);
+			double nu_yawdd = Xsig_aug(6,j);
+
+			// Predicted state values
+			double px_p, py_p;
+
+			// Avoid division by zero
+			if(fabs(yawd) > 0.001){
+				px_p = p_x + v/yawd * ( sin (yaw + yawd * delta_t) - sin(yaw));
+				py_p = p_y + v/yawd * ( cos(yaw) - cos(yaw + yawd * delta_t) );
+			}
+			else {
+				px_p = p_x + v * delta_t * cos(yaw);
+				py_p = p_y + v * delta_t * sin(yaw);
+			}
+			double v_p = v;
+			double yaw_p = yaw + yawd * delta_t;
+			double yawd_p = yawd;
+
+			// Add noise
+			px_p = px_p + 0.5 * nu_a * delta_t * delta_t * cos(yaw);
+			py_p = py_p + 0.5 * nu_a * delta_t * delta_t * sin(yaw);
+			v_p = v_p + nu_a * delta_t;
+			yaw_p = yaw_p + 0.5 * nu_yawdd * delta_t * delta_t;
+			yawd_p = yawd_p + nu_yawdd * delta_t;
+
+			// Write predicted sigma point into right column
+			track.sta.Xsig_pred(0,j) = px_p;
+			track.sta.Xsig_pred(1,j) = py_p;
+			track.sta.Xsig_pred(2,j) = v_p;
+			track.sta.Xsig_pred(3,j) = yaw_p;
+			track.sta.Xsig_pred(4,j) = yawd_p;
+		}
+		//std::cout << "Predicted sigma points " << std::endl << track.sta.Xsig_pred
+		//	<< std::endl << std::endl;
+
+		// 3. Predict mean and covariance
+		// Predicted state mean
+		track.sta.x.fill(0.0);
+		for(int j = 0; j < 2 * TRA_N_AUG + 1; j++) {
+			track.sta.x = track.sta.x + weights_(j) * track.sta.Xsig_pred.col(j);
+		}
+
+		//predicted state covariance matrix
+		track.sta.P.fill(0.0);
+		//iterate over sigma points
+		for(int j = 0; j < 2 * TRA_N_AUG + 1; j++) {
+
+			// state difference
+			VectorXd x_diff = track.sta.Xsig_pred.col(j) - track.sta.x;
+
+			//angle normalization
+			while (x_diff(3) >  M_PI) x_diff(3) -= 2. * M_PI;
+			while (x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
+
+			track.sta.P = track.sta.P + weights_(j) * x_diff * x_diff.transpose() ;
+		}
+
+		// Print prediction
+		//std::cout << "Prediction of track " << i << std::endl;
+		//std::cout << "x = " << std::endl << track.sta.x << std::endl;
+		//std::cout << "P = " << std::endl << track.sta.P << std::endl;
+		//std::cout << std::endl << std::endl;
+	}
+	*/
+}
+
+void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
+
+	/*
+	// Buffer variables
+	VectorXd z = VectorXd(TRA_Z_LASER);
+	MatrixXd Zsig;
+	VectorXd z_pred = VectorXd(TRA_Z_LASER);
+	MatrixXd S = MatrixXd(TRA_Z_LASER, TRA_Z_LASER);
+	MatrixXd Tc = MatrixXd(TRA_N_X, TRA_Z_LASER);
+
+	// Loop through all tracks
+	for(int i = 0; i < tracks_.size(); ++i){
+
+		// Grab track
+		Track & track = tracks_[i];
+
+		// Check if data association has found measurement for track i
+		if(track_association_[i] == -1){
+
+			// Update History
+			track.hist.bad_age++;
+
+			// Print
+			//std::cout << "No measurement found for track " << track.id
+			//	<< std::endl;
+		}
+		else{
+
+			// Grab measurement
+			z << detected_objects->list[ track_association_[i] ].world_pose.point.x, 
+				 detected_objects->list[ track_association_[i] ].world_pose.point.y;
+
+			// Prints
+			//std::cout << "Lidar measurement found for track " << i 
+			//	<< std::endl  << z << std::endl;
+
+			// 1. Predict measurement
+			// Init measurement sigma points
+			Zsig = track.sta.Xsig_pred.topLeftCorner(TRA_Z_LASER,2 * TRA_N_AUG + 1);
+
+			//std::cout << "Zsig " << Zsig << std::endl;
+
+			// Mean predicted measurement
+			z_pred.fill(0.0);
+			for(int j = 0; j < 2 * TRA_N_AUG + 1; j++) {
+				z_pred = z_pred + weights_(j) * Zsig.col(j);
+			}
+
+			//std::cout << "Z pred " << z_pred << std::endl;
+
+			S.fill(0.0);
+			Tc.fill(0.0);
+			for(int j = 0; j < 2 * TRA_N_AUG + 1; j++) {  //2n+1 simga points
+
+				// Residual
+				VectorXd z_sig_diff = Zsig.col(j) - z_pred;
+
+				// Angle normalization
+				//while(z_sig_diff(1) >  M_PI) z_sig_diff(1) -= 2. * M_PI;
+				//while(z_sig_diff(1) < -M_PI) z_sig_diff(1) += 2. * M_PI;
+
+				S = S + weights_(j) * z_sig_diff * z_sig_diff.transpose();
+
+				// State difference
+				VectorXd x_diff = track.sta.Xsig_pred.col(j) - track.sta.x;
+
+				//std::cout << j << " " << weights_(j) << " "
+				//	<< x_diff << " " << z_sig_diff.transpose() << std::endl;
+				// Angle normalization
+				while(x_diff(3) >  M_PI) x_diff(3) -= 2. * M_PI;
+				while(x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
+
+				Tc = Tc + weights_(j) * x_diff * z_sig_diff.transpose();
+			}
+
+			//add measurement noise covariance matrix
+			S = S + R_laser_;
+
+			// 2. State update
+			//Kalman gain K;
+			MatrixXd K = Tc * S.inverse();
+
+			//residual
+			VectorXd z_diff = z - z_pred;
+
+			// Print
+			//std::cout << "Laser Measurement" << std::endl;
+			//std::cout << "z_pred " << std::endl << z_pred << std::endl;
+			//std::cout << "z " << std::endl << z << std::endl;
+			//std::cout << "z_diff " << std::endl << z_diff << std::endl;
+
+			//std::cout << "S " << std::endl << S << std::endl;
+			//std::cout << "Tc " << std::endl << Tc << std::endl;
+			//std::cout << "S_inv " << std::endl << S.inverse() << std::endl;
+			//std::cout << "K " << std::endl << K << std::endl;
+			//std::cout << "x diff " << std::endl << K * z_diff << std::endl;
+
+			//update state mean and covariance matrix
+			track.sta.x = track.sta.x + K * z_diff;
+			track.sta.P = track.sta.P - K * S * K.transpose();
+
+			//VectorXd pos = VectorXd::Zero(2);
+			//pos << track.sta.x(0), track.sta.x(1);
+			//track.hist_pos.push_back(pos);
+
+			// Update History
+			track.hist.good_age++;
+			track.hist.bad_age = 0;
+
+			// Update geometry
+			if(detected_objects->list[ track_association_[i] ].height <= TRA_MIN_OBJ_HEIGHT){
+				track.geo.h = TRA_MIN_OBJ_HEIGHT;
+				std::cout << "WARN: Car seems to be too short and is set from "
+					<< detected_objects->list[ track_association_[i] ].height << " to "
+					<< TRA_MIN_OBJ_HEIGHT << std::endl;
+			}
+			else{
+				track.geo.h = detected_objects->list[ track_association_[i] ].height;
+			}
+			float detected_area = detected_objects->list[ track_association_[i] ].length *
+				detected_objects->list[ track_association_[i] ].width;
+			float tracked_area = track.geo.l * track.geo.w;
+			float occluded_factor = 2.0;
+			if(occluded_factor * detected_area < tracked_area){
+				ROS_WARN("Track [%d] probably occluded because of dropping size from [%f] to [%f]",
+					track.id, tracked_area, detected_area);
+			}
+			else{
+				track.geo.l = detected_objects->list[ track_association_[i] ].length;
+				track.geo.w = detected_objects->list[ track_association_[i] ].width;
+				track.geo.o = detected_objects->list[ track_association_[i] ].orientation;
+				track.sta.z = detected_objects->list[ track_association_[i] ].world_pose.point.z;
+			}
+
+
+			// Print prediction
+			std::cout << "Laser Update [" << track.hist.good_age << "," 
+				<< track.hist.bad_age
+				<< "] of track " << track.id << " with ["
+				<< z_diff[0] << " , " << z_diff[1] << "]" << std::endl;
+			//std::cout << "P = " << std::endl << track.sta.P << std::endl;
+			//std::cout << "eps = " << std::endl << CalculateNIS(z_diff,S)
+			//	<< std::endl;
+			//std::cout << std::endl << std::endl;
+		}
+	}
+	*/
+}
+
+void UnscentedKF::TrackManagement(const ObjectArrayConstPtr & detected_objects){
+
+	/*
+	// Delete spuriors tracks
+	for(int i = 0; i < tracks_.size() ; ++i){
+
+		// Deletion condition
+		if(tracks_[i].hist.bad_age >= TRA_BAD_AGE){
+
+			std::cout << "Deletion of track " << tracks_[i].id << std::endl;
+
+			// Swap track with end of vector and pop back
+			std::swap(tracks_[i],tracks_.back());
+			tracks_.pop_back();
+		}
 	}
 
+	// Create new ones out of untracked new detected object hypothesis
+	// Initialize tracks
+	for(int i = 0; i < detected_objects->list.size(); ++i){
+
+		// Unassigned object condition
+		if(object_association_[i] == -1){
+
+			// Init new track
+			initTrack(detected_objects->list[i]);
+		}
+	}
+	*/
 }
 
-bool UnscentedKF::hasShapeOfPed(const Cluster & c){
-	return (c.geometric.width > params_.ped_side_min ||
-		c.geometric.length > params_.ped_side_min)
-		&&
-		(c.geometric.width < params_.ped_side_max &&
-		c.geometric.length < params_.ped_side_max)
-		&&
-		(c.geometric.height > params_.ped_height_min && 
-		c.geometric.height < params_.ped_height_max)
-		&&
-		(c.semantic.confidence > params_.ped_semantic_min);
+void UnscentedKF::initTrack(const Object & obj){
+
+	// Create new track
+	Track tr = Track();
+
+	// Add id and increment
+	tr.id = track_id_counter_;
+	track_id_counter_++;
+
+	// Add state information
+	tr.sta.x = VectorXd::Zero(params_.tra_dim_x);
+	tr.sta.x[0] = obj.world_pose.point.x;
+	tr.sta.x[1] = obj.world_pose.point.y;
+	tr.sta.z = obj.world_pose.point.z;
+	tr.sta.P = MatrixXd::Zero(params_.tra_dim_x, params_.tra_dim_x);
+	tr.sta.P <<  	1,  0,  0,  0,  0,
+					0,  1,  0,  0,  0,
+					0,  0, 10,  0,  0,
+					0,  0,  0,  1,  0,
+					0,  0,  0,  0,  1;
+	tr.sta.Xsig_pred = MatrixXd::Zero(params_.tra_dim_x, 
+		2 * params_.tra_dim_x_aug + 1);
+
+	// Add geometric information
+	tr.geo.width = obj.width;
+	tr.geo.length = obj.length;
+	tr.geo.height = obj.height;
+	tr.geo.orientation = obj.orientation;
+
+	// Add semantic information
+	tr.sem.name = obj.semantic_name;
+	tr.sem.id = obj.semantic_id;
+	tr.sem.confidence = obj.semantic_confidence;
+
+	// Add unique color
+	tr.r = rng_.uniform(0, 255);
+	tr.g = rng_.uniform(0, 255);
+	tr.b = rng_.uniform(0, 255);
+	
+	// Push back to track list
+	tracks_.push_back(tr);
 }
 
-bool UnscentedKF::hasShapeOfCar(const Cluster & c){
-	return (c.geometric.width > params_.car_side_min ||
-		c.geometric.length > params_.car_side_min)
-		&&
-		(c.geometric.width < params_.car_side_max &&
-		c.geometric.length < params_.car_side_max)
-		&&
-		(c.geometric.height > params_.car_height_min && 
-		c.geometric.height < params_.car_height_max)
-		&&
-		(c.semantic.confidence > params_.car_semantic_min);
+void UnscentedKF::publishTracks(const std_msgs::Header & header){
+
+	// Create track message
+	ObjectArray track_list;
+	track_list.header = header;
+
+	// Loop over all tracks
+	for(int i = 0; i < tracks_.size(); ++i){
+
+		// Grab track
+		Track & track = tracks_[i];
+
+		// Create new message and fill it
+		Object track_msg;
+		track_msg.id = track.id;
+		track_msg.world_pose.header.frame_id = "world";
+		track_msg.world_pose.point.x = track.sta.x[0];
+		track_msg.world_pose.point.y = track.sta.x[1];
+		track_msg.world_pose.point.z = track.sta.z;
+
+		try{
+			listener_.transformPoint("camera_color_left",
+				track_msg.world_pose,
+				track_msg.cam_pose);
+			listener_.transformPoint("velo_link",
+				track_msg.world_pose,
+				track_msg.velo_pose);
+		}
+		catch(tf::TransformException& ex){
+			ROS_ERROR("Received an exception trying to transform a point from"
+				"\"velo_link\" to \"world\": %s", ex.what());
+		}
+		track_msg.heading = track.sta.x[3];
+		track_msg.velocity = track.sta.x[2];
+		track_msg.width = track.geo.width;
+		track_msg.length = track.geo.length;
+		track_msg.height = track.geo.height;
+		track_msg.orientation = track.geo.orientation;
+		track_msg.semantic_name = track.sem.name;
+		track_msg.semantic_id = track.sem.id;
+		track_msg.semantic_confidence = track.sem.confidence;
+		track_msg.r = track.r;
+		track_msg.g = track.g;
+		track_msg.b = track.b;
+		track_msg.is_track = true;
+
+		// Push back track message
+		track_list.list.push_back(track_msg);
+	}
+
+	// Print
+	ROS_INFO("Publishing Tracking [%d]: # Tracks [%d]", time_frame_,
+		int(tracks_.size()));
+
+	// Publish
+	list_tracked_objects_pub_.publish(track_list);
 }
 
-bool UnscentedKF::isValidSemantic(const int semantic_class){
-	return semantic_class > 10;
+void UnscentedKF::printTrack(const Track & tr){
+
+	ROS_INFO("Track [%d] is [%s] with to [%f],"
+	" pos[x,y,z] [%f,%f,%f]"
+	" form[w,l,h,o] [%f,%f,%f,%f]",
+	tr.id, tr.sem.name.c_str(), tr.sem.confidence,
+	tr.sta.x[0], tr.sta.x[1], tr.sta.z,
+	tr.geo.width, tr.geo.length,
+	tr.geo.height, tr.geo.orientation);
 }
 
-bool UnscentedKF::isKittiValidSemantic(const int semantic_class){
+void UnscentedKF::printTracks(){
 
-	// Only allow Cars and Pedestrians
-	return (semantic_class == 11 || semantic_class == 13);
+	for(int i = 0; i < tracks_.size(); ++i){
+		printTrack(tracks_[i]);
+	}
 }
-
-void UnscentedKF::printCluster(const Cluster & c){
-
-	std::cout << std::fixed;
-	std::cout << "C " << std::setw(2)
-		<< c.id << " "
-		<< c.semantic.name
-		<< " % " << c.semantic.confidence
-		<< "(" << c.geometric.cells.size()
-		<< "," << c.semantic.diff_counter
-		<< ") GEO"
-		<< " at (x,y,z) " << c.geometric.x 
-		<< "," << c.geometric.y
-		<< "," << c.geometric.ground_level
-		<< " ori " << c.geometric.orientation
-		<< " w/along " << c.geometric.width
-		<< " l/ortho " << c.geometric.length
-		<< " h " << c.geometric.height
-		<< std::endl;
-}
-*/
 
 } // namespace tracking

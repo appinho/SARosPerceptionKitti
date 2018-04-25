@@ -14,11 +14,14 @@
 #include <sensor_msgs/Image.h>
 #include <helper/ObjectArray.h>
 #include <tf/transform_listener.h>
+#include <Eigen/Dense>
+#include <opencv2/core/core.hpp>
 
 // Namespaces
 namespace tracking{
 
 using namespace helper;
+using namespace Eigen;
 
 struct Parameter{
 
@@ -39,6 +42,50 @@ struct Parameter{
 	int tra_aging_bad;
 };
 
+struct History{
+
+	int good_age;
+	int bad_age;
+
+};
+
+struct Geometry{
+
+	float width;
+	float length;
+	float height;
+	float orientation;
+};
+
+struct Semantic{
+
+	int id;
+	std::string name;
+	float confidence;
+};
+
+struct State{
+
+	VectorXd x;
+	float z;
+	MatrixXd P;
+	VectorXd x_aug;
+	VectorXd P_aug;
+	MatrixXd Xsig_pred;
+};
+
+struct Track{
+
+	// Attributes
+	int id;
+	State sta;
+	Geometry geo;
+	Semantic sem;
+	History hist;
+	int r;
+	int g;
+	int b;
+};
 
 class UnscentedKF{
 
@@ -52,23 +99,47 @@ public:
 
 	virtual void process(const ObjectArrayConstPtr & detected_objects);
 
+protected:
+
+	// Class member
+	Parameter params_;
 
 private:
 
 	// Node handle
 	ros::NodeHandle nh_, private_nh_;
 
-	// Class member
-	Parameter params_;
-	tf::TransformListener listener_;
+	// Processing
+	bool is_initialized_;
+	int track_id_counter_;
 	int time_frame_;
+	tf::TransformListener listener_;
+
+	// Visualization
+	cv::RNG rng_;
+
+	// UKF
+	MatrixXd R_laser_;
+	VectorXd weights_;
+	std::vector<Track> tracks_;
+
+	// Prediction
+	double last_time_stamp_;
 
 	// Subscriber
 	ros::Subscriber list_detected_objects_sub_;
 
 	// Publisher
 	ros::Publisher list_tracked_objects_pub_;
+	void publishTracks(const std_msgs::Header & header);
 
+	// Class functions
+	void Prediction(const double delta_t);
+	void Update(const ObjectArrayConstPtr & detected_objects);
+	void TrackManagement(const ObjectArrayConstPtr & detected_objects);
+	void initTrack(const Object & obj);
+	void printTrack(const Track & tr);
+	void printTracks();
 };
 
 } // namespace tracking

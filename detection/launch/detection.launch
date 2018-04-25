@@ -4,10 +4,10 @@
   <arg name="scenario" default="0060" />
 
   <!-- Play rosbag file -->
-  <node pkg="rosbag" type="play" name="player" args="-r 0.05 -l -d 2 /home/simonappel/kitti_data/$(arg scenario)/synchronized_data.bag"/>
+  <node pkg="rosbag" type="play" name="player" args="-r 1 -l -d 2 /home/simonappel/kitti_data/$(arg scenario)/synchronized_data.bag"/>
 
   <!-- Run the sensor setup node -->
-  <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node" output="screen">
+  <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node">
 
     <!-- Get parameters from parameter.yaml file -->
     <rosparam file="$(find sensor_processing)/config/parameters.yaml" command="load" />
@@ -25,7 +25,9 @@
   </node>
 
   <!-- Run the visualization node -->
-  <node pkg="visualization" type="visualization" name="visualization_node" output="screen">    
+  <node pkg="visualization" type="visualization" name="visualization_node">
+    <!-- Get scenario identifier -->
+    <param name="scenario" value="$(arg scenario)" />
   </node>
 
   <!-- Launch rviz for visualization -->

@@ -9,7 +9,6 @@ float32 velocity
 
 float32 width
 float32 length
-float32 ground_level
 float32 height
 float32 orientation
 
@@ -21,4 +20,4 @@ uint32 r
 uint32 g
 uint32 b
 
-bool is_new_track
+bool is_track

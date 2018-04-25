@@ -7,7 +7,7 @@
   <node pkg="rosbag" type="play" name="player" args="-r 0.05 -l -d 2 /home/simonappel/kitti_data/$(arg scenario)/synchronized_data.bag"/>
 
   <!-- Run the sensor setup node -->
-  <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node" output="screen">
+  <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node">
 
     <!-- Get parameters from parameter.yaml file -->
     <rosparam file="$(find sensor_processing)/config/parameters.yaml" command="load" />
@@ -16,7 +16,7 @@
   </node>
 
   <!-- Run the detection node -->
-  <node pkg="detection" type="detection" name="detection_node" output="screen">
+  <node pkg="detection" type="detection" name="detection_node">
 
     <!-- Get parameters from parameter.yaml file -->
     <rosparam file="$(find sensor_processing)/config/parameters.yaml" command="load" />
@@ -30,6 +30,12 @@
     <!-- Get parameters from parameter.yaml file -->
     <rosparam file="$(find tracking)/config/parameters.yaml" command="load" />
     
+  </node>
+
+  <!-- Run the visualization node -->
+  <node pkg="visualization" type="visualization" name="visualization_node">
+    <!-- Get scenario identifier -->
+    <param name="scenario" value="$(arg scenario)" />
   </node>
 
   <!-- Launch rviz for visualization -->

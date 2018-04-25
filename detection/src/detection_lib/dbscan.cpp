@@ -97,7 +97,7 @@ void DbScan::process(const Image::ConstPtr & image_detection_grid){
 
 	// Print cluster info
 	for(int i = 0; i < number_of_clusters_; ++i){
-		if(clusters_[i].is_new_track)
+		if(clusters_[i].is_track)
 			printCluster(clusters_[i]);
 	}
 
@@ -258,7 +258,7 @@ void DbScan::getClusterDetails(const cv::Mat grid){
 		}
 
 		// Get ground level and height of cluster
-		c.geometric.ground_level = min_low_z;
+		c.geometric.z = min_low_z;
 		c.geometric.height = max_high_z - min_low_z;
 
 		// Get orientation of bounding box
@@ -277,14 +277,14 @@ void DbScan::getClusterDetails(const cv::Mat grid){
 		// Determine if cluster can be a new track
 		// Car
 		if(c.semantic.id == 13){
-			c.is_new_track = hasShapeOfCar(c);
+			c.is_track = hasShapeOfCar(c);
 		}
 		// Pedestrian
 		else if(c.semantic.id == 11){
-			c.is_new_track = hasShapeOfPed(c);
+			c.is_track = hasShapeOfPed(c);
 		}
 		else{
-			c.is_new_track = false;
+			c.is_track = false;
 		}
 	}
 }
@@ -329,7 +329,7 @@ void DbScan::addObject(const Cluster & c){
 	object.velo_pose.header.frame_id = "velo_link";
 	object.velo_pose.point.x = c.geometric.x;
 	object.velo_pose.point.y = c.geometric.y;
-	object.velo_pose.point.z = c.geometric.ground_level;
+	object.velo_pose.point.z = c.geometric.z;
 
 	// Geometry
 	object.width = c.geometric.width;
@@ -342,13 +342,8 @@ void DbScan::addObject(const Cluster & c){
 	object.semantic_confidence = c.semantic.confidence;
 	object.semantic_name = c.semantic.name;
 
-	// Color
-	object.r = c.color[2];
-	object.g = c.color[1];
-	object.b = c.color[0];
-
 	// Tracking
-	object.is_new_track = c.is_new_track;
+	object.is_track = c.is_track;
 
 	// Push back object to list
 	object_array_.list.push_back(object);
@@ -392,22 +387,14 @@ bool DbScan::isKittiValidSemantic(const int semantic_class){
 
 void DbScan::printCluster(const Cluster & c){
 
-	std::cout << std::fixed;
-	std::cout << "C " << std::setw(2)
-		<< c.id << " "
-		<< c.semantic.name
-		<< " % " << c.semantic.confidence
-		<< "(" << c.geometric.cells.size()
-		<< "," << c.semantic.diff_counter
-		<< ") GEO"
-		<< " at (x,y,z) " << c.geometric.x 
-		<< "," << c.geometric.y
-		<< "," << c.geometric.ground_level
-		<< " ori " << c.geometric.orientation
-		<< " w/along " << c.geometric.width
-		<< " l/ortho " << c.geometric.length
-		<< " h " << c.geometric.height
-		<< std::endl;
+	ROS_INFO("Cluster [%d] is [%s] with to [%f,%d,%d],"
+		" pos[x,y,z] [%f,%f,%f]"
+		" form[w,l,h,o] [%f,%f,%f,%f]",
+		c.id, c.semantic.name.c_str(), c.semantic.confidence,
+		c.geometric.num_cells, c.semantic.diff_counter,
+		c.geometric.x, c.geometric.y, c.geometric.z,
+		c.geometric.width, c.geometric.length,
+		c.geometric.height, c.geometric.orientation);
 }
 
 } // namespace detection

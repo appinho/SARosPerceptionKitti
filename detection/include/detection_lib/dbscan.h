@@ -57,9 +57,9 @@ struct Geometric{
 
 	float x;
 	float y;
+	float z;
 	float width;
 	float length;
-	float ground_level;
 	float height;
 	float orientation;
 
@@ -85,7 +85,7 @@ struct Cluster{
 	// Misc stuff
 	cv::RotatedRect rect;
 	cv::Scalar color;
-	bool is_new_track;
+	bool is_track;
 
 };
 

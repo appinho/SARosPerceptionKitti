@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   pcl_ros
   helper
+  visualization_msgs
 )
 
 find_package( OpenCV REQUIRED )

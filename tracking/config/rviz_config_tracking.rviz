@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Map1
       Splitter Ratio: 0.5
     Tree Height: 775
   - Class: rviz/Selection
@@ -36,7 +37,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /sensor/grid_occupancy
+      Topic: /sensor/grid/occupancy
       Unreliable: false
       Use Timestamp: false
       Value: true
