@@ -33,7 +33,7 @@
   </node>
 
   <!-- Run the visualization node -->
-  <node pkg="visualization" type="visualization" name="visualization_node">
+  <node pkg="visualization" type="visualization" name="visualization_node" output="screen">
     <!-- Get scenario identifier -->
     <param name="scenario" value="$(arg scenario)" />
   </node>

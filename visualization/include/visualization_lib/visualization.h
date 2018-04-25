@@ -16,6 +16,7 @@
 #include <opencv2/opencv.hpp>
 #include <helper/ObjectArray.h>
 #include <helper/tools.h>
+#include <tf/transform_datatypes.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -28,6 +29,13 @@ using namespace sensor_msgs;
 using namespace message_filters;
 using namespace visualization_msgs;
 
+struct VizObject{
+
+	Marker bb;
+	Marker arr;
+	Marker txt;
+};
+
 class Visualization{
 
 public:
@@ -38,8 +46,9 @@ public:
 	// Virtual destructor
 	virtual ~Visualization();
 
-	virtual void process(const Image::ConstPtr & image_raw_left,
-		const ObjectArrayConstPtr & detected_objects,
+	void processDetection(const Image::ConstPtr & image_raw_left,
+		const ObjectArrayConstPtr & detected_objects);
+	void processTracking(const Image::ConstPtr & image_raw_left,
 		const ObjectArrayConstPtr & tracked_objects);
 
 
@@ -57,14 +66,21 @@ private:
 	double fontscale_;
 	int thickness_;
 	bool save_;
+	int viz_buffer_;
+
+	// Marker member
+	std::vector<VizObject> detection_;
+	std::vector<VizObject> tracking_;
 
 	// Subscriber
 	Subscriber<Image> image_raw_left_sub_;
 	Subscriber<ObjectArray> list_detected_objects_sub_;
 	Subscriber<ObjectArray> list_tracked_objects_sub_;
 	typedef sync_policies::ExactTime
-		<Image, ObjectArray, ObjectArray> MySyncPolicy;
-	Synchronizer<MySyncPolicy> sync_;
+		<Image, ObjectArray> MySyncPolicy;
+	Synchronizer<MySyncPolicy> sync_det_;
+	Synchronizer<MySyncPolicy> sync_tra_;
+
 
 	// Publisher
 	ros::Publisher image_detection_pub_;
@@ -75,7 +91,17 @@ private:
 	ros::Publisher text_tracking_pub_;
 	ros::Publisher arrow_tracking_pub_;
 
-	// Class functions
+	// Marker Functions
+	void showRVizMarkers(
+		const std::string & node_name,
+		const ObjectArrayConstPtr & objects);
+	VizObject initVizObject(const int i);
+	void updateBoundingBox(VizObject & viz_obj, const int i, const Object & obj);
+	void updateText(VizObject & viz_obj, const int i, const Object & obj);
+	void updateArrow(VizObject & viz_obj, const int i, const Object & obj);
+	void hide(VizObject & viz_obj);
+
+	// Image functions
 	void showFirstPersonImage(
 		const std::string & node_name,
 		const ObjectArrayConstPtr & objects,

@@ -97,8 +97,7 @@ void DbScan::process(const Image::ConstPtr & image_detection_grid){
 
 	// Print cluster info
 	for(int i = 0; i < number_of_clusters_; ++i){
-		if(clusters_[i].is_track)
-			printCluster(clusters_[i]);
+		printCluster(clusters_[i]);
 	}
 
 	// Print sensor fusion
@@ -263,7 +262,7 @@ void DbScan::getClusterDetails(const cv::Mat grid){
 
 		// Get orientation of bounding box
 		// Minus since opencv y,x is the opposite of the velodyne frame
-		c.geometric.orientation = - rect.angle;
+		c.geometric.orientation = -rect.angle;
 
 		// Store rect as back up
 		c.rect = rect;
@@ -341,6 +340,11 @@ void DbScan::addObject(const Cluster & c){
 	object.semantic_id = c.semantic.id;
 	object.semantic_confidence = c.semantic.confidence;
 	object.semantic_name = c.semantic.name;
+
+	// Color with BGR encoding
+	object.r = c.color[0];
+	object.g = c.color[1];
+	object.b = c.color[2];
 
 	// Tracking
 	object.is_track = c.is_track;
