@@ -40,6 +40,8 @@ struct Parameter{
 	float tra_std_yaw_rate;
 	float tra_lambda;
 	int tra_aging_bad;
+
+	float tra_occ_factor;
 };
 
 struct History{
@@ -140,6 +142,17 @@ private:
 	void initTrack(const Object & obj);
 	void printTrack(const Track & tr);
 	void printTracks();
+
+	// Data Association members
+	std::vector<int> da_tracks;
+	std::vector<int> da_objects;
+
+	// Data Association functions
+	void GlobalNearestNeighbor(const ObjectArrayConstPtr & detected_objects);
+	float CalculateDistance(const Track & track, const Object & object);
+	float CalculateBoxMismatch(const Track & track, const Object & object);
+	float CalculateEuclideanAndBoxOffset(const Track & track, 
+		const Object & object);
 };
 
 } // namespace tracking

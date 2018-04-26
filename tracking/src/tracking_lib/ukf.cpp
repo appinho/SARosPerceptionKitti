@@ -45,6 +45,8 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		params_.tra_lambda);
 	private_nh_.param("tracking/aging/bad", params_.tra_aging_bad,
 		params_.tra_aging_bad);
+	private_nh_.param("tracking/occlusion_factor", params_.tra_occ_factor, 
+		params_.tra_occ_factor);
 
 	// Print parameters
 	ROS_INFO_STREAM("da_ped_dist_pos " << params_.da_ped_dist_pos);
@@ -60,6 +62,7 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	ROS_INFO_STREAM("tra_std_yaw_rate " << params_.tra_std_yaw_rate);
 	ROS_INFO_STREAM("tra_lambda " << params_.tra_lambda);
 	ROS_INFO_STREAM("tra_aging_bad " << params_.tra_aging_bad);
+	ROS_INFO_STREAM("tra_occ_factor " << params_.tra_occ_factor);
 
 	// Set initialized to false at the beginning
 	is_initialized_ = false;
@@ -114,7 +117,7 @@ void UnscentedKF::process(const ObjectArrayConstPtr & detected_objects){
 		Prediction(delta_t);
 
 		// Data association
-		//DataAssociation(detected_objects);
+		GlobalNearestNeighbor(detected_objects);
 
 		// Update
 		Update(detected_objects);
@@ -149,11 +152,11 @@ void UnscentedKF::process(const ObjectArrayConstPtr & detected_objects){
 }
 void UnscentedKF::Prediction(const double delta_t){
 
-	/*
 	// Buffer variables
-	VectorXd x_aug = VectorXd(TRA_N_AUG);
-	MatrixXd P_aug = MatrixXd(TRA_N_AUG, TRA_N_AUG);
-	MatrixXd Xsig_aug = MatrixXd(TRA_N_AUG, 2 * TRA_N_AUG + 1);
+	VectorXd x_aug = VectorXd(params_.tra_dim_x_aug);
+	MatrixXd P_aug = MatrixXd(params_.tra_dim_x_aug, params_.tra_dim_x_aug);
+	MatrixXd Xsig_aug = 
+		MatrixXd(params_.tra_dim_x_aug, 2 * params_.tra_dim_x_aug + 1);
 
 	// Loop through all tracks
 	for(int i = 0; i < tracks_.size(); ++i){
@@ -161,7 +164,10 @@ void UnscentedKF::Prediction(const double delta_t){
 		// Grab track
 		Track & track = tracks_[i];
 
-		// 1. Generate augmented sigma points
+/******************************************************************************
+ * 1. Generate augmented sigma points
+ */
+
 		// Fill augmented mean state
 		x_aug.head(5) = track.sta.x;
 		x_aug(5) = 0;
@@ -170,27 +176,28 @@ void UnscentedKF::Prediction(const double delta_t){
 		// Fill augmented covariance matrix
 		P_aug.fill(0.0);
 		P_aug.topLeftCorner(5,5) = track.sta.P;
-		P_aug(5,5) = TRA_STD_A * TRA_STD_A;
-		P_aug(6,6) = TRA_STD_YAWDD * TRA_STD_YAWDD;
+		P_aug(5,5) = params_.tra_std_acc * params_.tra_std_acc;
+		P_aug(6,6) = params_.tra_std_yaw_rate * params_.tra_std_yaw_rate;
 
 		// Create square root matrix
 		MatrixXd L = P_aug.llt().matrixL();
 
 		// Create augmented sigma points
 		Xsig_aug.col(0)  = x_aug;
-		for(int j = 0; j < TRA_N_AUG; j++){
-			Xsig_aug.col(j + 1) = 
-				x_aug + sqrt(TRA_LAMBDA + TRA_N_AUG) * L.col(j);
-			Xsig_aug.col(j + 1 + TRA_N_AUG) = 
-				x_aug - sqrt(TRA_LAMBDA + TRA_N_AUG) * L.col(j);
+		for(int j = 0; j < params_.tra_dim_x_aug; j++){
+			Xsig_aug.col(j + 1) = x_aug + 
+				sqrt(params_.tra_lambda + params_.tra_dim_x_aug) * L.col(j);
+			Xsig_aug.col(j + 1 + params_.tra_dim_x_aug) = x_aug - 
+				sqrt(params_.tra_lambda + params_.tra_dim_x_aug) * L.col(j);
 		}
-		//std::cout << "Generated sigma points " << std::endl << Xsig_aug
-		//	<< std::endl << std::endl;
 
-		// 2. Predict sigma points
-		for(int j = 0; j < 2 * TRA_N_AUG + 1; j++){
+/******************************************************************************
+ * 2. Predict sigma points
+ */
 
-			// Extract values for better readability
+		for(int j = 0; j < 2 * params_.tra_dim_x_aug + 1; j++){
+
+			// Grab values for better readability
 			double p_x = Xsig_aug(0,j);
 			double p_y = Xsig_aug(1,j);
 			double v = Xsig_aug(2,j);
@@ -229,49 +236,175 @@ void UnscentedKF::Prediction(const double delta_t){
 			track.sta.Xsig_pred(3,j) = yaw_p;
 			track.sta.Xsig_pred(4,j) = yawd_p;
 		}
-		//std::cout << "Predicted sigma points " << std::endl << track.sta.Xsig_pred
-		//	<< std::endl << std::endl;
 
-		// 3. Predict mean and covariance
+/******************************************************************************
+ * 3. Predict state vector and state covariance
+ */
 		// Predicted state mean
 		track.sta.x.fill(0.0);
-		for(int j = 0; j < 2 * TRA_N_AUG + 1; j++) {
-			track.sta.x = track.sta.x + weights_(j) * track.sta.Xsig_pred.col(j);
+		for(int j = 0; j < 2 * params_.tra_dim_x_aug + 1; j++) {
+			track.sta.x = track.sta.x + weights_(j) *
+				track.sta.Xsig_pred.col(j);
 		}
 
-		//predicted state covariance matrix
+		// Predicted state covariance matrix
 		track.sta.P.fill(0.0);
-		//iterate over sigma points
-		for(int j = 0; j < 2 * TRA_N_AUG + 1; j++) {
 
-			// state difference
+		// Iterate over sigma points
+		for(int j = 0; j < 2 * params_.tra_dim_x_aug + 1; j++) {
+
+			// State difference
 			VectorXd x_diff = track.sta.Xsig_pred.col(j) - track.sta.x;
 
-			//angle normalization
+			// Angle normalization
 			while (x_diff(3) >  M_PI) x_diff(3) -= 2. * M_PI;
 			while (x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
 
-			track.sta.P = track.sta.P + weights_(j) * x_diff * x_diff.transpose() ;
+			track.sta.P = track.sta.P + weights_(j) * x_diff * 
+				x_diff.transpose() ;
 		}
 
 		// Print prediction
-		//std::cout << "Prediction of track " << i << std::endl;
-		//std::cout << "x = " << std::endl << track.sta.x << std::endl;
-		//std::cout << "P = " << std::endl << track.sta.P << std::endl;
-		//std::cout << std::endl << std::endl;
+		ROS_INFO("Pred of T[%d] xp=[%f,%f,%f,%f,%f], Pp=[%f,%f,%f,%f,%f]",
+			track.id, track.sta.x(0), track.sta.x(1), track.sta.x(2), 
+			track.sta.x(3), track.sta.x(4),	track.sta.P(0), track.sta.P(6), 
+			track.sta.P(12), track.sta.P(18), track.sta.P(24)
+		);
 	}
-	*/
+}
+
+void UnscentedKF::GlobalNearestNeighbor(
+	const ObjectArrayConstPtr & detected_objects){
+
+	// Define assoication vectors
+	da_tracks = std::vector<int>(tracks_.size(),-1);
+	da_objects = std::vector<int>(detected_objects->list.size(),-1);
+
+	// Loop through tracks
+	for(int i = 0; i < tracks_.size(); ++i){
+
+		// Buffer variables
+		std::vector<float> distances;
+		std::vector<int> matches;
+
+		// Set data association parameters depending on if 
+		// the track is a car or a pedestrian
+		float gate;
+		float box_gate;
+
+		// Pedestrian
+		if(tracks_[i].sem.id == 11){
+			gate = params_.da_ped_dist_pos;
+			box_gate = params_.da_ped_dist_form;
+		}
+		// Car
+		else if(tracks_[i].sem.id == 13){
+			gate = params_.da_car_dist_pos;
+			box_gate = params_.da_car_dist_form;
+		}
+		else{
+			ROS_WARN("Wrong semantic for track [%d]", tracks_[i].id);
+		}
+
+		// Loop through detected objects
+		for(int j = 0; j < detected_objects->list.size(); ++j){
+
+			// Calculate distance between track and detected object
+			if(tracks_[i].sem.id == detected_objects->list[j].semantic_id){
+				float dist = CalculateDistance(tracks_[i], 
+					detected_objects->list[j]);
+
+				if(dist < gate){
+					distances.push_back(dist);
+					matches.push_back(j);
+				}
+			}
+		}
+
+		// If track exactly finds one match assign it
+		if(matches.size() == 1){
+
+			float box_dist = CalculateEuclideanAndBoxOffset(tracks_[i], 
+				detected_objects->list[matches[0]]);
+			if(box_dist < box_gate){
+				da_tracks[i] = matches[0];
+				da_objects[matches[0]] = i;
+			}
+		}
+		// If found more then take best match and block other measurements
+		else if(matches.size() > 1){
+
+			// Block other measurements to NOT be initialized
+			ROS_WARN("Multiple associations for track [%d]", tracks_[i].id);
+
+			// Calculate all box distances and find minimum
+			float min_box_dist = box_gate;
+			int min_box_index = -1;
+
+			for(int k = 0; k < matches.size(); ++k){
+
+				float box_dist = CalculateEuclideanAndBoxOffset(tracks_[i],
+					detected_objects->list[matches[k]]);
+
+				if(box_dist < min_box_dist){
+					min_box_index = k;
+					min_box_dist = box_dist;
+				}
+			}
+
+			for(int k = 0; k < matches.size(); ++k){
+				if(k == min_box_index){
+					da_objects[matches[k]] = i;
+					da_tracks[i] = matches[k];
+				}
+				else{
+					da_objects[matches[k]] = -2;
+				}
+			}
+		}
+		else{
+			ROS_WARN("No measurement found for track [%d]", tracks_[i].id);
+		}
+	}
+}
+
+float UnscentedKF::CalculateDistance(const Track & track,
+	const Object & object){
+
+	return abs(track.sta.x(0) - object.world_pose.point.x) + 
+		abs(track.sta.x(1) - object.world_pose.point.y) + 
+		abs(track.sta.z - object.world_pose.point.z);
+}
+
+float UnscentedKF::CalculateBoxMismatch(const Track & track,
+	const Object & object){
+
+	// Calculate geometric mismatch
+	float box_wl_switched =  abs(track.geo.width - object.length) + 
+		abs(track.geo.length - object.width);
+	float box_wl_ordered = abs(track.geo.width - object.width) + 
+		abs(track.geo.length - object.length);
+	float box_mismatch = (box_wl_switched < box_wl_ordered) ? 
+		box_wl_switched : box_wl_ordered;
+	box_mismatch += abs(track.geo.height - object.height);
+	return box_mismatch;
+}
+
+float UnscentedKF::CalculateEuclideanAndBoxOffset(const Track & track,
+	const Object & object){
+
+	return CalculateDistance(track, object) + 
+		CalculateBoxMismatch(track, object);
 }
 
 void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 
-	/*
 	// Buffer variables
-	VectorXd z = VectorXd(TRA_Z_LASER);
+	VectorXd z = VectorXd(params_.tra_dim_z);
 	MatrixXd Zsig;
-	VectorXd z_pred = VectorXd(TRA_Z_LASER);
-	MatrixXd S = MatrixXd(TRA_Z_LASER, TRA_Z_LASER);
-	MatrixXd Tc = MatrixXd(TRA_N_X, TRA_Z_LASER);
+	VectorXd z_pred = VectorXd(params_.tra_dim_z);
+	MatrixXd S = MatrixXd(params_.tra_dim_z, params_.tra_dim_z);
+	MatrixXd Tc = MatrixXd(params_.tra_dim_x, params_.tra_dim_z);
 
 	// Loop through all tracks
 	for(int i = 0; i < tracks_.size(); ++i){
@@ -279,58 +412,43 @@ void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 		// Grab track
 		Track & track = tracks_[i];
 
-		// Check if data association has found measurement for track i
-		if(track_association_[i] == -1){
+		// If track has not found any measurement
+		if(da_tracks[i] == -1){
 
-			// Update History
+			// Increment bad aging
 			track.hist.bad_age++;
-
-			// Print
-			//std::cout << "No measurement found for track " << track.id
-			//	<< std::endl;
 		}
+		// If track has found a measurement update it
 		else{
 
 			// Grab measurement
-			z << detected_objects->list[ track_association_[i] ].world_pose.point.x, 
-				 detected_objects->list[ track_association_[i] ].world_pose.point.y;
+			z << detected_objects->list[ da_tracks[i] ].world_pose.point.x, 
+				 detected_objects->list[ da_tracks[i] ].world_pose.point.y;
 
-			// Prints
-			//std::cout << "Lidar measurement found for track " << i 
-			//	<< std::endl  << z << std::endl;
-
-			// 1. Predict measurement
+/******************************************************************************
+ * 1. Predict measurement
+ */
 			// Init measurement sigma points
-			Zsig = track.sta.Xsig_pred.topLeftCorner(TRA_Z_LASER,2 * TRA_N_AUG + 1);
-
-			//std::cout << "Zsig " << Zsig << std::endl;
+			Zsig = track.sta.Xsig_pred.topLeftCorner(params_.tra_dim_z, 
+				2 * params_.tra_dim_x_aug + 1);
 
 			// Mean predicted measurement
 			z_pred.fill(0.0);
-			for(int j = 0; j < 2 * TRA_N_AUG + 1; j++) {
+			for(int j = 0; j < 2 * params_.tra_dim_x_aug + 1; j++) {
 				z_pred = z_pred + weights_(j) * Zsig.col(j);
 			}
 
-			//std::cout << "Z pred " << z_pred << std::endl;
-
 			S.fill(0.0);
 			Tc.fill(0.0);
-			for(int j = 0; j < 2 * TRA_N_AUG + 1; j++) {  //2n+1 simga points
+			for(int j = 0; j < 2 * params_.tra_dim_x_aug + 1; j++) {
 
 				// Residual
 				VectorXd z_sig_diff = Zsig.col(j) - z_pred;
-
-				// Angle normalization
-				//while(z_sig_diff(1) >  M_PI) z_sig_diff(1) -= 2. * M_PI;
-				//while(z_sig_diff(1) < -M_PI) z_sig_diff(1) += 2. * M_PI;
-
 				S = S + weights_(j) * z_sig_diff * z_sig_diff.transpose();
 
 				// State difference
 				VectorXd x_diff = track.sta.Xsig_pred.col(j) - track.sta.x;
 
-				//std::cout << j << " " << weights_(j) << " "
-				//	<< x_diff << " " << z_sig_diff.transpose() << std::endl;
 				// Angle normalization
 				while(x_diff(3) >  M_PI) x_diff(3) -= 2. * M_PI;
 				while(x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
@@ -338,90 +456,90 @@ void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 				Tc = Tc + weights_(j) * x_diff * z_sig_diff.transpose();
 			}
 
-			//add measurement noise covariance matrix
+			// Add measurement noise covariance matrix
 			S = S + R_laser_;
 
-			// 2. State update
-			//Kalman gain K;
+/******************************************************************************
+ * 2. Update state vector and covariance matrix
+ */
+			// Kalman gain K;
 			MatrixXd K = Tc * S.inverse();
 
-			//residual
+			// Residual
 			VectorXd z_diff = z - z_pred;
 
-			// Print
-			//std::cout << "Laser Measurement" << std::endl;
-			//std::cout << "z_pred " << std::endl << z_pred << std::endl;
-			//std::cout << "z " << std::endl << z << std::endl;
-			//std::cout << "z_diff " << std::endl << z_diff << std::endl;
-
-			//std::cout << "S " << std::endl << S << std::endl;
-			//std::cout << "Tc " << std::endl << Tc << std::endl;
-			//std::cout << "S_inv " << std::endl << S.inverse() << std::endl;
-			//std::cout << "K " << std::endl << K << std::endl;
-			//std::cout << "x diff " << std::endl << K * z_diff << std::endl;
-
-			//update state mean and covariance matrix
+			// Update state mean and covariance matrix
 			track.sta.x = track.sta.x + K * z_diff;
 			track.sta.P = track.sta.P - K * S * K.transpose();
-
-			//VectorXd pos = VectorXd::Zero(2);
-			//pos << track.sta.x(0), track.sta.x(1);
-			//track.hist_pos.push_back(pos);
 
 			// Update History
 			track.hist.good_age++;
 			track.hist.bad_age = 0;
 
 			// Update geometry
-			if(detected_objects->list[ track_association_[i] ].height <= TRA_MIN_OBJ_HEIGHT){
+			/*
+			if(detected_objects->list[ da_tracks[i] ].height <= TRA_MIN_OBJ_HEIGHT){
 				track.geo.h = TRA_MIN_OBJ_HEIGHT;
 				std::cout << "WARN: Car seems to be too short and is set from "
-					<< detected_objects->list[ track_association_[i] ].height << " to "
+					<< detected_objects->list[ da_tracks[i] ].height << " to "
 					<< TRA_MIN_OBJ_HEIGHT << std::endl;
 			}
 			else{
-				track.geo.h = detected_objects->list[ track_association_[i] ].height;
+				track.geo.h = detected_objects->list[ da_tracks[i] ].height;
 			}
-			float detected_area = detected_objects->list[ track_association_[i] ].length *
-				detected_objects->list[ track_association_[i] ].width;
-			float tracked_area = track.geo.l * track.geo.w;
-			float occluded_factor = 2.0;
-			if(occluded_factor * detected_area < tracked_area){
-				ROS_WARN("Track [%d] probably occluded because of dropping size from [%f] to [%f]",
-					track.id, tracked_area, detected_area);
+			*/
+
+/******************************************************************************
+ * 3. Update geometric information of track
+ */
+			// Calculate area of detection and track
+			float det_area = 
+				detected_objects->list[ da_tracks[i] ].length *
+				detected_objects->list[ da_tracks[i] ].width;
+			float tra_area = track.geo.length * track.geo.width;
+
+			// If track became strongly smaller keep the shape
+			if(params_.tra_occ_factor * det_area < tra_area){
+				ROS_WARN("Track [%d] probably occluded because of dropping size"
+					" from [%f] to [%f]", track.id, tra_area, det_area);
 			}
+			// Else update the form of the track with measurement
 			else{
-				track.geo.l = detected_objects->list[ track_association_[i] ].length;
-				track.geo.w = detected_objects->list[ track_association_[i] ].width;
-				track.geo.o = detected_objects->list[ track_association_[i] ].orientation;
-				track.sta.z = detected_objects->list[ track_association_[i] ].world_pose.point.z;
+				track.geo.length = 
+					detected_objects->list[ da_tracks[i] ].length;
+				track.geo.width = 
+					detected_objects->list[ da_tracks[i] ].width;
 			}
 
+			// Update orientation and ground level
+			track.geo.orientation = 
+				detected_objects->list[ da_tracks[i] ].orientation;
+			track.sta.z = 
+				detected_objects->list[ da_tracks[i] ].world_pose.point.z;
 
 			// Print prediction
-			std::cout << "Laser Update [" << track.hist.good_age << "," 
-				<< track.hist.bad_age
-				<< "] of track " << track.id << " with ["
-				<< z_diff[0] << " , " << z_diff[1] << "]" << std::endl;
-			//std::cout << "P = " << std::endl << track.sta.P << std::endl;
-			//std::cout << "eps = " << std::endl << CalculateNIS(z_diff,S)
-			//	<< std::endl;
-			//std::cout << std::endl << std::endl;
+			ROS_INFO("Update of T[%d] A[%d] z=[%f,%f] x=[%f,%f,%f,%f,%f],"
+				" P=[%f,%f,%f,%f,%f]", track.id, track.hist.good_age,
+				z_diff[0], z_diff[1],
+				track.sta.x(0), track.sta.x(1), track.sta.x(2), 
+				track.sta.x(3), track.sta.x(4),	
+				track.sta.P(0), track.sta.P(6), track.sta.P(12), 
+				track.sta.P(18), track.sta.P(24)
+			);
 		}
 	}
-	*/
 }
 
 void UnscentedKF::TrackManagement(const ObjectArrayConstPtr & detected_objects){
 
-	/*
 	// Delete spuriors tracks
 	for(int i = 0; i < tracks_.size() ; ++i){
 
 		// Deletion condition
-		if(tracks_[i].hist.bad_age >= TRA_BAD_AGE){
+		if(tracks_[i].hist.bad_age >= params_.tra_aging_bad){
 
-			std::cout << "Deletion of track " << tracks_[i].id << std::endl;
+			// Print
+			ROS_INFO("Deletion of T [%d]", tracks_[i].id);
 
 			// Swap track with end of vector and pop back
 			std::swap(tracks_[i],tracks_.back());
@@ -434,16 +552,19 @@ void UnscentedKF::TrackManagement(const ObjectArrayConstPtr & detected_objects){
 	for(int i = 0; i < detected_objects->list.size(); ++i){
 
 		// Unassigned object condition
-		if(object_association_[i] == -1){
+		if(da_objects[i] == -1){
 
 			// Init new track
 			initTrack(detected_objects->list[i]);
 		}
 	}
-	*/
 }
 
 void UnscentedKF::initTrack(const Object & obj){
+
+	// Only if object can be a track
+	if(! obj.is_track)
+		return;
 
 	// Create new track
 	Track tr = Track();
@@ -460,8 +581,8 @@ void UnscentedKF::initTrack(const Object & obj){
 	tr.sta.P = MatrixXd::Zero(params_.tra_dim_x, params_.tra_dim_x);
 	tr.sta.P <<  	1,  0,  0,  0,  0,
 					0,  1,  0,  0,  0,
-					0,  0, 10,  0,  0,
-					0,  0,  0,  1,  0,
+					0,  0,1000,  0,  0,
+					0,  0,  0,10,  0,
 					0,  0,  0,  0,  1;
 	tr.sta.Xsig_pred = MatrixXd::Zero(params_.tra_dim_x, 
 		2 * params_.tra_dim_x_aug + 1);
@@ -546,13 +667,17 @@ void UnscentedKF::publishTracks(const std_msgs::Header & header){
 
 void UnscentedKF::printTrack(const Track & tr){
 
-	ROS_INFO("Track [%d] is [%s] with to [%f],"
-	" pos[x,y,z] [%f,%f,%f]"
-	" form[w,l,h,o] [%f,%f,%f,%f]",
-	tr.id, tr.sem.name.c_str(), tr.sem.confidence,
-	tr.sta.x[0], tr.sta.x[1], tr.sta.z,
-	tr.geo.width, tr.geo.length,
-	tr.geo.height, tr.geo.orientation);
+	ROS_INFO("Track [%d] x=[%f,%f,%f,%f,%f], z=[%f]"
+		" P=[%f,%f,%f,%f,%f] is [%s, %f] A[%d] [w,l,h,o] [%f,%f,%f,%f]", 
+		tr.id,
+		tr.sta.x(0), tr.sta.x(1), tr.sta.x(2), tr.sta.x(3), tr.sta.x(4),
+		tr.sta.z,
+		tr.sta.P(0), tr.sta.P(6), tr.sta.P(12), tr.sta.P(18), tr.sta.P(24),
+		tr.sem.name.c_str(), tr.sem.confidence,
+		tr.hist.good_age,
+		tr.geo.width, tr.geo.length,
+		tr.geo.height, tr.geo.orientation
+	);
 }
 
 void UnscentedKF::printTracks(){

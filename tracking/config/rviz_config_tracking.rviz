@@ -3,11 +3,7 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Global Options1
-        - /Status1
-        - /Map1
-        - /Marker2
+      Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 360
   - Class: rviz/Selection
@@ -41,6 +37,36 @@ Visualization Manager:
       Topic: /sensor/grid/occupancy
       Unreliable: false
       Use Timestamp: false
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.25
+      Style: Boxes
+      Topic: /sensor/cloud/semantic_sparse
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
       Value: true
     - Class: rviz/Image
       Enabled: true
@@ -115,25 +141,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 80.1794586
+      Distance: 102.699577
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 37.8746948
-        Y: -0.212410793
-        Z: 3.70825386
+        X: 34.5552025
+        Y: -3.60376668
+        Z: 3.69165921
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.434797525
+      Pitch: 1.23479664
       Target Frame: velo_link
       Value: Orbit (rviz)
-      Yaw: 3.12539625
+      Yaw: 3.10539627
     Saved: ~
 Window Geometry:
   Displays:

@@ -22,3 +22,4 @@ tracking:
   lambda: 2.0
   aging:
     bad: 2
+  occlusion_factor: 2.0
