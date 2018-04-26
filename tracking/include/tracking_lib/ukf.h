@@ -42,6 +42,12 @@ struct Parameter{
 	int tra_aging_bad;
 
 	float tra_occ_factor;
+
+	float p_init_x;
+	float p_init_y;
+	float p_init_v;
+	float p_init_yaw;
+	float p_init_yaw_rate;
 };
 
 struct History{

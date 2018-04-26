@@ -60,7 +60,8 @@ private:
 	// Class member
 	Tools tools_;
 	std::string scenario_;
-	int time_frame_;
+	int det_time_frame_;
+	int tra_time_frame_;
 	int linewidth_;
 	int fontface_;
 	double fontscale_;

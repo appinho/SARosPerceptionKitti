@@ -54,6 +54,11 @@ struct Parameters{
 	double inv_angular_res;
 	double inv_radial_res;
 
+	bool sem_ed;
+	int sem_ed_min;
+	int sem_ed_max;
+	int sem_ed_kernel;
+
 	float lidar_height;
 	float lidar_opening_angle;
 	float lidar_z_min;

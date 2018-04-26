@@ -43,7 +43,7 @@ Visualization::Visualization(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	thickness_ = 3;
 
 	// Init viz buffers
-	viz_buffer_ = 100;
+	viz_buffer_ = 60;
 	for(int i = 0; i < viz_buffer_; i++){
 		detection_.push_back(initVizObject(i));
 	}
@@ -71,7 +71,8 @@ Visualization::Visualization(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	save_ = true;
 		
 	// Init counter for publishing
-	time_frame_ = 0;
+	det_time_frame_ = 0;
+	tra_time_frame_ = 0;
 }
 
 Visualization::~Visualization(){
@@ -88,10 +89,10 @@ void Visualization::processDetection(const Image::ConstPtr & image_raw_left,
 	showRVizMarkers("detection", detected_objects);
 
 	// Print sensor fusion
-	ROS_INFO("Publishing Visualization for Detection [%d]", time_frame_);
+	ROS_INFO("Publishing Visualization for Detection [%d]", det_time_frame_);
 
 	// Increment time frame
-	time_frame_++;
+	det_time_frame_++;
 }
 
 void Visualization::processTracking(const Image::ConstPtr & image_raw_left,
@@ -104,7 +105,10 @@ void Visualization::processTracking(const Image::ConstPtr & image_raw_left,
 	showRVizMarkers("tracking", tracked_objects);
 
 	// Print sensor fusion
-	ROS_INFO("Publishing Visualization for Tracking [%d]", time_frame_);
+	ROS_INFO("Publishing Visualization for Tracking [%d]", tra_time_frame_);
+
+	// Increment time frame
+	tra_time_frame_++;
 }
 
 void Visualization::showFirstPersonImage(
@@ -124,7 +128,7 @@ void Visualization::showFirstPersonImage(
 	}
 
 	// Copy image for drawing
-	cv::Mat image = cv_raw_left_ptr->image.clone();	
+	cv::Mat image = cv_raw_left_ptr->image;	
 
 	// Loop through clusters
 	for(int i = 0; i < objects->list.size(); ++i){
@@ -162,9 +166,18 @@ void Visualization::showFirstPersonImage(
 
 	if(save_){
 		std::ostringstream filename;
-		filename << "/home/simonappel/kitti_data/" << scenario_  << "/" 
-		<< node_name << "/00000" << std::setfill('0') << std::setw(5) 
-		<< time_frame_ << ".png";
+
+		if(node_name == "detection"){
+			filename << "/home/simonappel/kitti_data/" << scenario_  << "/" 
+				<< node_name << "/00000" << std::setfill('0') << std::setw(5) 
+				<< det_time_frame_ << ".png";			
+		}
+		else if(node_name == "tracking"){
+			filename << "/home/simonappel/kitti_data/" << scenario_  << "/" 
+				<< node_name << "/00000" << std::setfill('0') << std::setw(5) 
+				<< tra_time_frame_ << ".png";
+		}
+
 		cv::imwrite(filename.str(), image);
 	}
 

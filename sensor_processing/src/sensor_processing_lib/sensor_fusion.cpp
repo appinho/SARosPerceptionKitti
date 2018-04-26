@@ -62,6 +62,15 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	params_.grid_bins = (params_.grid_range_max * std::sqrt(2)) /
 		params_.grid_cell_size + 1;
 
+	// Define semantic parameters
+	private_nh_.param("semantic/edge_detection/perform", params_.sem_ed,
+		params_.sem_ed);
+	private_nh_.param("semantic/edge_detection/min", params_.sem_ed_min,
+		params_.sem_ed_min);
+	private_nh_.param("semantic/edge_detection/max", params_.sem_ed_max,
+		params_.sem_ed_max);
+	private_nh_.param("semantic/edge_detection/kernel", params_.sem_ed_kernel,
+		params_.sem_ed_kernel);
 	// Define ransac ground plane parameters
 	private_nh_.param("ransac/tolerance", params_.ransac_tolerance,
 		params_.ransac_tolerance);
@@ -452,6 +461,10 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 	pcl_voxel_elevated_->points.clear();
 	pcl_voxel_ground_->points.clear();
 
+	// Init detection image and fill free space grid cells
+	detection_grid_ = cv::Mat(params_.grid_height, params_.grid_width, CV_32FC3,
+		cv::Scalar(-100.0, 0.0, 0.0));
+
 	// Go through cartesian grid
 	float x = params_.grid_range_max - params_.grid_cell_size / 2;
 	for(int j = 0; j < params_.grid_height; ++j, x -= params_.grid_cell_size){
@@ -475,9 +488,10 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 			int cell_index = j * params_.grid_width + i;
 
 			// If cell is free
-			if(cell.idx == PolarCell::FREE)
+			if(cell.idx == PolarCell::FREE){
 				occ_grid_->data[cell_index] = 0;
-
+				detection_grid_.at<cv::Vec3f>(j, i)[0] = -50.0;
+			}
 			// If cell is unknown
 			else if(cell.idx == PolarCell::UNKNOWN)
 				occ_grid_->data[cell_index] = 50;
@@ -538,9 +552,19 @@ void SensorFusion::processImage(const Image::ConstPtr & image){
 		return;
 	}
 
+	// Canny edge detection
+	cv::Mat sem_edge_img, sem_dil_img, sem_output;
+	if(params_.sem_ed){
+		cv::Canny(sem_image_, sem_edge_img, params_.sem_ed_min,
+			params_.sem_ed_max, params_.sem_ed_kernel);
+		cv::dilate(sem_edge_img, sem_dil_img, cv::Mat(), 
+			cv::Point(-1, -1), 1, 1, 1);
+		sem_image_.copyTo(sem_output, sem_dil_img);
+	}
+
 	// Publish
 	cv_bridge::CvImage cv_semantic_image;
-	cv_semantic_image.image = sem_image_;
+	cv_semantic_image.image = sem_output;
 	cv_semantic_image.encoding = "bgr8";
 	cv_semantic_image.header.stamp = image->header.stamp;
 	image_semantic_pub_.publish(cv_semantic_image.toImageMsg());
@@ -646,10 +670,6 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
 /******************************************************************************
  * 3. Fill detection grid image and sparse semantic point cloud
  */	
-
-	// Init image
-	detection_grid_ = cv::Mat(params_.grid_height, params_.grid_width, CV_32FC3,
-		cv::Scalar(-100.0, 0.0, 0.0));
 
 	// Init  sparse semantic point cloud
 	pcl_sparse_semantic_->points.clear();

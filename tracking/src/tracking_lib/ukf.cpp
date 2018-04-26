@@ -47,6 +47,16 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		params_.tra_aging_bad);
 	private_nh_.param("tracking/occlusion_factor", params_.tra_occ_factor, 
 		params_.tra_occ_factor);
+	private_nh_.param("track/P_init/x", params_.p_init_x,
+		params_.p_init_x);
+	private_nh_.param("track/P_init/y", params_.p_init_y,
+		params_.p_init_y);
+	private_nh_.param("track/P_init/v", params_.p_init_v,
+		params_.p_init_v);
+	private_nh_.param("track/P_init/yaw", params_.p_init_yaw,
+		params_.p_init_yaw);
+	private_nh_.param("track/P_init/yaw_rate", params_.p_init_yaw_rate, 
+		params_.p_init_yaw_rate);
 
 	// Print parameters
 	ROS_INFO_STREAM("da_ped_dist_pos " << params_.da_ped_dist_pos);
@@ -63,6 +73,11 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	ROS_INFO_STREAM("tra_lambda " << params_.tra_lambda);
 	ROS_INFO_STREAM("tra_aging_bad " << params_.tra_aging_bad);
 	ROS_INFO_STREAM("tra_occ_factor " << params_.tra_occ_factor);
+	ROS_INFO_STREAM("p_init_x " << params_.p_init_x);
+	ROS_INFO_STREAM("p_init_y " << params_.p_init_y);
+	ROS_INFO_STREAM("p_init_v " << params_.p_init_v);
+	ROS_INFO_STREAM("p_init_yaw " << params_.p_init_yaw);
+	ROS_INFO_STREAM("p_init_yaw_rate " << params_.p_init_yaw_rate);
 
 	// Set initialized to false at the beginning
 	is_initialized_ = false;
@@ -264,12 +279,14 @@ void UnscentedKF::Prediction(const double delta_t){
 				x_diff.transpose() ;
 		}
 
+		/*
 		// Print prediction
 		ROS_INFO("Pred of T[%d] xp=[%f,%f,%f,%f,%f], Pp=[%f,%f,%f,%f,%f]",
 			track.id, track.sta.x(0), track.sta.x(1), track.sta.x(2), 
 			track.sta.x(3), track.sta.x(4),	track.sta.P(0), track.sta.P(6), 
 			track.sta.P(12), track.sta.P(18), track.sta.P(24)
 		);
+		*/
 	}
 }
 
@@ -371,6 +388,7 @@ void UnscentedKF::GlobalNearestNeighbor(
 float UnscentedKF::CalculateDistance(const Track & track,
 	const Object & object){
 
+	// Calculate euclidean distance in x,y,z coordinates of track and object
 	return abs(track.sta.x(0) - object.world_pose.point.x) + 
 		abs(track.sta.x(1) - object.world_pose.point.y) + 
 		abs(track.sta.z - object.world_pose.point.z);
@@ -379,7 +397,7 @@ float UnscentedKF::CalculateDistance(const Track & track,
 float UnscentedKF::CalculateBoxMismatch(const Track & track,
 	const Object & object){
 
-	// Calculate geometric mismatch
+	// Calculate mismatch of both tracked cube and detected cube
 	float box_wl_switched =  abs(track.geo.width - object.length) + 
 		abs(track.geo.length - object.width);
 	float box_wl_ordered = abs(track.geo.width - object.width) + 
@@ -393,6 +411,7 @@ float UnscentedKF::CalculateBoxMismatch(const Track & track,
 float UnscentedKF::CalculateEuclideanAndBoxOffset(const Track & track,
 	const Object & object){
 
+	// Sum of euclidean offset and box mismatch
 	return CalculateDistance(track, object) + 
 		CalculateBoxMismatch(track, object);
 }
@@ -476,19 +495,6 @@ void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 			track.hist.good_age++;
 			track.hist.bad_age = 0;
 
-			// Update geometry
-			/*
-			if(detected_objects->list[ da_tracks[i] ].height <= TRA_MIN_OBJ_HEIGHT){
-				track.geo.h = TRA_MIN_OBJ_HEIGHT;
-				std::cout << "WARN: Car seems to be too short and is set from "
-					<< detected_objects->list[ da_tracks[i] ].height << " to "
-					<< TRA_MIN_OBJ_HEIGHT << std::endl;
-			}
-			else{
-				track.geo.h = detected_objects->list[ da_tracks[i] ].height;
-			}
-			*/
-
 /******************************************************************************
  * 3. Update geometric information of track
  */
@@ -517,7 +523,8 @@ void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 			track.sta.z = 
 				detected_objects->list[ da_tracks[i] ].world_pose.point.z;
 
-			// Print prediction
+			/*
+			// Print Update
 			ROS_INFO("Update of T[%d] A[%d] z=[%f,%f] x=[%f,%f,%f,%f,%f],"
 				" P=[%f,%f,%f,%f,%f]", track.id, track.hist.good_age,
 				z_diff[0], z_diff[1],
@@ -526,6 +533,7 @@ void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 				track.sta.P(0), track.sta.P(6), track.sta.P(12), 
 				track.sta.P(18), track.sta.P(24)
 			);
+			*/
 		}
 	}
 }
@@ -579,11 +587,11 @@ void UnscentedKF::initTrack(const Object & obj){
 	tr.sta.x[1] = obj.world_pose.point.y;
 	tr.sta.z = obj.world_pose.point.z;
 	tr.sta.P = MatrixXd::Zero(params_.tra_dim_x, params_.tra_dim_x);
-	tr.sta.P <<  	1,  0,  0,  0,  0,
-					0,  1,  0,  0,  0,
-					0,  0,1000,  0,  0,
-					0,  0,  0,10,  0,
-					0,  0,  0,  0,  1;
+	tr.sta.P << params_.p_init_x,  0,  0,  0,  0,
+				0,  params_.p_init_y,  0,  0,  0,
+				0,  0,	params_.p_init_v,  0,  0,
+				0,  0,  0,params_.p_init_yaw,  0,
+				0,  0,  0,  0,  params_.p_init_yaw_rate;
 	tr.sta.Xsig_pred = MatrixXd::Zero(params_.tra_dim_x, 
 		2 * params_.tra_dim_x_aug + 1);
 

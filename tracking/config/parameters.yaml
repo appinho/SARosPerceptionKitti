@@ -17,9 +17,17 @@ tracking:
     lidar:
       x: 0.15
       y: 0.15
-    acc: 0.2
+    acc: 0.4
     yaw_rate: 0.314
   lambda: 2.0
   aging:
     bad: 2
   occlusion_factor: 2.0
+
+track:
+  P_init:
+    x: 1.0
+    y: 1.0
+    v: 10.0
+    yaw: 10.0
+    yaw_rate: 1.0

@@ -97,7 +97,8 @@ void DbScan::process(const Image::ConstPtr & image_detection_grid){
 
 	// Print cluster info
 	for(int i = 0; i < number_of_clusters_; ++i){
-		printCluster(clusters_[i]);
+		if(clusters_[i].is_track)
+			printCluster(clusters_[i]);
 	}
 
 	// Print sensor fusion
@@ -124,6 +125,23 @@ void DbScan::runDbScan(cv::Mat grid){
 			if(!isKittiValidSemantic(semantic_class)){
 				continue;
 			}
+
+			// If no free space cell next to it continue
+			int fs_kernel = 2;
+			bool fs_next_to_cell = false;
+			for(int k = -fs_kernel; k <= fs_kernel; ++k){
+				for(int l = -fs_kernel; l <= fs_kernel; ++l){
+					if(grid.at<cv::Vec3f>(y + k,x + l)[0] == -50){
+						fs_next_to_cell = true;
+						break;
+					}
+				}
+			}
+
+			if(!fs_next_to_cell)
+				continue;
+
+			std::cout << y << " " << x << " " << semantic_class << std::endl;
 				
 			// Flag cell as visited
 			grid.at<cv::Vec3f>(y,x)[0] = -100.0;
@@ -267,7 +285,7 @@ void DbScan::getClusterDetails(const cv::Mat grid){
 		// Store rect as back up
 		c.rect = rect;
 
-		// Get color
+		// Get color BGR
 		int r = tools_.SEMANTIC_CLASS_TO_COLOR(c.semantic.id, 0);
 		int g = tools_.SEMANTIC_CLASS_TO_COLOR(c.semantic.id, 1);
 		int b = tools_.SEMANTIC_CLASS_TO_COLOR(c.semantic.id, 2);
@@ -295,8 +313,8 @@ void DbScan::createObjectList(){
 
 	// Loop through clusters to obtain object information
 	for(int i = 0; i < number_of_clusters_; ++i){
-
-		addObject(clusters_[i]);
+		if(clusters_[i].is_track)
+			addObject(clusters_[i]);
 	}
 
 	// Transform objects in camera and world frame
