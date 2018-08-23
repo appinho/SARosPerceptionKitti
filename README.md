@@ -8,7 +8,7 @@
   <img src="./videos/rviz.gif">
 </p>
 
-## How to run the package
+## Documentation
 
 1) [Install ROS Kinetic on Ubuntu 16.04](http://wiki.ros.org/kinetic/Installation/Ubuntu)
 2) [Create ROS Workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace) by opening a new Terminal and run following commands:  
