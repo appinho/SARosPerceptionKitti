@@ -20,7 +20,7 @@ cd ..
 catkin_make  
 source devel/setup.bash  
 ```
-3) Converting a scenario (e.g. `0060` like the video above) from the KITTI Raw Dataset to a ROSbag file
+3) Converting a scenario (e.g. `0060` like in the video above) from the KITTI Raw Dataset to a ROSbag file
 
 * Download two files: Synced+rectified data and its calibration file from [KITTI Dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php)
 * Store the two files in a separate directory (e.g. /data/)
@@ -31,6 +31,13 @@ source devel/setup.bash
 pip install kitti2bag
 kitti2bag -t 2011_09_26 -r 0060 raw_synced
 ```
+
+4) Run the code:
+
+```
+roslaunch tracking tracking.launch
+```
+(Check the launch file and adjust the parameters)
 
 ## Evaluation for 7 Scenarios 0011,0013,0014,0018,0056,0059,0060
 
