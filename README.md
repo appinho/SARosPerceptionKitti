@@ -10,6 +10,11 @@
   <img src="./videos/rviz.gif">
 </p>
 
+## Run Code
+
+1) Install ROS Kinetic on Ubuntu 16.04: http://wiki.ros.org/kinetic/Installation/Ubuntu
+2) Create ROS Workspace: http://wiki.ros.org/catkin/Tutorials/create_a_workspace
+
 ## Evaluation for 7 Scenarios 0011,0013,0014,0018,0056,0059,0060
 
 | Class        | MOTA    | MOTP    |  MOTAL  |    MODA |    MODP |
