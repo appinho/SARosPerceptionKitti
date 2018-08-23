@@ -10,7 +10,7 @@
 
 ## How to run the package
 
-1) [Install ROS Kinetic on Ubuntu 16.04] (http://wiki.ros.org/kinetic/Installation/Ubuntu)
+1) [Install ROS Kinetic on Ubuntu 16.04](http://wiki.ros.org/kinetic/Installation/Ubuntu)
 2) [Create ROS Workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace) by opening a new Terminal and run following commands:  
 ```
 mkdir -p ~/catkin_ws/src  
@@ -20,11 +20,17 @@ cd ..
 catkin_make  
 source devel/setup.bash  
 ```
-3) Converting a scenario (e.g. 0060 like the video above) from the [KITTI Dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php) to a ROSbag file with [Kitti2Bag](https://github.com/tomas789/kitti2bag)
+3) Converting a scenario (e.g. 0060 like the video above) from the KITTI Raw Dataset to a ROSbag file
 
-* Download synced+rectified scenario and its calibration file
+* Download two files: Synced+rectified data and its calibration file from [KITTI Dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php)
 * Store the two files in a separate directory (e.g. /data/)
-* Unzip them
+* Unzip the two files
+* Install [Kitti2Bag](https://github.com/tomas789/kitti2bag) and convert both files into one ROSbag file:
+
+```
+pip install kitti2bag
+kitti2bag -t 2011_09_26 -r 0060 raw_synced
+```
 
 ## Evaluation for 7 Scenarios 0011,0013,0014,0018,0056,0059,0060
 
