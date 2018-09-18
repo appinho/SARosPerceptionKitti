@@ -31,7 +31,7 @@ Evaluation::Evaluation(ros::NodeHandle nh, ros::NodeHandle private_nh):
 
 	// Delete content in file if there is one
 	filename_ = 
-		"/home/simonappel/kitti_results/devkit/python/results/sha_key/data/"
+		"~/kitti_results/"
 		+ scenario_name + ".txt";
 	tracking_results_.open(filename_.c_str(),
 		std::ofstream::out | std::ofstream::trunc);
