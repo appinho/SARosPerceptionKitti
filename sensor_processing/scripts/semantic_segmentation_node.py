@@ -20,7 +20,7 @@ class SemanticSegmentation(object):
         self.message_counter = 0
 
         scenario = str(rospy.get_param('~scenario', '0001')).zfill(4)
-        self.dir = '/home/simonappel/kitti_data/' + scenario \
+        self.dir = '~/kitti_data/' + scenario \
             + '/segmented_semantic_images/'
 
         rospy.spin()
