@@ -538,7 +538,7 @@ void SensorFusion::processImage(const Image::ConstPtr & image){
 
 	// Define path
 	std::ostringstream path_name;
-	path_name << "/home/simonappel/kitti_data/"
+	path_name << "~/kitti_data/"
 		<< params_.scenario 
 		<< "/segmented_semantic_images/"
 		<< std::setfill('0') << std::setw(10)	<< time_frame_ << ".png";
