@@ -4,7 +4,7 @@
   <arg name="scenario" default="0060" />
 
   <!-- Play rosbag file -->
-  <node pkg="rosbag" type="play" name="player" args="-r 0.5 -d 2 /home/simonappel/kitti_data/$(arg scenario)/synchronized_data.bag"/>
+  <node pkg="rosbag" type="play" name="player" args="-r 0.5 -d 2 ~/kitti_data/$(arg scenario)/synchronized_data.bag"/>
 
   <!-- Run the sensor setup node -->
   <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node">
