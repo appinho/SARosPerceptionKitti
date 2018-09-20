@@ -168,12 +168,12 @@ void Visualization::showFirstPersonImage(
 		std::ostringstream filename;
 
 		if(node_name == "detection"){
-			filename << "/home/simonappel/kitti_data/" << scenario_  << "/" 
+			filename << "~/kitti_data/" << scenario_  << "/" 
 				<< node_name << "/00000" << std::setfill('0') << std::setw(5) 
 				<< det_time_frame_ << ".png";			
 		}
 		else if(node_name == "tracking"){
-			filename << "/home/simonappel/kitti_data/" << scenario_  << "/" 
+			filename << "~/kitti_data/" << scenario_  << "/" 
 				<< node_name << "/00000" << std::setfill('0') << std::setw(5) 
 				<< tra_time_frame_ << ".png";
 		}
