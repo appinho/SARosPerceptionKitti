@@ -32,18 +32,26 @@ cd ~/kitti_data/
 kitti2bag -t 2011_09_26 -r 0060 raw_synced
 ```
 
-CAUTION: Code won't create an output currently because the images and pointclouds are not perfectly synced and therefore the ROS routine is not called!  
+4) Synchronizing the sensor data time stamps:
+
+```
+cd pre_processing/
+python sync_rosbag.py 'your_rosbag.bag'
+```
+
+5) Infer semantic images by using pretrained neural network:  
 
 
-
-
-
-4) Run the code:
+6) Run the code:
 
 ```
 roslaunch sensor_processing sensor.launch
 ```
-(Check the launch file and adjust the parameters)
+
+Check the launch file and adjust the parameters if you want to run other scenarios  
+
+
+
 
 ## Evaluation for 7 Scenarios 0011,0013,0014,0018,0056,0059,0060
 
