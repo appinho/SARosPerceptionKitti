@@ -52,10 +52,7 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 
 * Make sure the images are encoded as 10 digit numbers starting from 0000000000.png
 * Make sure the resulting images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)
-
-Well pre-trained network with an IOU of 73% can be found here:  
-
-* [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
+* Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
 
 7) Run the code:
 
