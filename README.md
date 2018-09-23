@@ -39,8 +39,13 @@ cd pre_processing/
 python sync_rosbag.py 'your_rosbag.bag'
 ```
 
-5) Infer semantic images by using pretrained neural network:  
+5) Create a data structure for pre-calculated segmented semantic images:  
 
+
+```
+mkdir ~/kitti_data/0060/segmented_semantic_images/
+cd ~/kitti_data/0060/segmented_semantic_images/
+```
 
 6) Run the code:
 
