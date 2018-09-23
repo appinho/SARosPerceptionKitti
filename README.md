@@ -11,7 +11,7 @@
 ## Documentation
 
 1) [Install ROS Kinetic on Ubuntu 16.04](http://wiki.ros.org/kinetic/Installation/Ubuntu)
-2) [Create ROS Workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace) by opening a new Terminal and run following commands:  
+2) [Set up ROS Workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace):  
 ```
 mkdir -p ~/catkin_ws/src  
 cd ~/catkin_ws/src  
@@ -23,7 +23,7 @@ source devel/setup.bash
 3) Converting a scenario (e.g. `0060` like in the video above) from the KITTI Raw Dataset to a ROSbag file
 
 * Download two files: Synced+rectified data and its calibration file from [KITTI Dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php)
-* Store and then unzip the two files
+* Unzio the two files
 * Install [Kitti2Bag](https://github.com/tomas789/kitti2bag) and convert both files into one ROSbag file:
 
 ```
@@ -32,26 +32,30 @@ cd ~/kitti_data/
 kitti2bag -t 2011_09_26 -r 0060 raw_synced
 ```
 
-4) Synchronizing the sensor data time stamps:
+4) Synchronizing the time stamps of the Lidar and camera data:  
 
 ```
-cd pre_processing/
-python sync_rosbag.py 'your_rosbag.bag'
+cd ~/ROS_Perception_Kitti_Dataset/pre_processing/
+python sync_rosbag.py raw_synced.bag
 ```
 
 5) Create a data structure for pre-calculated segmented semantic images:  
-
-* Make sure the scenario is encoded as 4 digit number, like here 0060
 
 ```
 mkdir ~/kitti_data/0060/segmented_semantic_images/
 cd ~/kitti_data/0060/segmented_semantic_images/
 ```
 
-6) Infer segmented semantic images:  
+* Make sure the scenario is encoded as 4 digit number, like here 0060
 
-* [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab) (73% IOU)
-* Make sure the images are encoded as 10 digit number and the colors match the Cityscape color encoding
+6) Obtain segmented semantic images from camera data by infereing trained Deep Neural Network:  
+
+* Make sure the images are encoded as 10 digit numbers starting from 0000000000.png
+* Make sure the resulting images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)
+
+Well pre-trained network with an IOU of 73% can be found here:  
+
+* [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
 
 7) Run the code:
 
