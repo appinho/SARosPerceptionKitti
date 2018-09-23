@@ -41,23 +41,27 @@ python sync_rosbag.py 'your_rosbag.bag'
 
 5) Create a data structure for pre-calculated segmented semantic images:  
 
+* Make sure the scenario is encoded as 4 digit number, like here 0060
 
 ```
 mkdir ~/kitti_data/0060/segmented_semantic_images/
 cd ~/kitti_data/0060/segmented_semantic_images/
 ```
 
-6) Run the code:
+6) Infer segmented semantic images:  
+
+* [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab) (73% IOU)
+* Make sure the images are encoded as 10 digit number and the colors match the Cityscape color encoding
+
+7) Run the code:
 
 ```
-roslaunch sensor_processing sensor.launch
+roslaunch tracking tracking.launch
 ```
 
-Check the launch file and adjust the parameters if you want to run other scenarios  
+Final tip: Check the launch files and adjust the parameters if you want to run other scenarios! 
 
-
-
-
+<!--
 ## Evaluation for 7 Scenarios 0011,0013,0014,0018,0056,0059,0060
 
 | Class        | MOTA    | MOTP    |  MOTAL  |    MODA |    MODP |
@@ -90,3 +94,4 @@ Check the launch file and adjust the parameters if you want to run other scenari
 
 ### 3 Tracking: UKF Tracker
 
+-->
