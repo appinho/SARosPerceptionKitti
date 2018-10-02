@@ -20,7 +20,7 @@ cd ..
 catkin_make  
 source devel/setup.bash  
 ```
-3) Converting a scenario (e.g. `0060` like in the video above) from the KITTI Raw Dataset to a ROSbag file
+3) Convert a scenario from the KITTI Raw Dataset into a ROSbag file (here `0060` like in the video above - exchange this 4 digit number in all subsequent occurences if you want to test another scenario):  
 
 * Download two files: Synced+rectified data and its calibration file from [KITTI Dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php)
 * Unzio the two files
@@ -46,8 +46,8 @@ mkdir ~/kitti_data/0060/segmented_semantic_images/
 cd ~/kitti_data/0060/segmented_semantic_images/
 ```
 
-* For scenario 0060 you can [download my results](https://drive.google.com/file/d/1ihGnk5x9OlzF4X-YJXFsKB8rYSLyo0YF/view?usp=sharing) and store them within the above mentioned directory
-* Make sure the scenario is encoded as 4 digit number, like here 0060
+* For scenario `0060` you can [download my results](https://drive.google.com/file/d/1ihGnk5x9OlzF4X-YJXFsKB8rYSLyo0YF/view?usp=sharing) and store them within the above mentioned directory
+* Make sure the scenario is encoded as 4 digit number, like here `0060`
 
 6) Obtain segmented semantic images from camera data by infereing trained Deep Neural Network:  
 
@@ -55,13 +55,20 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 * Make sure the resulting images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)
 * Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
 
-7) Run the code:
+7) Run the code for scenario `0060`:  
+
+* Open a first terminal and launch ROS node and wait until rviz is fully loaded:  
 
 ```
-roslaunch tracking tracking.launch
+roslaunch sensor_processing sensor.launch 0060
 ```
 
-Final tip: Check the launch files and adjust the parameters if you want to run other scenarios! 
+* Open a second terminal and replay the synchronized data file (here at 25% speed):  
+
+```
+cd ~/kitti_data/0060/
+rosbag play -r 0.25 synchronized_data.bag
+```
 
 <!--
 ## Evaluation for 7 Scenarios 0011,0013,0014,0018,0056,0059,0060
