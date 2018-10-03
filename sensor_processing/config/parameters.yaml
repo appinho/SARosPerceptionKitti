@@ -9,7 +9,7 @@ grid:
 
 semantic:
   edge_detection:
-    perform: true
+    perform: false
     min: 5
     max: 120
     kernel: 3
