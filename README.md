@@ -1,7 +1,7 @@
 SARosPerceptionKitti
 =================
 
-A comprehensive ROS package for the Perception - Sensor Processing, Detection, Tracking and Evaluation - of the KITTI Vision Benchmark Suite 
+A ROS package for the Perception (Sensor Processing, Detection, Tracking and Evaluation) of the KITTI Vision Benchmark Suite 
 
 <p align="center">
   <img src="./videos/semantic.gif">
