@@ -32,9 +32,7 @@ pip install kitti2bag
 
 ### Documentation
 
-1) Convert a scenario into a ROSbag file:  
-
-Scenario `0060` from the demo above (Exchange this 4 digit number in all subsequent occurences in case you want to test another scenario)
+1) Convert scenario `0060` (from the demo above) into a ROSbag file:  
 
 * Download and unzip the `synced+rectified data` file and its `calibration` file from the [KITTI Raw Dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php)
 * Merge both files into one ROSbag file
@@ -67,11 +65,6 @@ b) For any other scenario follow this steps:
 
 * Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
 
-Troubleshooting:  
-* Make sure the scenario is encoded as 4 digit number, like above `0060`
-* Make sure the images are encoded as 10 digit numbers starting from `0000000000.png`
-* Make sure the resulting images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)
-
 4) Run the ROS Package:  
 
 * Launch one of the following ROS nodes and wait until RViz is fully loaded:  
@@ -88,6 +81,12 @@ roslaunch tracking tracking.launch 0060
 cd ~/kitti_data/0060/
 rosbag play -r 0.25 synchronized_data.bag
 ```
+
+### Troubleshooting
+
+* Make sure the scenario is encoded as 4 digit number, like above `0060`
+* Make sure the images are encoded as 10 digit numbers starting from `0000000000.png`
+* Make sure the resulting semantic segmentated images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)
 
 ### Discussion
 
