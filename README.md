@@ -84,7 +84,7 @@ rosbag play -r 0.25 synchronized_data.bag
 
 ### Troubleshooting
 
-* Make sure to restart the launch command above if you want to execute the scenario again [see here](https://github.com/appinho/SARosPerceptionKitti/issues/7)
+* Make sure to restart the launch command above if you want to execute the scenario again ([See here](https://github.com/appinho/SARosPerceptionKitti/issues/7))
 * Make sure the scenario is encoded as 4 digit number, like above `0060`
 * Make sure the images are encoded as 10 digit numbers starting from `0000000000.png`
 * Make sure the resulting semantic segmentated images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)
@@ -105,7 +105,7 @@ Evaluation results for 7 Scenarios `0011,0013,0014,0018,0056,0059,0060`
 
 ### Contact
 
-Send me an email simonappel62@gmail.com if you have any questions, wishes or ideas to find an even better solution! Happy to help :)
+Send me an email simonappel62@gmail.com if you have any questions, wishes or ideas to find an even better solution! Happy to collaborate :)
 
 <!--
 ## Evaluation for 7 Scenarios 0011,0013,0014,0018,0056,0059,0060
