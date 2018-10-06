@@ -11,7 +11,7 @@ A ROS package for the Perception (Sensor Processing, Detection, Tracking and Eva
   <img src="./videos/rviz.gif">
 </p>
 
-## Documentation
+### Setup
 
 1) [Install ROS Kinetic on Ubuntu 16.04](http://wiki.ros.org/kinetic/Installation/Ubuntu)
 2) [Set up ROS Workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace):  
@@ -23,55 +23,89 @@ cd ..
 catkin_make  
 source devel/setup.bash  
 ```
-3) Convert a scenario from the KITTI Raw Dataset into a ROSbag file (here `0060` like in the video above - exchange this 4 digit number in all subsequent occurences if you want to test another scenario):  
 
-* Download two files: Synced+rectified data and its calibration file from [KITTI Dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php)
-* Unzio the two files
-* Install [Kitti2Bag](https://github.com/tomas789/kitti2bag) and convert both files into one ROSbag file:
+3) [Install Kitti2Bag](https://github.com/tomas789/kitti2bag)
 
 ```
 pip install kitti2bag
+```
+
+### Documentation
+
+1) Convert a scenario into a ROSbag file:  
+
+Scenario `0060` from the demo above (Exchange this 4 digit number in all subsequent occurences in case you want to test another scenario)
+
+* Download and unzip the `synced+rectified data` file and its `calibration` file from the [KITTI Raw Dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php)
+* Merge both files into one ROSbag file
+
+```
 cd ~/kitti_data/
 kitti2bag -t 2011_09_26 -r 0060 raw_synced
 ```
 
-4) Synchronizing the time stamps of the Lidar and camera data:  
+2) Synchronize the sensor data:  
 
+The script matches the timestamps of the Velodyne point cloud data with the Camara data to perform Sensor Fusion in a synchronized way within the ROS framework 
 ```
 cd ~/ROS_Perception_Kitti_Dataset/pre_processing/
 python sync_rosbag.py raw_synced.bag
 ```
 
-5) Create a data structure for pre-calculated segmented semantic images:  
+3) Store preprocessed semantic segmentated images:  
+
+The Camera data is preprocessed within a Deep Neural Network to create semantic segmentated images. With this step a "real-time" performance on any device (CPU usage) can be guaranteed
 
 ```
 mkdir ~/kitti_data/0060/segmented_semantic_images/
 cd ~/kitti_data/0060/segmented_semantic_images/
 ```
 
-* For scenario `0060` you can [download my results](https://drive.google.com/file/d/1ihGnk5x9OlzF4X-YJXFsKB8rYSLyo0YF/view?usp=sharing) and store them within the above mentioned directory
-* Make sure the scenario is encoded as 4 digit number, like here `0060`
+a) For scenario `0060` you can [download my results](https://drive.google.com/file/d/1ihGnk5x9OlzF4X-YJXFsKB8rYSLyo0YF/view?usp=sharing) and store them within the directory
 
-6) Obtain segmented semantic images from camera data by infereing trained Deep Neural Network:  
+b) For any other scenario follow this steps:  
 
-* Make sure the images are encoded as 10 digit numbers starting from 0000000000.png
-* Make sure the resulting images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)
 * Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
 
-7) Run the code for scenario `0060`:  
+Troubleshooting:  
+* Make sure the scenario is encoded as 4 digit number, like above `0060`
+* Make sure the images are encoded as 10 digit numbers starting from `0000000000.png`
+* Make sure the resulting images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)
 
-* Open a first terminal and launch ROS node and wait until rviz is fully loaded:  
+4) Run the ROS Package:  
+
+* Launch one of the following ROS nodes and wait until RViz is fully loaded:  
 
 ```
 roslaunch sensor_processing sensor.launch 0060
+roslaunch detection detection.launch 0060
+roslaunch tracking tracking.launch 0060
 ```
 
-* Open a second terminal and replay the synchronized data file (here at 25% speed):  
+* Play back the synchronized ROSbag file (here at 25% speed):  
 
 ```
 cd ~/kitti_data/0060/
 rosbag play -r 0.25 synchronized_data.bag
 ```
+
+### Discussion
+
+Evaluation results for 7 Scenarios `0011,0013,0014,0018,0056,0059,0060`
+
+| Class        |  MOTP   |  MODP   |
+| ------------ |:-------:|:-------:|
+| Car          | 0.715273| 0.785403|
+| Pedestrian   | 0.581809| 0.988038|
+
+### Areas for Improvements
+
+* Improving the Object Detection so that the object's shape, especially for cars, is incorporated and that false classification within the semantic segmentation can be tolerated
+* Applying the VoxelNet
+
+### Contact
+
+Send me an email simonappel62@gmail.com if you have any questions, wishes or ideas to find an even better solution! Happy to help :)
 
 <!--
 ## Evaluation for 7 Scenarios 0011,0013,0014,0018,0056,0059,0060
