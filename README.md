@@ -84,7 +84,7 @@ rosbag play -r 0.25 synchronized_data.bag
 
 ### Troubleshooting
 
-* Make sure to close RVIz and restart the ROS launch command if you want to execute the scenario again. Otherwise it seems that the data isn't moving anymore ([see here](https://github.com/appinho/SARosPerceptionKitti/issues/7))
+* Make sure to close RVIz and restart the ROS launch command if you want to execute the scenario again. Otherwise it seems like the data isn't moving anymore ([see here](https://github.com/appinho/SARosPerceptionKitti/issues/7))
 * Make sure the scenario is encoded as 4 digit number, like above `0060`
 * Make sure the images are encoded as 10 digit numbers starting from `0000000000.png`
 * Make sure the resulting semantic segmentated images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)
