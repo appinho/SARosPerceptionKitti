@@ -30,7 +30,7 @@ source devel/setup.bash
 pip install kitti2bag
 ```
 
-### Documentation
+### Usage
 
 1) Convert scenario `0060` (from the demo above) into a ROSbag file:  
 
