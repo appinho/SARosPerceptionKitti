@@ -15,7 +15,7 @@
 ```
 mkdir -p ~/catkin_ws/src  
 cd ~/catkin_ws/src  
-git pull https://github.com/appinho/ROS_Perception_Package_Kitti_Dataset.git  
+git pull https://github.com/appinho/SARosPerceptionKitti.git  
 cd ..  
 catkin_make  
 source devel/setup.bash  
