@@ -14,7 +14,7 @@ A ROS package for the Perception (Sensor Processing, Detection, Tracking and Eva
 ### Setup
 
 1) [Install ROS Kinetic on Ubuntu 16.04](http://wiki.ros.org/kinetic/Installation/Ubuntu)
-2) [Set up ROS Workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace):  
+2) [Setup ROS Workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace):  
 ```
 mkdir -p ~/catkin_ws/src  
 cd ~/catkin_ws/src  
