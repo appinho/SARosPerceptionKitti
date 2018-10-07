@@ -44,7 +44,7 @@ kitti2bag -t 2011_09_26 -r 0060 raw_synced
 
 2) Synchronize the sensor data:  
 
-The script matches the timestamps of the Velodyne point cloud data with the Camara data to perform Sensor Fusion in a synchronized way within the ROS framework 
+* The script matches the timestamps of the Velodyne point cloud data with the Camara data to perform Sensor Fusion in a synchronized way within the ROS framework 
 ```
 cd ~/ROS_Perception_Kitti_Dataset/pre_processing/
 python sync_rosbag.py raw_synced.bag
@@ -52,7 +52,7 @@ python sync_rosbag.py raw_synced.bag
 
 3) Store preprocessed semantic segmentated images:  
 
-The Camera data is preprocessed within a Deep Neural Network to create semantic segmentated images. With this step a "real-time" performance on any device (CPU usage) can be guaranteed
+* The Camera data is preprocessed within a Deep Neural Network to create semantic segmentated images. With this step a "real-time" performance on any device (CPU usage) can be guaranteed
 
 ```
 mkdir ~/kitti_data/0060/segmented_semantic_images/
