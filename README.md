@@ -61,9 +61,7 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 
 * For scenario `0060` you can [download my results](https://drive.google.com/file/d/1ihGnk5x9OlzF4X-YJXFsKB8rYSLyo0YF/view?usp=sharing) and store them within the directory
 
-* For any other scenario follow this steps:  
-
-* Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
+* For any other scenario follow this steps: Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
 
 4) Run the ROS Package:  
 
