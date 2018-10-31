@@ -66,16 +66,16 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 * FINAL FOLDER STRUCTURE
 
 .
-    ├── kitti_data
-        ├── 0001
-        ├── ...
-        ├── 0060
-        │   ├── segmented_semantic_images
-        │   │   └── 0000000000.png
-        │   │   └── 0000000001.png
-        │   │   └── ...
-        │   └── synchronized_data.bag
-        ├── ...
+    ├── kitti_data  
+        ├── 0001  
+        ├── ...  
+        ├── 0060  
+        │   ├── segmented_semantic_images  
+        │   │   └── 0000000000.png  
+        │   │   └── 0000000001.png  
+        │   │   └── ...  
+        │   └── synchronized_data.bag  
+        ├── ...  
         
 
 4) Run the ROS Package:  
