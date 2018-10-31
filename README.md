@@ -67,7 +67,7 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 
 .  
 ├── kitti_data  
-        ├── 0001  
+    ├── 0001  
         ├── ...  
         ├── 0060  
         │   ├── segmented_semantic_images  
