@@ -46,7 +46,7 @@ kitti2bag -t 2011_09_26 -r 0060 raw_synced
 
 * The script matches the timestamps of the Velodyne point cloud data with the Camara data to perform Sensor Fusion in a synchronized way within the ROS framework 
 ```
-cd ~/ROS_Perception_Kitti_Dataset/pre_processing/
+cd ~/catkim_ws/src/ROS_Perception_Kitti_Dataset/pre_processing/
 python sync_rosbag.py raw_synced.bag
 ```
 
@@ -63,30 +63,22 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 
 * For any other scenario follow this steps: Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
 
-* FINAL FOLDER STRUCTURE
-
-.  
-├── kitti_data  
-    ├── 0001  
-        ├── ...  
-        ├── 0060  
-        │   ├── segmented_semantic_images  
-        │   │   └── 0000000000.png  
-        │   │   └── 0000000001.png  
-        │   │   └── ...  
-        │   └── synchronized_data.bag  
-        ├── ...  
-        
+* Final folder structure  
     .
-    ├── ...
-    ├── docs                    # Documentation files (alternatively `doc`)
-    │   ├── TOC.md              # Table of contents
-    │   ├── faq.md              # Frequently asked questions
-    │   ├── misc.md             # Miscellaneous information
-    │   ├── usage.md            # Getting started guide
-    │   └── ...                 # etc.
-    └── ...
-        
+    ~                                 # Home directory
+    ├── catkin_ws                     # Catkin workspace
+    │   ├── src                       # Clone repo into here
+    │      └── ROS_Perception_Kitti_Dataset # Repo
+    ├── kitti_data                    # Data folder
+    │   ├── 0001                      # Scenario 0001
+    │   ├── ...                       # Any other scenario
+    │   ├── 0060                      # Demo scenario 0060
+    │       ├── segmented_semantic_images # Folder for semantic images
+    │   │   └── 0000000000.png        # Semantic image from first time frame
+    │   │   └── 0000000001.png        # Semantic image from second time frame
+    │   │   └── ...  
+    │       └── synchronized_data.bag  # Synchronized ROSbag file
+    │   ├── ...
 
 4) Run the ROS Package:  
 
