@@ -63,7 +63,7 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 
 * For any other scenario follow this steps: Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
 
-* Final folder structure  
+4) Final folder structure  
 ```
     ~                                       # Home directory
     ├── catkin_ws                           # Catkin workspace
@@ -81,7 +81,7 @@ cd ~/kitti_data/0060/segmented_semantic_images/
     │   ├── ...
 ```
 
-4) Run the ROS Package:  
+5) Run the ROS Package:  
 
 * Launch one of the following ROS nodes and wait until RViz is fully loaded:  
 
