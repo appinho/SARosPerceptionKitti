@@ -66,7 +66,7 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 * FINAL FOLDER STRUCTURE
 
 .  
-    ├── kitti_data  
+├── kitti_data  
         ├── 0001  
         ├── ...  
         ├── 0060  
