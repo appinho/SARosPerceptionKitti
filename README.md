@@ -67,15 +67,15 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 ```
     ~                                       # Home directory
     ├── catkin_ws                           # Catkin workspace
-    │   ├── src                             # Clone repo into here
+    │   ├── src                             # Clone repo in here
     │      └── ROS_Perception_Kitti_Dataset # Repo
     ├── kitti_data                          # Data folder
     │   ├── 0001                            # Scenario 0001
     │   ├── ...                             # Any other scenario
     │   ├── 0060                            # Demo scenario 0060
-    │   │   ├── segmented_semantic_images   # Folder for semantic images
-    │   │       └── 0000000000.png          # Semantic image from first time frame
-    │   │       └── 0000000001.png          # Semantic image from second time frame
+    │   │   ├── segmented_semantic_images   # Folder for semantic images (Copy download in here)
+    │   │       ├── 0000000000.png          # Semantic image from first time frame
+    │   │       ├── 0000000001.png          # Semantic image from second time frame
     │   │       └── ...  
     │   │   └── synchronized_data.bag      # Synchronized ROSbag file
     │   ├── ...
