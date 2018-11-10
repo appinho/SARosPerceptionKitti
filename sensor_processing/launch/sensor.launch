@@ -1,7 +1,7 @@
 <launch>
 
   <!-- Choose scenario -->
-  <arg name="scenario" default="0060" />
+  <arg name="scenario" />
 
   <!-- Run the sensor setup node -->
   <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node" output="screen">
