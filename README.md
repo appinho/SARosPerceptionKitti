@@ -83,7 +83,7 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 
 5) Run the ROS Package:  
 
-* Launch one of the following ROS nodes and wait until RViz is fully loaded:  
+* Launch one of the following ROS nodes together with the scenario identifier and wait until RViz is fully loaded:  
 
 ```
 roslaunch sensor_processing sensor.launch 0060
