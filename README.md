@@ -89,6 +89,7 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 roslaunch sensor_processing sensor.launch scenario:=0060
 roslaunch detection detection.launch scenario:=0060
 roslaunch tracking tracking.launch scenario:=0060
+roslaunch evaluation evaluation.launch scenario:=0060
 ```
 
 * Play back the synchronized ROSbag file (here at 25% speed):  
