@@ -538,7 +538,9 @@ void SensorFusion::processImage(const Image::ConstPtr & image){
 
 	// Define path
 	std::ostringstream path_name;
-	path_name << "~/kitti_data/"
+
+	// HARDCODE HOME DIRECTORY HERE
+	path_name << "/home/simonappel/kitti_data/"
 		<< params_.scenario 
 		<< "/segmented_semantic_images/"
 		<< std::setfill('0') << std::setw(10)	<< time_frame_ << ".png";
@@ -548,11 +550,12 @@ void SensorFusion::processImage(const Image::ConstPtr & image){
 
 	// Sanity check if image is loaded correctly
 	if(sem_image_.cols == 0 || sem_image_.rows == 0){
-		ROS_WARN("Semantic image not read properly!");
+		ROS_WARN("Hardcode path in sensor_fusion.cpp processImage()!");
 		return;
 	}
 
 	// Canny edge detection
+	/*
 	cv::Mat sem_edge_img, sem_dil_img, sem_output;
 	if(params_.sem_ed){
 		cv::Canny(sem_image_, sem_edge_img, params_.sem_ed_min,
@@ -561,10 +564,11 @@ void SensorFusion::processImage(const Image::ConstPtr & image){
 			cv::Point(-1, -1), 1, 1, 1);
 		sem_image_.copyTo(sem_output, sem_dil_img);
 	}
+	*/
 
 	// Publish
 	cv_bridge::CvImage cv_semantic_image;
-	cv_semantic_image.image = sem_output;
+	cv_semantic_image.image = sem_image_;
 	cv_semantic_image.encoding = "bgr8";
 	cv_semantic_image.header.stamp = image->header.stamp;
 	image_semantic_pub_.publish(cv_semantic_image.toImageMsg());
