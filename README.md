@@ -81,6 +81,8 @@ cd ~/kitti_data/0060/segmented_semantic_images/
     │   ├── ...
 ```
 
+Go into `sensor_processing/src/sensor_processing_lib/sensor_fusion.cpp` under method `processImage()` to hardcode your home directory!
+
 5) Run the ROS Package:  
 
 * Launch one of the following ROS nodes together with the scenario identifier and wait until RViz is fully loaded:  
@@ -101,7 +103,7 @@ rosbag play -r 0.25 synchronized_data.bag
 
 ### Troubleshooting
 
-* SEMANTIC IMAGES WARNING: Go to sensor.cpp line 542 in sensor_processing_lib and hardcode your personal home directory! ([see full discussion here](https://github.com/appinho/SARosPerceptionKitti/issues/10))
+* SEMANTIC IMAGES WARNING: Go to sensor.cpp line 543 in sensor_processing_lib and hardcode your personal home directory! ([see full discussion here](https://github.com/appinho/SARosPerceptionKitti/issues/10))
 
 * Make sure to close RVIz and restart the ROS launch command if you want to execute the scenario again. Otherwise it seems like the data isn't moving anymore ([see here](https://github.com/appinho/SARosPerceptionKitti/issues/7))
 * Make sure the scenario is encoded as 4 digit number, like above `0060`
