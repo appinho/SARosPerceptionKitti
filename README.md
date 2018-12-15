@@ -43,10 +43,10 @@ roslaunch detection detection.launch
 roslaunch tracking tracking.launch
 ```
 
-* Default parameters: 
-    * scenario:=0060  
-    * speed:=0.25  
-    * delay:=3  
+   * Default parameters: 
+        * scenario:=0060  
+        * speed:=0.25  
+        * delay:=3  
 
 So, without assigning any of the abovementioned parameters the scenario 0060 is replayed at 25% speed with a 3 second delay so RViz has enough time to boot up.   
 
@@ -97,42 +97,43 @@ catkin_make
 source devel/setup.bash  
 ```
 
-3) [Install Kitti2Bag](https://github.com/tomas789/kitti2bag)
+### DIY: Data generation
+
+
+1) [Install Kitti2Bag](https://github.com/tomas789/kitti2bag)
 
 ```
 pip install kitti2bag
 ```
 
-### Data generation
+2) Convert scenario `0060` into a ROSbag file:  
 
-1) Convert scenario `0060` into a ROSbag file:  
-
-* Download and unzip the `synced+rectified data` file and its `calibration` file from the [KITTI Raw Dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php)
-* Merge both files into one ROSbag file
+    * Download and unzip the `synced+rectified data` file and its `calibration` file from the [KITTI Raw Dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php)
+    * Merge both files into one ROSbag file
 
 ```
 cd ~/kitti_data/
 kitti2bag -t 2011_09_26 -r 0060 raw_synced
 ```
 
-2) Synchronize the sensor data:  
+3) Synchronize the sensor data:  
 
-* The script matches the timestamps of the Velodyne point cloud data with the Camara data to perform Sensor Fusion in a synchronized way within the ROS framework 
+    * The script matches the timestamps of the Velodyne point cloud data with the Camara data to perform Sensor Fusion in a synchronized way within the ROS framework 
 ```
 cd ~/catkim_ws/src/ROS_Perception_Kitti_Dataset/pre_processing/
 python sync_rosbag.py raw_synced.bag
 ```
 
-3) Store preprocessed semantic segmentated images:  
+4) Store preprocessed semantic segmentated images:  
 
-* The Camera data is preprocessed within a Deep Neural Network to create semantic segmentated images. With this step a "real-time" performance on any device (CPU usage) can be guaranteed
+    * The Camera data is preprocessed within a Deep Neural Network to create semantic segmentated images. With this step a "real-time" performance on any device (CPU usage) can be guaranteed
 
 ```
 mkdir ~/kitti_data/0060/segmented_semantic_images/
 cd ~/kitti_data/0060/segmented_semantic_images/
 ```
 
-* For any other scenario follow this steps: Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
+   * For any other scenario follow this steps: Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
 
 ### Discussion
 
