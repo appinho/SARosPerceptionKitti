@@ -52,6 +52,7 @@ So, without assigning any of the abovementioned parameters the scenario 0060 is 
 
 ### To Do
 
+* Upload more scenarios
 * Make Youtube video to walk through repo
 * Make smaller gifs
 * Double check transformation from camera 02 to velo
