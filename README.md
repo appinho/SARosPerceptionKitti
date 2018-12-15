@@ -43,7 +43,7 @@ roslaunch detection detection.launch
 roslaunch tracking tracking.launch
 ```
 
-   * Default parameters: 
+    * Default parameters: 
         * scenario:=0060  
         * speed:=0.25  
         * delay:=3  
@@ -133,7 +133,7 @@ mkdir ~/kitti_data/0060/segmented_semantic_images/
 cd ~/kitti_data/0060/segmented_semantic_images/
 ```
 
-   * For any other scenario follow this steps: Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
+    * For any other scenario follow this steps: Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
 
 ### Discussion
 
