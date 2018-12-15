@@ -3,10 +3,7 @@ Panels:
     Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Global Options1
-        - /Status1
-        - /Image1
+      Expanded: ~
       Splitter Ratio: 0.439560443
     Tree Height: 443
   - Class: rviz/Selection
@@ -119,7 +116,7 @@ Visualization Manager:
       Marker Topic: /viz/detection/cubes
       Name: Marker
       Namespaces:
-        {}
+        my_namespace: true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -127,7 +124,7 @@ Visualization Manager:
       Marker Topic: /viz/detection/texts
       Name: Marker
       Namespaces:
-        {}
+        my_namespace: true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -155,25 +152,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 105.30912
+      Distance: 63.1533928
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 42.1738129
-        Y: -2.43468904
-        Z: 0.693514764
+        X: 42.3229141
+        Y: -0.432525933
+        Z: 1.34470999
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.56979632
+      Pitch: 0.139797643
       Target Frame: velo_link
       Value: Orbit (rviz)
-      Yaw: 3.15649986
+      Yaw: 3.15150023
     Saved: ~
 Window Geometry:
   Displays:

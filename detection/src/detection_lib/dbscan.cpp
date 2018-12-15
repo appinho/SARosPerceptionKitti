@@ -140,8 +140,6 @@ void DbScan::runDbScan(cv::Mat grid){
 
 			if(!fs_next_to_cell)
 				continue;
-
-			std::cout << y << " " << x << " " << semantic_class << std::endl;
 				
 			// Flag cell as visited
 			grid.at<cv::Vec3f>(y,x)[0] = -100.0;
