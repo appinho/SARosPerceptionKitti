@@ -48,7 +48,7 @@ roslaunch tracking tracking.launch
         * speed:=0.25  
         * delay:=3  
 
-So, without assigning any of the abovementioned parameters the scenario 0060 is replayed at 25% speed with a 3 second delay so RViz has enough time to boot up.   
+So, without assigning any of the abovementioned parameters the scenario 0060 from the demo above is replayed at 25% speed with a 3 second delay so RViz has enough time to boot up.   
 
 ### To Do
 
