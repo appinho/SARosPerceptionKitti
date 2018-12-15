@@ -8,10 +8,11 @@ ROS package for the Perception (Sensor Processing, Detection, Tracking and Evalu
   <img src="./videos/semantic.gif">
 </p>
 
+<!--
 <p align="center">
   <img src="./videos/rviz.gif">
 </p>
-
+-->
 
 ### Usage
 
