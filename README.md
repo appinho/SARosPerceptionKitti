@@ -50,10 +50,36 @@ roslaunch tracking tracking.launch
 
 So, without assigning any of the abovementioned parameters the scenario 0060 is replayed at 25% speed with a 3 second delay so RViz has enough time to boot up.   
 
+### To Do
+
+* Make Youtube video to walk through repo
+* Make smaller gifs
+* Double check transformation from camera 02 to velo
+* Improve evaluation
+
+### Area for Improvements
+
+* Unique solution for setting the home directory path
+* Find a way to run multiple scenarios in one shot
+* Improving the Object Detection:  
+     * Object's shape (especially for cars) is incorporated 
+     * False classification within the semantic segmentation can be eradicated
+     * Replace MinAreaRect with better bounding box fitting
+     * Rule based filter
+     * Integrate camera image to better group clusters
+* Improving the Object Tracking:
+     * Delete duplicated tracks
+     * Soften yaw estimations
+* Applying the VoxelNet
+
+### Contact
+
+If you have any questions, things you would love to add to my To Do list or ideas how to actualize the points in the Area of Improvements, send me an email simonappel62@gmail.com ! More than interested to collaborate and hear any kind of feedback. Happy hacking :)
+
 ### Troubleshooting
 
-* SEMANTIC IMAGES WARNING: Go to sensor.cpp line 543 in sensor_processing_lib and hardcode your personal home directory! ([see full discussion here](https://github.com/appinho/SARosPerceptionKitti/issues/10))
 * Make sure to close RVIz and restart the ROS launch command if you want to execute the scenario again. Otherwise it seems like the data isn't moving anymore ([see here](https://github.com/appinho/SARosPerceptionKitti/issues/7))
+* Semenatic images warning: Go to sensor.cpp line 543 in sensor_processing_lib and hardcode your personal home directory! ([see full discussion here](https://github.com/appinho/SARosPerceptionKitti/issues/10))
 * Make sure the scenario is encoded as 4 digit number, like above `0060`
 * Make sure the images are encoded as 10 digit numbers starting from `0000000000.png`
 * Make sure the resulting semantic segmentated images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)
@@ -117,31 +143,7 @@ Evaluation results for 7 Scenarios `0011,0013,0014,0018,0056,0059,0060`
 | Car          | 0.715273| 0.785403|
 | Pedestrian   | 0.581809| 0.988038|
 
-### To Do
 
-* Make Youtube video to walk through repo
-* Make smaller gifs
-* Double check transformation from camera 02 to velo
-* Improve evaluation
-
-### Area for Improvements
-
-* Unique solution for setting the home directory path
-* Find a way to run multiple scenarios in one shot
-* Improving the Object Detection:  
-     * Object's shape (especially for cars) is incorporated 
-     * False classification within the semantic segmentation can be eradicated
-     * Replace MinAreaRect with better bounding box fitting
-     * Rule based filter
-     * Integrate camera image to better group clusters
-* Improving the Object Tracking:
-     * Delete duplicated tracks
-     * Soften yaw estimations
-* Applying the VoxelNet
-
-### Contact
-
-If you have any questions, things you would love to add to my To Do list or ideas how to actualize the points in the Area of Improvements, send me an email simonappel62@gmail.com ! More than interested to collaborate and hear any kind of feedback. Happy hacking :)
 
 <!--
 ## Evaluation for 7 Scenarios 0011,0013,0014,0018,0056,0059,0060
