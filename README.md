@@ -14,8 +14,7 @@ ROS package for the Perception (Sensor Processing, Detection, Tracking and Evalu
 
 ### Usage
 
-1) Clone repository and [download any scenario or entire KITTI dataset](https://drive.google.com/drive/folders/1vHpkoC78fPXT64-VFL1H5Mm1bdukK5Qz?usp=sharing) 
-you would like (e.g. 0060 from demo above) and stick to following folder structure:  
+1) Clone repository and [download any scenario or entire KITTI dataset](https://drive.google.com/drive/folders/1vHpkoC78fPXT64-VFL1H5Mm1bdukK5Qz?usp=sharing) and stick to following folder structure:  
  
 ```
     ~                                        # Home directory
