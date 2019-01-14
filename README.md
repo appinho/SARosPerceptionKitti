@@ -52,6 +52,15 @@ roslaunch tracking tracking.launch
 
 So, without assigning any of the abovementioned parameters the scenario 0060 from the demo above is replayed at 25% speed with a 3 second delay so RViz has enough time to boot up.   
 
+### Results
+
+Evaluation results for 7 Scenarios `0011,0013,0014,0018,0056,0059,0060`
+
+| Class        |  MOTP   |  MODP   |
+| ------------ |:-------:|:-------:|
+| Car          | 0.715273| 0.785403|
+| Pedestrian   | 0.581809| 0.988038|
+
 ### Area for Improvements
 
 * Friendly solution to not hard code the user's home directory path
@@ -73,7 +82,7 @@ So, without assigning any of the abovementioned parameters the scenario 0060 fro
 
 ### Contact
 
-If you have any questions, things you would love to add to my To Do list or ideas how to actualize the points in the Area of Improvements, send me an email simonappel62@gmail.com ! More than interested to collaborate and hear any kind of feedback. Happy hacking :)
+If you have any questions, things you would love to add or ideas how to actualize the points in the Area of Improvements, send me an email at simonappel62@gmail.com ! More than interested to collaborate and hear any kind of feedback.
 
 ### Troubleshooting
 
@@ -133,17 +142,6 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 ```
 
    * For any other scenario follow this steps: Well pre-trained network with an IOU of 73% can be found here: [Finetuned Google's DeepLab on KITTI Dataset](https://github.com/hiwad-aziz/kitti_deeplab)
-
-### Discussion
-
-Evaluation results for 7 Scenarios `0011,0013,0014,0018,0056,0059,0060`
-
-| Class        |  MOTP   |  MODP   |
-| ------------ |:-------:|:-------:|
-| Car          | 0.715273| 0.785403|
-| Pedestrian   | 0.581809| 0.988038|
-
-
 
 <!--
 
