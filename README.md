@@ -70,7 +70,6 @@ So, without assigning any of the abovementioned parameters the scenario 0060 fro
      * Write out FP FN
 * Try different approaches:
      * Applying the VoxelNet
-     * 
 
 ### Contact
 
