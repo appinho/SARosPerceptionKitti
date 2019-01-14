@@ -52,17 +52,9 @@ roslaunch tracking tracking.launch
 
 So, without assigning any of the abovementioned parameters the scenario 0060 from the demo above is replayed at 25% speed with a 3 second delay so RViz has enough time to boot up.   
 
-### To Do
-
-* Upload more scenarios
-* Make Youtube video to walk through repo
-* Make smaller gifs
-* Double check transformation from camera 02 to velo
-* Improve evaluation
-
 ### Area for Improvements
 
-* Unique solution for setting the home directory path
+* Friendly solution to not hard code home directory path
 * Find a way to run multiple scenarios in one shot
 * Improving the Object Detection:  
      * Object's shape (especially for cars) is incorporated 
@@ -150,6 +142,22 @@ Evaluation results for 7 Scenarios `0011,0013,0014,0018,0056,0059,0060`
 
 
 <!--
+
+### To Do
+
+* Upload more scenarios
+* Make Youtube video to walk through the project
+* Make smaller gifs
+* Double check
+  * transformation from camera 02 to velo
+  * grid to point cloud has any errors
+* Improve evaluation
+  * Write out FP FN
+* Visualize Detection Grid
+* Delete duplicate tracks
+* Reduce street pavement error prone cells
+* Objects to free space or not
+
 ## Evaluation for 7 Scenarios 0011,0013,0014,0018,0056,0059,0060
 
 | Class        | MOTA    | MOTP    |  MOTAL  |    MODA |    MODP |
@@ -181,5 +189,11 @@ Evaluation results for 7 Scenarios `0011,0013,0014,0018,0056,0059,0060`
 ### 2 Detection: DBSCAN Clustering
 
 ### 3 Tracking: UKF Tracker
+
+
+Video image linker example
+
+[![Segmentation illustration](https://img.youtube.com/vi/UXHX9kFGXfg/0.jpg)](https://www.youtube.com/watch?v=UXHX9kFGXfg "Segmentation")
+
 
 -->
