@@ -16,7 +16,7 @@ ROS package for the Perception (Sensor Processing, Detection, Tracking and Evalu
 
 ### Usage
 
-1) Clone repository and [download any scenario or entire KITTI dataset](https://drive.google.com/drive/folders/1vHpkoC78fPXT64-VFL1H5Mm1bdukK5Qz?usp=sharing) and stick to following folder structure:  
+1) Clone repository and [download a preprocessed scenario](https://drive.google.com/drive/folders/1vHpkoC78fPXT64-VFL1H5Mm1bdukK5Qz?usp=sharing) and stick to following structure:  
  
 ```
     ~                                        # Home directory
@@ -54,18 +54,23 @@ So, without assigning any of the abovementioned parameters the scenario 0060 fro
 
 ### Area for Improvements
 
-* Friendly solution to not hard code home directory path
-* Find a way to run multiple scenarios in one shot
+* Friendly solution to not hard code the user's home directory path
+* Record walk through video of entire project
+* Find a way to run multiple scenarios with one execution
 * Improving the Object Detection:  
-     * Object's shape (especially for cars) is incorporated 
-     * False classification within the semantic segmentation can be eradicated
-     * Replace MinAreaRect with better bounding box fitting
-     * Rule based filter
-     * Integrate camera image to better group clusters
+     * Visualize Detection Grid
+     * Incorporate features of the shape of cars
+     * Handle false classification within the semantic segmentation
+     * Replace MinAreaRect with better fitting of the object's bounding box
+     * Integrate view of camera image to better group clusters since point clouds can be spare for far distances
 * Improving the Object Tracking:
      * Delete duplicated tracks
      * Soften yaw estimations
-* Applying the VoxelNet
+* Improve evaluation
+     * Write out FP FN
+* Try different approaches:
+     * Applying the VoxelNet
+     * 
 
 ### Contact
 
@@ -145,16 +150,10 @@ Evaluation results for 7 Scenarios `0011,0013,0014,0018,0056,0059,0060`
 
 ### To Do
 
-* Upload more scenarios
-* Make Youtube video to walk through the project
 * Make smaller gifs
 * Double check
   * transformation from camera 02 to velo
   * grid to point cloud has any errors
-* Improve evaluation
-  * Write out FP FN
-* Visualize Detection Grid
-* Delete duplicate tracks
 * Reduce street pavement error prone cells
 * Objects to free space or not
 
