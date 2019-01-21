@@ -22,7 +22,7 @@ ROS package for the Perception (Sensor Processing, Detection, Tracking and Evalu
     ~                                        # Home directory
     ├── catkin_ws                            # Catkin workspace
     │   ├── src                              # Clone repo in here
-    │       └── ROS_Perception_Kitti_Dataset # Repo
+    │       └── SAROSPerceptionKitti         # Repo
     ├── kitti_data                           # Data folder
     │   ├── 0001                             # Scenario 0001
     │   ├── ...                              # Any other scenario
