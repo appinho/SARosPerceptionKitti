@@ -191,3 +191,7 @@ Video image linker example
 
 
 -->
+
+## License
+
+With the standards of the [MIT License](LICENSE.md) you are more than welcomed to contribute to this repository!
