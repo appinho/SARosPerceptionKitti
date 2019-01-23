@@ -8,15 +8,13 @@ ROS package for the Perception (Sensor Processing, Detection, Tracking and Evalu
   <img src="./videos/semantic.gif">
 </p>
 
-<!--
 <p align="center">
   <img src="./videos/rviz.gif">
 </p>
--->
 
 ### Usage
 
-1) Clone repository and [download a preprocessed scenario](https://drive.google.com/drive/folders/1vHpkoC78fPXT64-VFL1H5Mm1bdukK5Qz?usp=sharing) and stick to following structure:  
+1) Clone this repository, [download a preprocessed scenario](https://drive.google.com/drive/folders/1vHpkoC78fPXT64-VFL1H5Mm1bdukK5Qz?usp=sharing), and stick to following structure:  
  
 ```
     ~                                        # Home directory
@@ -35,7 +33,7 @@ ROS package for the Perception (Sensor Processing, Detection, Tracking and Evalu
     │   ├── ...
 ```
 
-2) Go into `sensor_processing/src/sensor_processing_lib/sensor_fusion.cpp` under method `processImage()` to hardcode your home directory!
+2) Go into `sensor_processing/src/sensor_processing_lib/sensor_fusion.cpp` and hardcode your home directory within the method `processImage()`!
 
 3) Launch one of the following ROS nodes:  
 
@@ -50,7 +48,7 @@ roslaunch tracking tracking.launch
         * speed:=0.25  
         * delay:=3  
 
-So, without assigning any of the abovementioned parameters the scenario 0060 from the demo above is replayed at 25% speed with a 3 second delay so RViz has enough time to boot up.   
+Without assigning any of the abovementioned parameters the scenario 0060 (which is the demo above) is replayed at 25% of its speed with a 3 second delay so RViz has enough time to boot up.   
 
 ### Results
 
