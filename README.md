@@ -27,7 +27,7 @@ Sticking to this folder structure is highly recommended:
     │   │   └── synchronized_data.bag        # Synchronized ROSbag file
 ```
 
-1) Install [ROS](http://wiki.ros.org/Installation/Ubuntu) and create a [catkin workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace) in your home directory.  
+1) Install [ROS](http://wiki.ros.org/Installation/Ubuntu) and create a [catkin workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace) in your home directory:  
 
 ```
 mkdir -p ~/catkin_ws/src
