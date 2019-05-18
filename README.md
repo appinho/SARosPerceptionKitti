@@ -3,7 +3,7 @@ SARosPerceptionKitti 2.0
  
 ROS package for the Perception (Sensor Processing, Detection, Tracking and Evaluation) of the KITTI Vision Benchmark 
 
-### Demo
+## Demo
 <p align="center">
   <img src="./videos/semantic.gif">
 </p>
@@ -12,7 +12,7 @@ ROS package for the Perception (Sensor Processing, Detection, Tracking and Evalu
   <img src="./videos/rviz.gif">
 </p>
 
-### Usage
+## Setup
 
 Sticking to this folder structure is highly recommended:  
  
@@ -65,7 +65,7 @@ roslaunch sensor_processing sensor_processing.launch data_path:=/home/YOUR_USERN
 
 Without assigning any of the abovementioned parameters the demo scenario 0060 is replayed at 25% of its speed with a 3 second delay so RViz has enough time to boot up.   
 
-### Contact
+## Contact
 
 If you have any questions, things you would love to add or ideas how to actualize the points in the Area of Improvements, send me an email at simonappel62@gmail.com ! More than interested to collaborate and hear any kind of feedback.
 
