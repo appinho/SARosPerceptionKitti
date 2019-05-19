@@ -54,18 +54,20 @@ unzip 0060.zip
 rm 0060.zip
 ```
 
-4) Launch the following ROS node to test successful setup:  
+4) Launch one of the following ROS nodes to perform the pipeline step-by-step:  
 
 ```
 roslaunch sensor_processing sensor_processing.launch data_path:=/home/YOUR_USERNAME/kitti_data
+roslaunch detection detection.launch data_path:=/home/YOUR_USERNAME/kitti_data
+roslaunch tracking tracking.launch data_path:=/home/YOUR_USERNAME/kitti_data
 ```
 
    * Default parameters:
         * scenario:=0060
-        * speed:=0.25  
+        * speed:=0.2   
         * delay:=3  
 
-Without assigning any of the abovementioned parameters the demo scenario 0060 is replayed at 25% of its speed with a 3 second delay so RViz has enough time to boot up.   
+Without assigning any of the abovementioned parameters the demo scenario 0060 is replayed at 20% of its speed with a 3 second delay so RViz has enough time to boot up.   
 
 ## Contact
 
