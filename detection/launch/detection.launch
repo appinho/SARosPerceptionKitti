@@ -1,5 +1,8 @@
 <launch>
 
+  <!-- Assign dataset directory -->
+  <arg name="data_path"/>
+
   <!-- Choose scenario-->
   <arg name="scenario" default="0060"/>
 
@@ -10,13 +13,17 @@
   <arg name="delay" default="3" />
 
   <!-- Play rosbag file -->
-  <node pkg="rosbag" type="play" name="player" args="-r $(arg speed) -d $(arg delay) /home/simonappel/kitti_data/$(arg scenario)/synchronized_data.bag"/>
+  <node pkg="rosbag" type="play" name="player" args="-r $(arg speed) -d $(arg delay) $(arg data_path)/$(arg scenario)/synchronized_data.bag"/>
 
   <!-- Run the sensor setup node -->
   <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node">
 
     <!-- Get parameters from parameter.yaml file -->
     <rosparam file="$(find sensor_processing)/config/parameters.yaml" command="load" />
+
+    <!-- Get data path -->
+    <param name="data_path" value="$(arg data_path)" />
+
     <!-- Get scenario identifier -->
     <param name="scenario" value="$(arg scenario)" />
   </node>
@@ -36,8 +43,9 @@
     <param name="scenario" value="$(arg scenario)" />
   </node>
 
+  
   <!-- Launch rviz for visualization -->
   <node pkg="rviz" type="rviz" name="my_rviz"
-	args="-d $(find detection)config/rviz_config_detection.rviz"/>
+  args="-d $(find detection)config/rviz_config_detection.rviz"/>
 
 </launch>

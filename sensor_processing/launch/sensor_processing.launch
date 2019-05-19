@@ -31,5 +31,5 @@
   <!-- Launch rviz for visualization -->
   <node pkg="rviz" type="rviz" name="my_rviz"
 	args="-d $(find sensor_processing)config/rviz_config_sensor.rviz"/>
-
+  
 </launch>
