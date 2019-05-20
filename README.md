@@ -57,9 +57,9 @@ rm 0060.zip
 4) Launch one of the following ROS nodes to perform the pipeline step-by-step:  
 
 ```
-roslaunch sensor_processing sensor_processing.launch data_path:=/home/YOUR_USERNAME/kitti_data
-roslaunch detection detection.launch data_path:=/home/YOUR_USERNAME/kitti_data
-roslaunch tracking tracking.launch data_path:=/home/YOUR_USERNAME/kitti_data
+roslaunch sensor_processing sensor_processing.launch home_dir:=/home/YOUR_USERNAME
+roslaunch detection detection.launch home_dir:=/home/YOUR_USERNAME
+roslaunch tracking tracking.launch home_dir:=/home/YOUR_USERNAME
 ```
 
    * Default parameters:
@@ -67,7 +67,20 @@ roslaunch tracking tracking.launch data_path:=/home/YOUR_USERNAME/kitti_data
         * speed:=0.2   
         * delay:=3  
 
-Without assigning any of the abovementioned parameters the demo scenario 0060 is replayed at 20% of its speed with a 3 second delay so RViz has enough time to boot up.   
+Without assigning any of the abovementioned parameters the demo scenario 0060 is replayed at 20% of its speed with a 3 second delay so RViz has enough time to boot up.  
+
+5) Evaluate the demo scenario 0060:
+
+```
+roslaunch evaluation evaluation.launch home_dir:=/home/YOUR_USERNAME
+cd ~/catkin_ws/src/SAROSPerceptionKitti/benchmark/python
+python evaluate_tracking.py
+```
+
+| Class        |  MOTP   |  MODP   |
+| ------------ |:-------:|:-------:|
+| Car          | 0.769004| 0.929824|
+| Pedestrian   | 0.572440| 0.902581|
 
 ## Contact
 
