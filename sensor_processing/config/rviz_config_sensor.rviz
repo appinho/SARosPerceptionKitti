@@ -3,7 +3,8 @@ Panels:
     Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /PointCloud26
       Splitter Ratio: 0.439560443
     Tree Height: 505
   - Class: rviz/Selection
@@ -26,6 +27,8 @@ Panels:
     Name: Time
     SyncMode: 0
     SyncSource: PointCloud2
+Toolbars:
+  toolButtonStyle: 2
 Visualization Manager:
   Class: ""
   Displays:
@@ -212,7 +215,7 @@ Visualization Manager:
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.25
+      Size (m): 0.200000003
       Style: Spheres
       Topic: /sensor/cloud/semantic
       Unreliable: false

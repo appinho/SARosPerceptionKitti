@@ -31,11 +31,12 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	// Get data path
 	std::string data_path;
 	if(ros::param::get("~data_path", data_path)){
-		params_.data_path = data_path;
+		params_.data_path = data_path + "/kitti_data";
 	}
 	else{
 		ROS_ERROR("Set dataset path as parameter");
 	}
+	ROS_INFO("%s\n", params_.data_path.c_str());
 
 	// Get scenario parameter
 	int scenario;

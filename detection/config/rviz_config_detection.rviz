@@ -26,6 +26,8 @@ Panels:
     Name: Time
     SyncMode: 0
     SyncSource: PointCloud2
+Toolbars:
+  toolButtonStyle: 2
 Visualization Manager:
   Class: ""
   Displays:

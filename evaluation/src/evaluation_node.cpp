@@ -9,6 +9,7 @@
 #include <evaluation_lib/evaluation.h>
 
 int main(int argc, char **argv){
+	
 	ros::init(argc, argv, "evaluation_node");
 	evaluation::Evaluation evaluator(
 		ros::NodeHandle(), ros::NodeHandle("~"));

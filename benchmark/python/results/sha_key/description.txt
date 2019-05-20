@@ -1,0 +1,1 @@
+MOTA MOTP MOTAL MODA MODP recall precision F1 FAR MT PT ML tp fp fn id_switches fragments n_gt n_gt_trajectories n_tr n_tr_trajectories

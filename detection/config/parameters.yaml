@@ -10,10 +10,10 @@ pedestrian:
 
 car:
   side:
-    min: 1.30
+    min: 1.00
     max: 6.00
   height:
-    min: 1.10
+    min: 0.80
     max: 2.00
   semantic:
-    min: 0.60
+    min: 0.70

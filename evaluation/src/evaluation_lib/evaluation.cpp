@@ -16,6 +16,16 @@ Evaluation::Evaluation(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	private_nh_(private_nh)
 	{
 
+	// Get data path
+	std::string absolut_data_path, data_path;
+	if(ros::param::get("~data_path", data_path)){
+		absolut_data_path = data_path + "/catkin_ws/src/SAROSPerceptionKitti/"
+			"benchmark/python/results/sha_key/data/";
+	}
+	else{
+		ROS_ERROR("Set dataset path as parameter");
+	}
+
 	// Get scenario parameter
 	int scenario;
 	std::string scenario_name;
@@ -30,9 +40,7 @@ Evaluation::Evaluation(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	}
 
 	// Delete content in file if there is one
-	filename_ = 
-		"~/kitti_results/"
-		+ scenario_name + ".txt";
+	filename_ = absolut_data_path + "0012" + ".txt";
 	tracking_results_.open(filename_.c_str(),
 		std::ofstream::out | std::ofstream::trunc);
 

@@ -25,6 +25,8 @@ Panels:
     Name: Time
     SyncMode: 0
     SyncSource: Image
+Toolbars:
+  toolButtonStyle: 2
 Visualization Manager:
   Class: ""
   Displays:
