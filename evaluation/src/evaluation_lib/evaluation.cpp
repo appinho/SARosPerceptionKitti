@@ -17,9 +17,9 @@ Evaluation::Evaluation(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	{
 
 	// Get data path
-	std::string absolut_data_path, data_path;
-	if(ros::param::get("~data_path", data_path)){
-		absolut_data_path = data_path + "/catkin_ws/src/SAROSPerceptionKitti/"
+	std::string data_path, home_dir;
+	if(ros::param::get("~home_dir", home_dir)){
+		data_path = home_dir + "/catkin_ws/src/SAROSPerceptionKitti/"
 			"benchmark/python/results/sha_key/data/";
 	}
 	else{
@@ -40,7 +40,7 @@ Evaluation::Evaluation(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	}
 
 	// Delete content in file if there is one
-	filename_ = absolut_data_path + "0012" + ".txt";
+	filename_ = data_path + "0012" + ".txt";
 	tracking_results_.open(filename_.c_str(),
 		std::ofstream::out | std::ofstream::trunc);
 

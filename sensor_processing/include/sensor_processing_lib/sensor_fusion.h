@@ -40,7 +40,7 @@ using namespace message_filters;
 // Parameter handler
 struct Parameters{
 
-	std::string data_path;
+	std::string home_dir;
 	std::string scenario;
 
 	float grid_range_min;

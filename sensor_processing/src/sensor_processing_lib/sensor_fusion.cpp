@@ -29,14 +29,13 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	sync_(MySyncPolicy(10), cloud_sub_, image_sub_){
 
 	// Get data path
-	std::string data_path;
-	if(ros::param::get("~data_path", data_path)){
-		params_.data_path = data_path + "/kitti_data";
+	std::string home_dir;
+	if(ros::param::get("~home_dir", home_dir)){
+		params_.home_dir = home_dir + "/kitti_data";
 	}
 	else{
 		ROS_ERROR("Set dataset path as parameter");
 	}
-	ROS_INFO("%s\n", params_.data_path.c_str());
 
 	// Get scenario parameter
 	int scenario;
@@ -550,7 +549,7 @@ void SensorFusion::processImage(const Image::ConstPtr & image){
 	std::ostringstream path_name;
 
 	// HARDCODE HOME DIRECTORY HERE
-	path_name << params_.data_path << "/"
+	path_name << params_.home_dir << "/"
 		<< params_.scenario 
 		<< "/segmented_semantic_images/"
 		<< std::setfill('0') << std::setw(10)	<< time_frame_ << ".png";

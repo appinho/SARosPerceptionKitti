@@ -1,7 +1,7 @@
 <launch>
 
-  <!-- Assign dataset directory -->
-  <arg name="data_path"/>
+  <!-- Assign home directory -->
+  <arg name="home_dir"/>
 
   <!-- Choose scenario-->
   <arg name="scenario" default="0060"/>
@@ -13,7 +13,7 @@
   <arg name="delay" default="3" />
 
   <!-- Play rosbag file -->
-  <node pkg="rosbag" type="play" name="player" args="-r $(arg speed) -d $(arg delay) $(arg data_path)/kitti_data/$(arg scenario)/synchronized_data.bag"/>
+  <node pkg="rosbag" type="play" name="player" args="-r $(arg speed) -d $(arg delay) $(arg home_dir)/kitti_data/$(arg scenario)/synchronized_data.bag"/>
   
   <!-- Run the sensor setup node -->
   <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node">
@@ -22,7 +22,7 @@
     <rosparam file="$(find sensor_processing)/config/parameters.yaml" command="load" />
 
     <!-- Get data path -->
-    <param name="data_path" value="$(arg data_path)" />
+    <param name="home_dir" value="$(arg home_dir)" />
 
     <!-- Get scenario identifier -->
     <param name="scenario" value="$(arg scenario)" />
@@ -55,7 +55,7 @@
   <node pkg="evaluation" type="evaluation" name="evaluation_node" output="screen">
 
     <!-- Get data path -->
-    <param name="data_path" value="$(arg data_path)" />
+    <param name="home_dir" value="$(arg home_dir)" />
 
     <!-- Get scenario identifier -->
     <param name="scenario" value="$(arg scenario)" />
