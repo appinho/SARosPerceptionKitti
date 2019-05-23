@@ -353,7 +353,6 @@ class trackingEvaluation(object):
         y1 = max(a.y1, b.y1)
         x2 = min(a.x2, b.x2)
         y2 = min(a.y2, b.y2)
-
         w = x2-x1
         h = y2-y1
 
@@ -409,7 +408,7 @@ class trackingEvaluation(object):
             n_gts = 0
             n_trs = 0
             
-            for f in range(len(seq_gt)):
+            for frame,f in enumerate(range(len(seq_gt))):
                 g = seq_gt[f]
                 dc = seq_dc[f]
 
@@ -466,6 +465,7 @@ class trackingEvaluation(object):
                 for row,col in association_matrix:
                     # apply gating on boxoverlap
                     c = cost_matrix[row][col]
+                    #print("Frame %d Union %f" % (frame, c))
                     if c < max_cost:
                         g[row].tracker   = t[col].track_id
                         this_ids[1][row] = t[col].track_id

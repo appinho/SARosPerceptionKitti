@@ -21,7 +21,7 @@ tracking:
     yaw_rate: 0.314
   lambda: 2.0
   aging:
-    bad: 2
+    bad: 5
   occlusion_factor: 2.0
 
 track:

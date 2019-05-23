@@ -160,8 +160,8 @@ void Visualization::showFirstPersonImage(
 		std::string text = ss.str();
 		top_left.y -= 10;
 		top_left.x -= 50;
-		cv::putText(image, text, top_left, fontface_, fontscale_, color,
-			thickness_,	8);
+		//cv::putText(image, text, top_left, fontface_, fontscale_, color,
+		//	thickness_,	8);
 	}
 
 	if(save_){

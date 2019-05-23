@@ -30,10 +30,10 @@ car:
       min: 0.90
   update:
     side:
-      min: 0.60
+      min: 0.40
       max: 5.00
     height:
-      min: 0.20
+      min: 0.10
       max: 2.00
     semantic:
-      min: 0.70
+      min: 0.60

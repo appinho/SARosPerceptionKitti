@@ -27,7 +27,7 @@ Ground Truth Objects (Total)                                                 144
 Ignored Ground Truth Objects                                                   1
 Ground Truth Trajectories                                                      2
 
-Tracker Objects (Total)                                                      107
-Ignored Tracker Objects                                                       75
-Tracker Trajectories                                                           7
+Tracker Objects (Total)                                                      120
+Ignored Tracker Objects                                                       88
+Tracker Trajectories                                                           3
 ================================================================================

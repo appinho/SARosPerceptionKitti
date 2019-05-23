@@ -610,7 +610,7 @@ void UnscentedKF::initTrack(const Object & obj){
 	tr.r = rng_.uniform(0, 255);
 	tr.g = rng_.uniform(0, 255);
 	tr.b = rng_.uniform(0, 255);
-	tr.prob_existence = 1.0f;
+	tr.prob_existence = 0.6f;
 	
 	// Push back to track list
 	tracks_.push_back(tr);
@@ -677,13 +677,13 @@ void UnscentedKF::publishTracks(const std_msgs::Header & header){
 void UnscentedKF::printTrack(const Track & tr){
 
 	ROS_INFO("Track [%d] x=[%f,%f,%f,%f,%f], z=[%f]"
-		" P=[%f,%f,%f,%f,%f] is [%s, %f] A[%d] [w,l,h,o] [%f,%f,%f,%f]", 
+		" P=[%f,%f,%f,%f,%f] is [%s, %f] A[%d, %d] [w,l,h,o] [%f,%f,%f,%f]", 
 		tr.id,
 		tr.sta.x(0), tr.sta.x(1), tr.sta.x(2), tr.sta.x(3), tr.sta.x(4),
 		tr.sta.z,
 		tr.sta.P(0), tr.sta.P(6), tr.sta.P(12), tr.sta.P(18), tr.sta.P(24),
 		tr.sem.name.c_str(), tr.sem.confidence,
-		tr.hist.good_age,
+		tr.hist.good_age, tr.hist.bad_age,
 		tr.geo.width, tr.geo.length,
 		tr.geo.height, tr.geo.orientation
 	);

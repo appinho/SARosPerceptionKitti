@@ -393,11 +393,11 @@ void DbScan::addObject(const Cluster & c){
 	object.r = c.color[0];
 	object.g = c.color[1];
 	object.b = c.color[2];
-	if(object.is_new_track){
-		object.a = 1.0f;
+	if(c.is_new_track){
+		object.a = 0.75f;
 	}
 	else{
-		object.a = 0.5f;
+		object.a = 0.35f;
 	}
 
 	// Tracking
