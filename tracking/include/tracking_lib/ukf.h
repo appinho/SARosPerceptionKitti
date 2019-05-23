@@ -93,6 +93,7 @@ struct Track{
 	int r;
 	int g;
 	int b;
+	float prob_existence;
 };
 
 class UnscentedKF{

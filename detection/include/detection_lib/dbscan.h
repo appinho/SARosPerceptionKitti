@@ -24,22 +24,23 @@ namespace detection{
 using namespace sensor_msgs;
 using namespace helper;
 
+struct ObjectAttributes{
+	float side_min;
+	float side_max;
+	float height_min;
+	float height_max;
+	float semantic_min;
+};
+
 struct Parameter{
 
 	float grid_range_max;
 	float grid_cell_size;
 
-	float ped_side_min;
-	float ped_side_max;
-	float ped_height_min;
-	float ped_height_max;
-	float ped_semantic_min;
-
-	float car_side_min;
-	float car_side_max;
-	float car_height_min;
-	float car_height_max;
-	float car_semantic_min;
+	ObjectAttributes car_spawn;
+	ObjectAttributes car_update;
+	ObjectAttributes ped_spawn;
+	ObjectAttributes ped_update;
 };
 
 // Semantic information of a cluster
@@ -85,7 +86,8 @@ struct Cluster{
 	// Misc stuff
 	cv::RotatedRect rect;
 	cv::Scalar color;
-	bool is_track;
+	bool is_new_track;
+	bool has_adjacent_free_space;
 
 };
 
@@ -124,14 +126,17 @@ private:
 
 	// Class functions
 	void runDbScan(cv::Mat grid);
-	void getClusterDetails(const cv::Mat grid);
-	void createObjectList();
+	void filterClusters(const cv::Mat grid);
+	void fillObjectList();
 	void addObject(const Cluster & c);
-	bool hasShapeOfPed(const Cluster & c);
-	bool hasShapeOfCar(const Cluster & c);
+	bool spawnPed(const Cluster & c);
+	bool spawnCar(const Cluster & c);
+	bool updatePed(const Cluster & c);
+	bool updateCar(const Cluster & c);
 	bool isValidSemantic(const int semantic_class);
 	bool isKittiValidSemantic(const int semantic_class);
 	void printCluster(const Cluster & c);
+	void printObject(const Object & o);
 
 };
 

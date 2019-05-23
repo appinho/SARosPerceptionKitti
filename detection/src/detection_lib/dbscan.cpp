@@ -21,38 +21,68 @@ DbScan::DbScan(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		params_.grid_range_max);
 	private_nh_.param("grid/cell/size", params_.grid_cell_size,
 		params_.grid_cell_size);
-	private_nh_.param("pedestrian/side/min", params_.ped_side_min,
-		params_.ped_side_min);
-	private_nh_.param("pedestrian/side/max", params_.ped_side_max,
-		params_.ped_side_max);
-	private_nh_.param("pedestrian/height/min", params_.ped_height_min,
-		params_.ped_height_min);
-	private_nh_.param("pedestrian/height/max", params_.ped_height_max,
-		params_.ped_height_max);
-	private_nh_.param("pedestrian/semantic/min", params_.ped_semantic_min,
-		params_.ped_semantic_min);
-	private_nh_.param("car/side/min", params_.car_side_min,
-		params_.car_side_min);
-	private_nh_.param("car/side/max", params_.car_side_max,
-		params_.car_side_max);
-	private_nh_.param("car/height/min", params_.car_height_min,
-		params_.car_height_min);
-	private_nh_.param("car/height/max", params_.car_height_max,
-		params_.car_height_max);
-	private_nh_.param("car/semantic/min", params_.car_semantic_min,
-		params_.car_semantic_min);
+	private_nh_.param("pedestrian/spawn/side/min", params_.ped_spawn.side_min,
+		params_.ped_spawn.side_min);
+	private_nh_.param("pedestrian/spawn/side/max", params_.ped_spawn.side_max,
+		params_.ped_spawn.side_max);
+	private_nh_.param("pedestrian/spawn/height/min", params_.ped_spawn.height_min,
+		params_.ped_spawn.height_min);
+	private_nh_.param("pedestrian/spawn/height/max", params_.ped_spawn.height_max,
+		params_.ped_spawn.height_max);
+	private_nh_.param("pedestrian/spawn/semantic/min", params_.ped_spawn.semantic_min,
+		params_.ped_spawn.semantic_min);
+	private_nh_.param("car/spawn/side/min", params_.car_spawn.side_min,
+		params_.car_spawn.side_min);
+	private_nh_.param("car/spawn/side/max", params_.car_spawn.side_max,
+		params_.car_spawn.side_max);
+	private_nh_.param("car/spawn/height/min", params_.car_spawn.height_min,
+		params_.car_spawn.height_min);
+	private_nh_.param("car/spawn/height/max", params_.car_spawn.height_max,
+		params_.car_spawn.height_max);
+	private_nh_.param("car/spawn/semantic/min", params_.car_spawn.semantic_min,
+		params_.car_spawn.semantic_min);
+	private_nh_.param("pedestrian/update/side/min", params_.ped_update.side_min,
+		params_.ped_update.side_min);
+	private_nh_.param("pedestrian/update/side/max", params_.ped_update.side_max,
+		params_.ped_update.side_max);
+	private_nh_.param("pedestrian/update/height/min", params_.ped_update.height_min,
+		params_.ped_update.height_min);
+	private_nh_.param("pedestrian/update/height/max", params_.ped_update.height_max,
+		params_.ped_update.height_max);
+	private_nh_.param("pedestrian/update/semantic/min", params_.ped_update.semantic_min,
+		params_.ped_update.semantic_min);
+	private_nh_.param("car/update/side/min", params_.car_update.side_min,
+		params_.car_update.side_min);
+	private_nh_.param("car/update/side/max", params_.car_update.side_max,
+		params_.car_update.side_max);
+	private_nh_.param("car/update/height/min", params_.car_update.height_min,
+		params_.car_update.height_min);
+	private_nh_.param("car/update/height/max", params_.car_update.height_max,
+		params_.car_update.height_max);
+	private_nh_.param("car/update/semantic/min", params_.car_update.semantic_min,
+		params_.car_update.semantic_min);
 
 	// Print parameters
-	ROS_INFO_STREAM("ped_side_min " << params_.ped_side_min);
-	ROS_INFO_STREAM("ped_side_max " << params_.ped_side_max);
-	ROS_INFO_STREAM("ped_height_min " << params_.ped_height_min);
-	ROS_INFO_STREAM("ped_height_max " << params_.ped_height_max);
-	ROS_INFO_STREAM("ped_semantic_min " << params_.ped_semantic_min);
-	ROS_INFO_STREAM("car_side_min " << params_.car_side_min);
-	ROS_INFO_STREAM("car_side_max " << params_.car_side_max);
-	ROS_INFO_STREAM("car_height_min " << params_.car_height_min);
-	ROS_INFO_STREAM("car_height_max " << params_.car_height_max);
-	ROS_INFO_STREAM("car_semantic_min " << params_.car_semantic_min);
+	ROS_INFO_STREAM("ped_spawn.side_min " << params_.ped_spawn.side_min);
+	ROS_INFO_STREAM("ped_spawn.side_max " << params_.ped_spawn.side_max);
+	ROS_INFO_STREAM("ped_spawn.height_min " << params_.ped_spawn.height_min);
+	ROS_INFO_STREAM("ped_spawn.height_max " << params_.ped_spawn.height_max);
+	ROS_INFO_STREAM("ped_spawn.semantic_min " << params_.ped_spawn.semantic_min);
+	ROS_INFO_STREAM("car_spawn.side_min " << params_.car_spawn.side_min);
+	ROS_INFO_STREAM("car_spawn.side_max " << params_.car_spawn.side_max);
+	ROS_INFO_STREAM("car_spawn.height_min " << params_.car_spawn.height_min);
+	ROS_INFO_STREAM("car_spawn.height_max " << params_.car_spawn.height_max);
+	ROS_INFO_STREAM("car_spawn.semantic_min " << params_.car_spawn.semantic_min);
+	ROS_INFO_STREAM("ped_update.side_min " << params_.ped_update.side_min);
+	ROS_INFO_STREAM("ped_update.side_max " << params_.ped_update.side_max);
+	ROS_INFO_STREAM("ped_update.height_min " << params_.ped_update.height_min);
+	ROS_INFO_STREAM("ped_update.height_max " << params_.ped_update.height_max);
+	ROS_INFO_STREAM("ped_update.semantic_min " << params_.ped_update.semantic_min);
+	ROS_INFO_STREAM("car_update.side_min " << params_.car_update.side_min);
+	ROS_INFO_STREAM("car_update.side_max " << params_.car_update.side_max);
+	ROS_INFO_STREAM("car_update.height_min " << params_.car_update.height_min);
+	ROS_INFO_STREAM("car_update.height_max " << params_.car_update.height_max);
+	ROS_INFO_STREAM("car_update.semantic_min " << params_.car_update.semantic_min);
 
 	// Init counter for publishing
 	time_frame_ = 0;
@@ -88,19 +118,21 @@ void DbScan::process(const Image::ConstPtr & image_detection_grid){
 	runDbScan(grid);
 
 	// Determine cluster information
-	getClusterDetails(cv_det_grid_ptr->image);
+	filterClusters(cv_det_grid_ptr->image);
 
 	// Publish object list
-	createObjectList();
+	fillObjectList();
 	object_array_.header = image_detection_grid->header;
 	object_array_pub_.publish(object_array_);
 
 	// Print cluster info
 	for(int i = 0; i < number_of_clusters_; ++i){
-		if(clusters_[i].is_track)
-			printCluster(clusters_[i]);
+		printCluster(clusters_[i]);
 	}
-
+	// Print object info
+	for(int i = 0; i < object_array_.list.size(); ++i){
+		printObject(object_array_.list[i]);
+	}
 	// Print sensor fusion
 	ROS_INFO("Publishing Detection [%d]: # Clusters[%d]", time_frame_,
 		number_of_clusters_);
@@ -125,21 +157,6 @@ void DbScan::runDbScan(cv::Mat grid){
 			if(!isKittiValidSemantic(semantic_class)){
 				continue;
 			}
-
-			// If no free space cell next to it continue
-			int fs_kernel = 2;
-			bool fs_next_to_cell = false;
-			for(int k = -fs_kernel; k <= fs_kernel; ++k){
-				for(int l = -fs_kernel; l <= fs_kernel; ++l){
-					if(grid.at<cv::Vec3f>(y + k,x + l)[0] == -50){
-						fs_next_to_cell = true;
-						break;
-					}
-				}
-			}
-
-			if(!fs_next_to_cell)
-				continue;
 				
 			// Flag cell as visited
 			grid.at<cv::Vec3f>(y,x)[0] = -100.0;
@@ -180,7 +197,7 @@ void DbScan::runDbScan(cv::Mat grid){
 						if(n_x >= 0 && n_x < grid.cols &&
 							n_y >= 0 && n_y < grid.rows){
 
-							// Get semantic of neihbor cell
+							// Get semantic of neighbor cell
 							int n_semantic_class = 
 								grid.at<cv::Vec3f>(n_y,n_x)[0];
 
@@ -192,6 +209,20 @@ void DbScan::runDbScan(cv::Mat grid){
 
 								// Add neighbor cell to neighbor queue
 								neighbor_queue.push(cv::Point(n_x,n_y));
+
+								// Check free space attachment
+								if(!c.has_adjacent_free_space){
+									// If no free space cell next to it continue
+									int fs_kernel = 1;
+									for(int k = -fs_kernel; k <= fs_kernel; ++k){
+										for(int l = -fs_kernel; l <= fs_kernel; ++l){
+											if(grid.at<cv::Vec3f>(n_y + k,n_x + l)[0] == -50){
+												c.has_adjacent_free_space = true;
+												break;
+											}
+										}
+									}
+								}
 
 							}
 							// If non aimed semantic has hit
@@ -232,7 +263,10 @@ void DbScan::runDbScan(cv::Mat grid){
 	number_of_clusters_ = clusters_.size();
 }
 
-void DbScan::getClusterDetails(const cv::Mat grid){
+void DbScan::filterClusters(const cv::Mat grid){
+
+	// Clear buffer
+	object_array_.list.clear();
 
 	// Loop through clusters
 	for(int i = 0; i < clusters_.size(); i++){
@@ -292,28 +326,26 @@ void DbScan::getClusterDetails(const cv::Mat grid){
 		// Determine if cluster can be a new track
 		// Car
 		if(c.semantic.id == 13){
-			c.is_track = hasShapeOfCar(c);
+			if(updateCar(c)){
+				if(spawnCar(c)){
+					c.is_new_track = true;
+				}
+				addObject(c);
+			}
 		}
 		// Pedestrian
 		else if(c.semantic.id == 11){
-			c.is_track = hasShapeOfPed(c);
-		}
-		else{
-			c.is_track = false;
+			if(updatePed(c)){
+				if(spawnPed(c)){
+					c.is_new_track = true;
+				}
+				addObject(c);
+			}
 		}
 	}
 }
 
-void DbScan::createObjectList(){
-
-	// Clear buffer
-	object_array_.list.clear();
-
-	// Loop through clusters to obtain object information
-	for(int i = 0; i < number_of_clusters_; ++i){
-		if(clusters_[i].is_track)
-			addObject(clusters_[i]);
-	}
+void DbScan::fillObjectList(){
 
 	// Transform objects in camera and world frame
 	try{
@@ -361,38 +393,74 @@ void DbScan::addObject(const Cluster & c){
 	object.r = c.color[0];
 	object.g = c.color[1];
 	object.b = c.color[2];
+	if(object.is_new_track){
+		object.a = 1.0f;
+	}
+	else{
+		object.a = 0.5f;
+	}
 
 	// Tracking
-	object.is_track = c.is_track;
+	object.is_new_track = c.is_new_track;
 
 	// Push back object to list
 	object_array_.list.push_back(object);
 }
 
-bool DbScan::hasShapeOfPed(const Cluster & c){
-	return (c.geometric.width > params_.ped_side_min ||
-		c.geometric.length > params_.ped_side_min)
+bool DbScan::spawnPed(const Cluster & c){
+	return (c.geometric.width > params_.ped_spawn.side_min ||
+		c.geometric.length > params_.ped_spawn.side_min)
 		&&
-		(c.geometric.width < params_.ped_side_max &&
-		c.geometric.length < params_.ped_side_max)
+		(c.geometric.width < params_.ped_spawn.side_max &&
+		c.geometric.length < params_.ped_spawn.side_max)
 		&&
-		(c.geometric.height > params_.ped_height_min && 
-		c.geometric.height < params_.ped_height_max)
+		(c.geometric.height > params_.ped_spawn.height_min && 
+		c.geometric.height < params_.ped_spawn.height_max)
 		&&
-		(c.semantic.confidence > params_.ped_semantic_min);
+		(c.semantic.confidence > params_.ped_spawn.semantic_min)
+		&&
+		c.has_adjacent_free_space;
 }
 
-bool DbScan::hasShapeOfCar(const Cluster & c){
-	return (c.geometric.width > params_.car_side_min ||
-		c.geometric.length > params_.car_side_min)
+bool DbScan::spawnCar(const Cluster & c){
+	return (c.geometric.width > params_.car_spawn.side_min ||
+		c.geometric.length > params_.car_spawn.side_min)
 		&&
-		(c.geometric.width < params_.car_side_max &&
-		c.geometric.length < params_.car_side_max)
+		(c.geometric.width < params_.car_spawn.side_max &&
+		c.geometric.length < params_.car_spawn.side_max)
 		&&
-		(c.geometric.height > params_.car_height_min && 
-		c.geometric.height < params_.car_height_max)
+		(c.geometric.height > params_.car_spawn.height_min && 
+		c.geometric.height < params_.car_spawn.height_max)
 		&&
-		(c.semantic.confidence > params_.car_semantic_min);
+		(c.semantic.confidence > params_.car_spawn.semantic_min)
+		&&
+		c.has_adjacent_free_space;
+}
+
+bool DbScan::updatePed(const Cluster & c){
+	return (c.geometric.width > params_.ped_update.side_min ||
+		c.geometric.length > params_.ped_update.side_min)
+		&&
+		(c.geometric.width < params_.ped_update.side_max &&
+		c.geometric.length < params_.ped_update.side_max)
+		&&
+		(c.geometric.height > params_.ped_update.height_min && 
+		c.geometric.height < params_.ped_update.height_max)
+		&&
+		(c.semantic.confidence > params_.ped_update.semantic_min);
+}
+
+bool DbScan::updateCar(const Cluster & c){
+	return (c.geometric.width > params_.car_update.side_min ||
+		c.geometric.length > params_.car_update.side_min)
+		&&
+		(c.geometric.width < params_.car_update.side_max &&
+		c.geometric.length < params_.car_update.side_max)
+		&&
+		(c.geometric.height > params_.car_update.height_min && 
+		c.geometric.height < params_.car_update.height_max)
+		&&
+		(c.semantic.confidence > params_.car_update.semantic_min);
 }
 
 bool DbScan::isValidSemantic(const int semantic_class){
@@ -407,14 +475,25 @@ bool DbScan::isKittiValidSemantic(const int semantic_class){
 
 void DbScan::printCluster(const Cluster & c){
 
-	ROS_INFO("Cluster [%d] is [%s] with to [%f,%d,%d],"
+	ROS_INFO("Cluster %d Label %s Freespace %d New Track %d with to [%f,%d,%d],"
 		" pos[x,y,z] [%f,%f,%f]"
 		" form[w,l,h,o] [%f,%f,%f,%f]",
-		c.id, c.semantic.name.c_str(), c.semantic.confidence,
-		c.geometric.num_cells, c.semantic.diff_counter,
+		c.id, c.semantic.name.c_str(), c.has_adjacent_free_space, c.is_new_track ,
+		c.semantic.confidence, c.geometric.num_cells, c.semantic.diff_counter,
 		c.geometric.x, c.geometric.y, c.geometric.z,
 		c.geometric.width, c.geometric.length,
 		c.geometric.height, c.geometric.orientation);
+}
+
+void DbScan::printObject(const Object & o){
+
+	ROS_INFO("Object %d Label %s New Track %d with to [%f],"
+		" pos[x,y,z] [%f,%f,%f]"
+		" form[w,l,h,o] [%f,%f,%f,%f]",
+		o.id, o.semantic_name.c_str(), o.is_new_track ,o.semantic_confidence,
+		o.velo_pose.point.x, o.velo_pose.point.y, o.velo_pose.point.z,
+		o.width, o.length,
+		o.height, o.orientation);
 }
 
 } // namespace detection

@@ -136,8 +136,8 @@ void Visualization::showFirstPersonImage(
 		// Grab object
 		const Object & o = objects->list[i];
 
-		if(!o.is_track)
-			continue;
+		//if(!o.is_new_track)
+			//continue;
 		
 		MatrixXf image_points = tools_.getImage2DBoundingBox(o);
 
@@ -295,7 +295,7 @@ void Visualization::updateBoundingBox(VizObject & viz_obj, const int i, const Ob
 	viz_obj.bb.scale.y = obj.width;
 	viz_obj.bb.scale.z = obj.height;
 
-	viz_obj.bb.color.a = 0.6;
+	viz_obj.bb.color.a = obj.a;
 	viz_obj.bb.color.r = float(obj.r)/255;
 	viz_obj.bb.color.g = float(obj.g)/255;
 	viz_obj.bb.color.b = float(obj.b)/255;
@@ -324,7 +324,7 @@ void Visualization::updateText(VizObject & viz_obj, const int i, const Object & 
 	viz_obj.txt.scale.y = 2.0;
 	viz_obj.txt.scale.z = 2.0;
 
-	viz_obj.txt.color.a = 1.0;
+	viz_obj.txt.color.a = obj.a;
 	viz_obj.txt.color.r = float(obj.r)/255;
 	viz_obj.txt.color.g = float(obj.g)/255;
 	viz_obj.txt.color.b = float(obj.b)/255;
@@ -363,7 +363,7 @@ void Visualization::updateArrow(VizObject & viz_obj, const int i, const Object &
 		viz_obj.arr.scale.z = 0.5;
 	}
 
-	viz_obj.arr.color.a = 0.7;
+	viz_obj.arr.color.a = obj.a;
 	viz_obj.arr.color.r = float(obj.r)/255;
 	viz_obj.arr.color.g = float(obj.g)/255;
 	viz_obj.arr.color.b = float(obj.b)/255;

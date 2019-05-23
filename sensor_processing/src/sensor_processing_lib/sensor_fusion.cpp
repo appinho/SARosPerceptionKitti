@@ -402,7 +402,7 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 			}
 			else{
 
-				// Calculate cell height
+				// Calculate cell height 
 				cell.height = polar_grid_[s][b].z_max - cell.ground;
 
 				// If cell height big enough fill cell as occupied

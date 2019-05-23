@@ -571,7 +571,7 @@ void UnscentedKF::TrackManagement(const ObjectArrayConstPtr & detected_objects){
 void UnscentedKF::initTrack(const Object & obj){
 
 	// Only if object can be a track
-	if(! obj.is_track)
+	if(! obj.is_new_track)
 		return;
 
 	// Create new track
@@ -610,6 +610,7 @@ void UnscentedKF::initTrack(const Object & obj){
 	tr.r = rng_.uniform(0, 255);
 	tr.g = rng_.uniform(0, 255);
 	tr.b = rng_.uniform(0, 255);
+	tr.prob_existence = 1.0f;
 	
 	// Push back to track list
 	tracks_.push_back(tr);
@@ -659,7 +660,7 @@ void UnscentedKF::publishTracks(const std_msgs::Header & header){
 		track_msg.r = track.r;
 		track_msg.g = track.g;
 		track_msg.b = track.b;
-		track_msg.is_track = true;
+		track_msg.a = track.prob_existence;
 
 		// Push back track message
 		track_list.list.push_back(track_msg);

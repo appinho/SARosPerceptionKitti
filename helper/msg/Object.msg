@@ -19,5 +19,6 @@ uint32 semantic_id
 uint32 r
 uint32 g
 uint32 b
+float32 a
 
-bool is_track
+bool is_new_track
