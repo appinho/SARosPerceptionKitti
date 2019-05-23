@@ -77,10 +77,10 @@ cd ~/catkin_ws/src/SAROSPerceptionKitti/benchmark/python
 python evaluate_tracking.py
 ```
 
-| Class        |  MOTP   |  MODP   |
-| ------------ |:-------:|:-------:|
-| Car          | 0.769004| 0.929824|
-| Pedestrian   | 0.572440| 0.902581|
+| Class        |  MOTA   |  MOTP   |  MOTAL  |  MODA   |  MODP   |
+| ------------ |:-------:|:-------:|:-------:|:-------:|:-------:|
+| Car          | 0.209790| 0.720035| 0.209790| 0.209790| 0.890141|
+| Pedestrian   | 0.234375| 0.530340| 0.234375| 0.234375| 0.910824|
 
 ## Contact
 
