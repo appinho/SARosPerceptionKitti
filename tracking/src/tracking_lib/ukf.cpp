@@ -107,7 +107,7 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		"/tracking/objects", 2);
 
 	// Random color for track
-	rng_(2345);
+	rng_(2145);
 		
 	// Init counter for publishing
 	time_frame_ = 0;
@@ -514,13 +514,13 @@ void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 				detected_objects->list[ da_tracks[i] ].length;
 			track.geo.width = 
 				detected_objects->list[ da_tracks[i] ].width;
-			
+			setTrackHeight(track, detected_objects->list[ da_tracks[i] ].height);
 
 			// Update orientation and ground level
 			track.geo.orientation = 
 				detected_objects->list[ da_tracks[i] ].orientation;
 			track.sta.z = 
-				detected_objects->list[ da_tracks[i] ].world_pose.point.z;
+				detected_objects->list[ da_tracks[i] ].world_pose.point.z - 0.3;
 
 			/*
 			// Print Update
@@ -574,48 +574,56 @@ void UnscentedKF::initTrack(const Object & obj){
 		return;
 
 	// Create new track
-	Track tr = Track();
+	Track track = Track();
 
 	// Add id and increment
-	tr.id = track_id_counter_;
+	track.id = track_id_counter_;
 	track_id_counter_++;
 
 	// Add state information
-	tr.sta.x = VectorXd::Zero(params_.tra_dim_x);
-	tr.sta.x[0] = obj.world_pose.point.x;
-	tr.sta.x[1] = obj.world_pose.point.y;
-	tr.sta.z = obj.world_pose.point.z;
-	tr.sta.P = MatrixXd::Zero(params_.tra_dim_x, params_.tra_dim_x);
-	tr.sta.P << params_.p_init_x,  0,  0,  0,  0,
+	track.sta.x = VectorXd::Zero(params_.tra_dim_x);
+	track.sta.x[0] = obj.world_pose.point.x;
+	track.sta.x[1] = obj.world_pose.point.y;
+	track.sta.z = obj.world_pose.point.z - 0.3;
+	track.sta.P = MatrixXd::Zero(params_.tra_dim_x, params_.tra_dim_x);
+	track.sta.P << params_.p_init_x,  0,  0,  0,  0,
 				0,  params_.p_init_y,  0,  0,  0,
 				0,  0,	params_.p_init_v,  0,  0,
 				0,  0,  0,params_.p_init_yaw,  0,
 				0,  0,  0,  0,  params_.p_init_yaw_rate;
-	tr.sta.Xsig_pred = MatrixXd::Zero(params_.tra_dim_x, 
+	track.sta.Xsig_pred = MatrixXd::Zero(params_.tra_dim_x, 
 		2 * params_.tra_dim_x_aug + 1);
 
-	// Add geometric information
-	tr.geo.width = obj.width;
-	tr.geo.length = obj.length;
-	if(obj.semantic_id == 13)
-		tr.geo.height = 1.4f;
-	else
-		tr.geo.height = obj.height;
-	tr.geo.orientation = obj.orientation;
-
 	// Add semantic information
-	tr.sem.name = obj.semantic_name;
-	tr.sem.id = obj.semantic_id;
-	tr.sem.confidence = obj.semantic_confidence;
+	track.sem.name = obj.semantic_name;
+	track.sem.id = obj.semantic_id;
+	track.sem.confidence = obj.semantic_confidence;
+
+	// Add geometric information
+	track.geo.width = obj.width;
+	track.geo.length = obj.length;
+	setTrackHeight(track, obj.height);
+	track.geo.orientation = obj.orientation;
 
 	// Add unique color
-	tr.r = rng_.uniform(0, 255);
-	tr.g = rng_.uniform(0, 255);
-	tr.b = rng_.uniform(0, 255);
-	tr.prob_existence = 0.6f;
+	track.r = rng_.uniform(0, 255);
+	track.g = rng_.uniform(0, 255);
+	track.b = rng_.uniform(0, 255);
+	track.prob_existence = 0.6f;
 	
 	// Push back to track list
-	tracks_.push_back(tr);
+	tracks_.push_back(track);
+}
+
+void UnscentedKF::setTrackHeight(Track & track, const float h){
+	// Exploit semantic id to set a minimum height for pedestrians/cars
+
+	if (track.sem.id == 11)
+		track.geo.height = std::max(1.7f, h);
+	else if(track.sem.id == 13)
+		track.geo.height = std::max(1.3f, h);
+	else
+		ROS_WARN("Unusual semantic label %d", track.sem.id);
 }
 
 void UnscentedKF::publishTracks(const std_msgs::Header & header){
@@ -676,18 +684,18 @@ void UnscentedKF::publishTracks(const std_msgs::Header & header){
 	list_tracked_objects_pub_.publish(track_list);
 }
 
-void UnscentedKF::printTrack(const Track & tr){
+void UnscentedKF::printTrack(const Track & track){
 
 	ROS_INFO("Track [%d] x=[%f,%f,%f,%f,%f], z=[%f]"
 		" P=[%f,%f,%f,%f,%f] is [%s, %f] A[%d, %d] [w,l,h,o] [%f,%f,%f,%f]", 
-		tr.id,
-		tr.sta.x(0), tr.sta.x(1), tr.sta.x(2), tr.sta.x(3), tr.sta.x(4),
-		tr.sta.z,
-		tr.sta.P(0), tr.sta.P(6), tr.sta.P(12), tr.sta.P(18), tr.sta.P(24),
-		tr.sem.name.c_str(), tr.sem.confidence,
-		tr.hist.good_age, tr.hist.bad_age,
-		tr.geo.width, tr.geo.length,
-		tr.geo.height, tr.geo.orientation
+		track.id,
+		track.sta.x(0), track.sta.x(1), track.sta.x(2), track.sta.x(3), track.sta.x(4),
+		track.sta.z,
+		track.sta.P(0), track.sta.P(6), track.sta.P(12), track.sta.P(18), track.sta.P(24),
+		track.sem.name.c_str(), track.sem.confidence,
+		track.hist.good_age, track.hist.bad_age,
+		track.geo.width, track.geo.length,
+		track.geo.height, track.geo.orientation
 	);
 }
 

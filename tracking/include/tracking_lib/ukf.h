@@ -160,6 +160,10 @@ private:
 	float CalculateBoxMismatch(const Track & track, const Object & object);
 	float CalculateEuclideanAndBoxOffset(const Track & track, 
 		const Object & object);
+
+	// Others
+	void setTrackHeight(Track & track, const float h);
+
 };
 
 } // namespace tracking
