@@ -22,7 +22,7 @@ Sticking to this folder structure is highly recommended:
     ~                                        # Home directory
     ├── catkin_ws                            # Catkin workspace
     │   ├── src                              # Source folder
-    │       └── SAROSPerceptionKitti         # Repo
+    │       └── SARosPerceptionKitti         # Repo
     ├── kitti_data                           # Dataset
     │   ├── 0060                             # Demo scenario 0060
     │   │   ├── segmented_semantic_images    # Folder for preprocessed semantic segmented images
@@ -73,7 +73,7 @@ Without assigning any of the abovementioned parameters the demo scenario 0060 is
 
 ```
 roslaunch evaluation evaluation.launch home_dir:=/home/YOUR_USERNAME
-cd ~/catkin_ws/src/SAROSPerceptionKitti/benchmark/python
+cd ~/catkin_ws/src/SARosPerceptionKitti/benchmark/python
 python evaluate_tracking.py
 ```
 
