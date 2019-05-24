@@ -509,13 +509,12 @@ void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 				ROS_WARN("Track [%d] probably occluded because of dropping size"
 					" from [%f] to [%f]", track.id, tra_area, det_area);
 			}
-			// Else update the form of the track with measurement
-			else{
-				track.geo.length = 
-					detected_objects->list[ da_tracks[i] ].length;
-				track.geo.width = 
-					detected_objects->list[ da_tracks[i] ].width;
-			}
+			// Update the form of the track with measurement
+			track.geo.length = 
+				detected_objects->list[ da_tracks[i] ].length;
+			track.geo.width = 
+				detected_objects->list[ da_tracks[i] ].width;
+			
 
 			// Update orientation and ground level
 			track.geo.orientation = 
@@ -598,7 +597,10 @@ void UnscentedKF::initTrack(const Object & obj){
 	// Add geometric information
 	tr.geo.width = obj.width;
 	tr.geo.length = obj.length;
-	tr.geo.height = obj.height;
+	if(obj.semantic_id == 13)
+		tr.geo.height = 1.4f;
+	else
+		tr.geo.height = obj.height;
 	tr.geo.orientation = obj.orientation;
 
 	// Add semantic information
