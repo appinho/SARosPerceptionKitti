@@ -232,6 +232,7 @@ void DbScan::runDbScan(cv::Mat grid){
 								// Flag cell temporarily as visited
 								grid.at<cv::Vec3f>(n_y,n_x)[0] -= 20;
 								non_neighbor_list.push_back(cv::Point(n_x,n_y));
+								// TODO: Dont increment if it is road or sidewalk
 								c.semantic.diff_counter++;
 							}
 						}

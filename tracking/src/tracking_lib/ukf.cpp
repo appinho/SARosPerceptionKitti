@@ -107,7 +107,7 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		"/tracking/objects", 2);
 
 	// Random color for track
-	rng_(2145);
+	rng_(2);
 		
 	// Init counter for publishing
 	time_frame_ = 0;
@@ -304,25 +304,6 @@ void UnscentedKF::GlobalNearestNeighbor(
 		std::vector<float> distances;
 		std::vector<int> matches;
 
-		// Set data association parameters depending on if 
-		// the track is a car or a pedestrian
-		float gate;
-		float box_gate;
-
-		// Pedestrian
-		if(tracks_[i].sem.id == 11){
-			gate = params_.da_ped_dist_pos;
-			box_gate = params_.da_ped_dist_form;
-		}
-		// Car
-		else if(tracks_[i].sem.id == 13){
-			gate = params_.da_car_dist_pos;
-			box_gate = params_.da_car_dist_form;
-		}
-		else{
-			ROS_WARN("Wrong semantic for track [%d]", tracks_[i].id);
-		}
-
 		// Loop through detected objects
 		for(int j = 0; j < detected_objects->list.size(); ++j){
 
@@ -331,7 +312,7 @@ void UnscentedKF::GlobalNearestNeighbor(
 				float dist = CalculateDistance(tracks_[i], 
 					detected_objects->list[j]);
 
-				if(dist < gate){
+				if(dist < tracks_[i].sem.pos_gate){
 					distances.push_back(dist);
 					matches.push_back(j);
 				}
@@ -343,7 +324,7 @@ void UnscentedKF::GlobalNearestNeighbor(
 
 			float box_dist = CalculateEuclideanAndBoxOffset(tracks_[i], 
 				detected_objects->list[matches[0]]);
-			if(box_dist < box_gate){
+			if(box_dist < tracks_[i].sem.com_gate){
 				da_tracks[i] = matches[0];
 				da_objects[matches[0]] = i;
 			}
@@ -355,14 +336,13 @@ void UnscentedKF::GlobalNearestNeighbor(
 			ROS_WARN("Multiple associations for track [%d]", tracks_[i].id);
 
 			// Calculate all box distances and find minimum
-			float min_box_dist = box_gate;
+			float min_box_dist = tracks_[i].sem.com_gate;
 			int min_box_index = -1;
 
 			for(int k = 0; k < matches.size(); ++k){
 
 				float box_dist = CalculateEuclideanAndBoxOffset(tracks_[i],
 					detected_objects->list[matches[k]]);
-
 				if(box_dist < min_box_dist){
 					min_box_index = k;
 					min_box_dist = box_dist;
@@ -389,22 +369,22 @@ float UnscentedKF::CalculateDistance(const Track & track,
 	const Object & object){
 
 	// Calculate euclidean distance in x,y,z coordinates of track and object
-	return abs(track.sta.x(0) - object.world_pose.point.x) + 
-		abs(track.sta.x(1) - object.world_pose.point.y) + 
-		abs(track.sta.z - object.world_pose.point.z);
+	return fabs(track.sta.x(0) - object.world_pose.point.x) +
+		fabs(track.sta.x(1) - object.world_pose.point.y) +
+		fabs(track.sta.z - object.world_pose.point.z);
 }
 
 float UnscentedKF::CalculateBoxMismatch(const Track & track,
 	const Object & object){
 
 	// Calculate mismatch of both tracked cube and detected cube
-	float box_wl_switched =  abs(track.geo.width - object.length) + 
-		abs(track.geo.length - object.width);
-	float box_wl_ordered = abs(track.geo.width - object.width) + 
-		abs(track.geo.length - object.length);
+	float box_wl_switched =  fabs(track.geo.width - object.length) +
+		fabs(track.geo.length - object.width);
+	float box_wl_ordered = fabs(track.geo.width - object.width) +
+		fabs(track.geo.length - object.length);
 	float box_mismatch = (box_wl_switched < box_wl_ordered) ? 
 		box_wl_switched : box_wl_ordered;
-	box_mismatch += abs(track.geo.height - object.height);
+	box_mismatch += fabs(track.geo.height - object.height);
 	return box_mismatch;
 }
 
@@ -509,18 +489,14 @@ void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 				ROS_WARN("Track [%d] probably occluded because of dropping size"
 					" from [%f] to [%f]", track.id, tra_area, det_area);
 			}
-			// Update the form of the track with measurement
-			track.geo.length = 
-				detected_objects->list[ da_tracks[i] ].length;
-			track.geo.width = 
-				detected_objects->list[ da_tracks[i] ].width;
-			setTrackHeight(track, detected_objects->list[ da_tracks[i] ].height);
 
-			// Update orientation and ground level
-			track.geo.orientation = 
-				detected_objects->list[ da_tracks[i] ].orientation;
+			// Update geometric info
+			setTrackShape(track, detected_objects->list[ da_tracks[i] ]);
+
+			// Update  ground level
+			// TODO: Lower Z
 			track.sta.z = 
-				detected_objects->list[ da_tracks[i] ].world_pose.point.z - 0.3;
+				detected_objects->list[ da_tracks[i] ].world_pose.point.z;
 
 			/*
 			// Print Update
@@ -554,6 +530,8 @@ void UnscentedKF::TrackManagement(const ObjectArrayConstPtr & detected_objects){
 		}
 	}
 
+	// TODO: Delete duplicated tracks
+
 	// Create new ones out of untracked new detected object hypothesis
 	// Initialize tracks
 	for(int i = 0; i < detected_objects->list.size(); ++i){
@@ -567,10 +545,29 @@ void UnscentedKF::TrackManagement(const ObjectArrayConstPtr & detected_objects){
 	}
 }
 
+bool UnscentedKF::is_too_close_to_a_track(const Object & obj){
+
+	// Check if other track exists in near surrounding
+	for(const auto & track: tracks_){
+		if(obj.semantic_id == track.sem.id){
+			if(CalculateDistance(track, obj) < track.sem.box_gate){
+				ROS_WARN("Not gonna init track because another one is close %f %f, %f %f",
+					track.sta.x(0), track.sta.x(1), obj.world_pose.point.x, obj.world_pose.point.y);
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 void UnscentedKF::initTrack(const Object & obj){
 
 	// Only if object can be a track
 	if(! obj.is_new_track)
+		return;
+
+	if(is_too_close_to_a_track(obj))
 		return;
 
 	// Create new track
@@ -584,7 +581,7 @@ void UnscentedKF::initTrack(const Object & obj){
 	track.sta.x = VectorXd::Zero(params_.tra_dim_x);
 	track.sta.x[0] = obj.world_pose.point.x;
 	track.sta.x[1] = obj.world_pose.point.y;
-	track.sta.z = obj.world_pose.point.z - 0.3;
+	track.sta.z = obj.world_pose.point.z;
 	track.sta.P = MatrixXd::Zero(params_.tra_dim_x, params_.tra_dim_x);
 	track.sta.P << params_.p_init_x,  0,  0,  0,  0,
 				0,  params_.p_init_y,  0,  0,  0,
@@ -597,13 +594,21 @@ void UnscentedKF::initTrack(const Object & obj){
 	// Add semantic information
 	track.sem.name = obj.semantic_name;
 	track.sem.id = obj.semantic_id;
+	// Pedestrian
+	if(obj.semantic_id == 11){
+		track.sem.pos_gate = params_.da_ped_dist_pos;
+		track.sem.box_gate = params_.da_ped_dist_form;
+	}
+	// Car
+	else if(obj.semantic_id == 13){
+		track.sem.pos_gate = params_.da_car_dist_pos;
+		track.sem.box_gate = params_.da_car_dist_form;
+	}
+	track.sem.com_gate = track.sem.box_gate + track.sem.pos_gate;
 	track.sem.confidence = obj.semantic_confidence;
 
 	// Add geometric information
-	track.geo.width = obj.width;
-	track.geo.length = obj.length;
-	setTrackHeight(track, obj.height);
-	track.geo.orientation = obj.orientation;
+	setTrackShape(track, obj);
 
 	// Add unique color
 	track.r = rng_.uniform(0, 255);
@@ -615,15 +620,24 @@ void UnscentedKF::initTrack(const Object & obj){
 	tracks_.push_back(track);
 }
 
-void UnscentedKF::setTrackHeight(Track & track, const float h){
-	// Exploit semantic id to set a minimum height for pedestrians/cars
+void UnscentedKF::setTrackShape(Track & track, const Object & obj){
 
-	if (track.sem.id == 11)
-		track.geo.height = std::max(1.7f, h);
-	else if(track.sem.id == 13)
-		track.geo.height = std::max(1.3f, h);
-	else
-		ROS_WARN("Unusual semantic label %d", track.sem.id);
+	// Update the form of the track with measurement
+	track.geo.length = obj.length;
+	track.geo.width = obj.width;
+	track.geo.orientation = obj.orientation;
+
+	// Find longer side of length and width and set it together with the height to a minimum
+	float & max_side = (track.geo.length < track.geo.width) ? 
+		track.geo.width : track.geo.length;
+	if(track.sem.id == 11){
+		track.geo.height = std::max(1.7f, obj.height);
+		max_side = std::max(max_side, 0.5f);
+	}
+	else if(track.sem.id == 13){
+		track.geo.height = std::max(1.3f, obj.height);
+		max_side = std::max(max_side, 1.75f);
+	}
 }
 
 void UnscentedKF::publishTracks(const std_msgs::Header & header){

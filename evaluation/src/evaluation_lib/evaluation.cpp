@@ -40,11 +40,16 @@ Evaluation::Evaluation(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	}
 
 	// Delete content in file if there is one
-	filename_ = data_path + "0012.txt";
+	std::ostringstream result_stream;
+	result_stream << std::setfill('0') << std::setw(4) << (scenario - 48);
+	std::string result_file_name = result_stream.str();
+	filename_ = data_path + result_file_name + ".txt";
 
 	tracking_results_.open(filename_.c_str(),
 		std::ofstream::out | std::ofstream::trunc);
-
+	if (!tracking_results_.is_open()){
+		ROS_WARN("Error opening file %s", filename_.c_str());
+	}
 	tracking_results_.close();
 	// Subscriber
 	list_tracked_objects_sub_ = 
@@ -102,9 +107,6 @@ void Evaluation::process(const ObjectArray& tracks){
 			}
 		}
 		tracking_results_.close();
-	}
-	else{
-		ROS_WARN("Error opening file");
 	}
 
 	// Print sensor fusion

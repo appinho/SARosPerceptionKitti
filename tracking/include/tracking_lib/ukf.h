@@ -70,6 +70,9 @@ struct Semantic{
 	int id;
 	std::string name;
 	float confidence;
+	float pos_gate;
+	float box_gate;
+	float com_gate;
 };
 
 struct State{
@@ -162,7 +165,8 @@ private:
 		const Object & object);
 
 	// Others
-	void setTrackHeight(Track & track, const float h);
+	void setTrackShape(Track & track, const Object & obj);
+	bool is_too_close_to_a_track(const Object & obj);
 
 };
 

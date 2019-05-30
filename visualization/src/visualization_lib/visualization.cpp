@@ -352,7 +352,7 @@ void Visualization::updateArrow(VizObject & viz_obj, const int i, const Object &
 	viz_obj.arr.pose.orientation.y = quat[1];
 	viz_obj.arr.pose.orientation.z = quat[0];
 
-	if(abs(obj.velocity) < 0.1){
+	if(fabs(obj.velocity) < 0.1){
 		viz_obj.arr.scale.x = 0.1;
 		viz_obj.arr.scale.y = 0.1;
 		viz_obj.arr.scale.z = 0.1;

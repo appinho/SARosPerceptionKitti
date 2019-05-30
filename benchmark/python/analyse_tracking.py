@@ -30,6 +30,10 @@ except:
 
 import mailpy
 
+# TODO: Store home path in file
+# TODO: Pass argument
+image_path = '/home/appinho/kitti_data/0059/images/'
+
 class tData:
     """
         Utility class to load data.
@@ -95,7 +99,7 @@ class trackingEvaluation(object):
         # get number of sequences and
         # get number of frames per sequence from test mapping
         # (created while extracting the benchmark)
-        filename_test_mapping = "./data/tracking/evaluate_0060.seqmap"
+        filename_test_mapping = "./data/tracking/evaluate_0059.seqmap"
         self.n_frames         = []
         self.sequence_name    = []
         with open(filename_test_mapping, "r") as fh:
@@ -469,9 +473,18 @@ class trackingEvaluation(object):
                                    # the reason is that some true positives might be ignored
                                    # later such that the corrsponding overlaps can
                                    # be subtracted from tmpc for MODP computation
-                
+
+                frame_10 = str(frame).rjust(10, '0')
+                img_path = image_path + frame_10 + '.png'
+
+                #TODO: Histogram of IoUs
                 # mapping for tracker ids and ground truth ids
                 for row,col in association_matrix:
+
+                    # Draw GT
+                    img = cv2.imread(img_path,1)
+                    self.drawRect(img, g[row], (0,255,0))
+
                     # apply gating on boxoverlap
                     c = cost_matrix[row][col]
                     if c<=self.min_overlap:
@@ -485,15 +498,12 @@ class trackingEvaluation(object):
                         tmpcs[row]      = 1-c
                         seq_trajectories[g[row].track_id][-1] = t[col].track_id
 
-                        frame_10 = str(frame).rjust(10, '0')
-                        img_path = '/home/simonappel/kitti_data/0060/segmented_semantic_images/' + frame_10 + '.png'
-                        img = cv2.imread(img_path,1)
-                        self.drawRect(img, g[row], (0,255,0))
+                        # Draw TP
                         self.drawRect(img, t[col], (255,0,0))
-                        cv2.putText(img,'HIT IoU  ' + str(1-c) + " " + str(self.tp) ,(10,50),
-                            cv2.FONT_HERSHEY_SIMPLEX, 2,(255,255,255),2,cv2.LINE_AA)
-                        cv2.imshow('HIT', img)
-                        cv2.waitKey(0)
+                        cv2.putText(img,'TP IoU  ' + str(1-c) + " #" + str(self.tp) ,(10,50),
+                            cv2.FONT_HERSHEY_SIMPLEX, 2,(0,255,0),2,cv2.LINE_AA)
+                        cv2.imshow('TP', img)
+
                         # true positives are only valid associations
                         self.tp += 1
                         tmptp   += 1
@@ -501,15 +511,14 @@ class trackingEvaluation(object):
                         g[row].tracker = -1
                         self.fn       += 1
                         tmpfn         += 1
-                        frame_10 = str(frame).rjust(10, '0')
-                        img_path = '/home/simonappel/kitti_data/0060/segmented_semantic_images/' + frame_10 + '.png'
-                        img = cv2.imread(img_path,1)
-                        self.drawRect(img, g[row], (0,255,0))
+
+                        # Draw FN
                         self.drawRect(img, t[col], (0,0,255))
-                        cv2.putText(img,'MISS IoU  ' + str(1-c) + " " + str(self.fn) ,(10,50),
+                        cv2.putText(img,'FN IoU  ' + str(1-c) + " #" + str(self.fn) ,(10,50),
                             cv2.FONT_HERSHEY_SIMPLEX, 2,(0,0,255),2,cv2.LINE_AA)
-                        cv2.imshow('MISS', img)
-                        cv2.waitKey(0)
+                        cv2.imshow('FN', img)
+
+                    cv2.waitKey(0)
                 
                 # associate tracker and DontCare areas
                 # ignore tracker in neighboring classes

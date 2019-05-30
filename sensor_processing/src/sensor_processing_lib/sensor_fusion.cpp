@@ -226,7 +226,7 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 		VPoint & point = pcl_in_->at(i);
 
 		// Determine angle of lidar point and check
-		float angle = std::abs( std::atan2(point.y, point.x) );
+		float angle = std::fabs( std::atan2(point.y, point.x) );
 		if(angle < params_.lidar_opening_angle){
 
 			// Determine range of lidar point and check
