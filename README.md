@@ -57,6 +57,7 @@ rm 0060.zip
 4) Launch one of the following ROS nodes to perform the pipeline step-by-step:  
 
 ```
+source devel/setup.bash
 roslaunch sensor_processing sensor_processing.launch home_dir:=/home/YOUR_USERNAME
 roslaunch detection detection.launch home_dir:=/home/YOUR_USERNAME
 roslaunch tracking tracking.launch home_dir:=/home/YOUR_USERNAME
