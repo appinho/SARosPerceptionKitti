@@ -54,7 +54,9 @@ unzip 0060.zip
 rm 0060.zip
 ```
 
-4) Launch one of the following ROS nodes to perform the pipeline step-by-step:  
+## Usage 
+
+1) Launch one of the following ROS nodes to perform and visualize the pipeline (Sensor Processing -> Object Detection -> Object Tracking) step-by-step:  
 
 ```
 source devel/setup.bash
@@ -70,13 +72,15 @@ roslaunch tracking tracking.launch home_dir:=/home/YOUR_USERNAME
 
 Without assigning any of the abovementioned parameters the demo scenario 0060 is replayed at 20% of its speed with a 3 second delay so RViz has enough time to boot up.  
 
-5) Evaluate the demo scenario 0060:
+2) Write the results to file and evaluate them:
 
 ```
 roslaunch evaluation evaluation.launch home_dir:=/home/YOUR_USERNAME
 cd ~/catkin_ws/src/SARosPerceptionKitti/benchmark/python
 python evaluate_tracking.py
 ```
+
+## Results for demo scenario 0060
 
 | Class        |  MOTA   |  MOTP   |  MOTAL  |  MODA   |  MODP   |
 | ------------ |:-------:|:-------:|:-------:|:-------:|:-------:|
