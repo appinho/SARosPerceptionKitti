@@ -148,11 +148,11 @@ target_link_libraries(
 
 # Detection nodelet
 add_library( detection_nodelet src/detection_nodelet.cpp )
-target_link_libraries( detection_nodelet ${PROJECT_NAME}_lib helper)
+target_link_libraries( detection_nodelet ${PROJECT_NAME}_lib)
 
 # Detection node
 add_executable(detection src/detection_node.cpp)
-target_link_libraries( detection ${PROJECT_NAME}_lib helper)
+target_link_libraries( detection ${PROJECT_NAME}_lib)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -185,8 +185,7 @@ target_link_libraries( detection ${PROJECT_NAME}_lib helper)
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
+## Mark cpp header files for installation # install(DIRECTORY include/${PROJECT_NAME}/
 #   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 #   FILES_MATCHING PATTERN "*.h"
 #   PATTERN ".svn" EXCLUDE
