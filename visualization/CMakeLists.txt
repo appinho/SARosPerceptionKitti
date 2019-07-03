@@ -149,11 +149,11 @@ target_link_libraries(
 
 # visualization nodelet
 add_library( visualization_nodelet src/visualization_nodelet.cpp )
-target_link_libraries( visualization_nodelet ${PROJECT_NAME}_lib helper)
+target_link_libraries( visualization_nodelet ${PROJECT_NAME}_lib)
 
 # visualization node
 add_executable(visualization src/visualization_node.cpp)
-target_link_libraries( visualization ${PROJECT_NAME}_lib helper)
+target_link_libraries( visualization ${PROJECT_NAME}_lib)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

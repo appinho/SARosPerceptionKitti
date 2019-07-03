@@ -148,11 +148,11 @@ target_link_libraries(
 
 # tracking nodelet
 add_library( tracking_nodelet src/tracking_nodelet.cpp )
-target_link_libraries( tracking_nodelet ${PROJECT_NAME}_lib helper)
+target_link_libraries( tracking_nodelet ${PROJECT_NAME}_lib)
 
 # tracking node
 add_executable(tracking src/tracking_node.cpp)
-target_link_libraries( tracking ${PROJECT_NAME}_lib helper)
+target_link_libraries( tracking ${PROJECT_NAME}_lib)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

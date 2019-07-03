@@ -148,11 +148,11 @@ target_link_libraries(
 
 # evaluation nodelet
 add_library( evaluation_nodelet src/evaluation_nodelet.cpp )
-target_link_libraries( evaluation_nodelet ${PROJECT_NAME}_lib helper)
+target_link_libraries( evaluation_nodelet ${PROJECT_NAME}_lib)
 
 # evaluation node
 add_executable(evaluation src/evaluation_node.cpp)
-target_link_libraries( evaluation ${PROJECT_NAME}_lib helper)
+target_link_libraries( evaluation ${PROJECT_NAME}_lib)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
