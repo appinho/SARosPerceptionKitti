@@ -107,7 +107,7 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		"/tracking/objects", 2);
 
 	// Random color for track
-	rng_(2145);
+	rng_.state = 1234;
 		
 	// Init counter for publishing
 	time_frame_ = 0;
@@ -609,7 +609,7 @@ void UnscentedKF::initTrack(const Object & obj){
 	track.r = rng_.uniform(0, 255);
 	track.g = rng_.uniform(0, 255);
 	track.b = rng_.uniform(0, 255);
-	track.prob_existence = 0.6f;
+	track.prob_existence = 1.0f;
 	
 	// Push back to track list
 	tracks_.push_back(track);
