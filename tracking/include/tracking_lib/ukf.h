@@ -42,7 +42,8 @@ struct Parameter{
 	int tra_aging_bad;
 
 	float tra_occ_factor;
-
+	float tra_min_dist_between_tracks;
+	
 	float p_init_x;
 	float p_init_y;
 	float p_init_v;
@@ -163,10 +164,13 @@ private:
 	float CalculateBoxMismatch(const Track & track, const Object & object);
 	float CalculateEuclideanAndBoxOffset(const Track & track, 
 		const Object & object);
+	float CalculateEuclideanDistanceBetweenTracks(const Track & t1, const Track & t2);
 
 	// Others
 	void setTrackShape(Track & track, const Object & obj);
 	bool is_too_close_to_a_track(const Object & obj);
+	void setTrackHeight(Track & track, const float h);
+	bool compareGoodAge(Track t1, Track t2);
 
 };
 

@@ -47,6 +47,8 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		params_.tra_aging_bad);
 	private_nh_.param("tracking/occlusion_factor", params_.tra_occ_factor, 
 		params_.tra_occ_factor);
+	private_nh_.param("tracking/min_dist_between_tracks", params_.tra_min_dist_between_tracks, 
+		params_.tra_min_dist_between_tracks);
 	private_nh_.param("track/P_init/x", params_.p_init_x,
 		params_.p_init_x);
 	private_nh_.param("track/P_init/y", params_.p_init_y,
@@ -73,6 +75,7 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	ROS_INFO_STREAM("tra_lambda " << params_.tra_lambda);
 	ROS_INFO_STREAM("tra_aging_bad " << params_.tra_aging_bad);
 	ROS_INFO_STREAM("tra_occ_factor " << params_.tra_occ_factor);
+	ROS_INFO_STREAM("tra_min_dist_between_tracks " << params_.tra_min_dist_between_tracks);
 	ROS_INFO_STREAM("p_init_x " << params_.p_init_x);
 	ROS_INFO_STREAM("p_init_y " << params_.p_init_y);
 	ROS_INFO_STREAM("p_init_v " << params_.p_init_v);
@@ -107,7 +110,7 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		"/tracking/objects", 2);
 
 	// Random color for track
-	rng_(2);
+	rng_.state = 1234;
 		
 	// Init counter for publishing
 	time_frame_ = 0;
@@ -374,6 +377,17 @@ float UnscentedKF::CalculateDistance(const Track & track,
 		fabs(track.sta.z - object.world_pose.point.z);
 }
 
+float UnscentedKF::CalculateEuclideanDistanceBetweenTracks(const Track & t1,
+	const Track & t2){
+
+	// Calculate euclidean distance in x,y,z coordinates of two tracks
+	return sqrt(
+		pow(t1.sta.x(0) - t2.sta.x(0),2) + 
+		pow(t1.sta.x(1) - t2.sta.x(1),2) + 
+		pow(t1.sta.z - t2.sta.z,2)
+		);
+}
+
 float UnscentedKF::CalculateBoxMismatch(const Track & track,
 	const Object & object){
 
@@ -395,6 +409,10 @@ float UnscentedKF::CalculateEuclideanAndBoxOffset(const Track & track,
 	return CalculateDistance(track, object) + 
 		CalculateBoxMismatch(track, object);
 }
+
+bool UnscentedKF::compareGoodAge(Track t1, Track t2) { 
+    return (t1.hist.good_age < t2.hist.good_age); 
+} 
 
 void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 
@@ -543,6 +561,25 @@ void UnscentedKF::TrackManagement(const ObjectArrayConstPtr & detected_objects){
 			initTrack(detected_objects->list[i]);
 		}
 	}
+
+	// Sort tracks upon age
+	sort(tracks_.begin(), tracks_.end(), [](Track  & t1, Track & t2)
+		{return (t1.hist.good_age > t2.hist.good_age);});
+
+	// Clear duplicated tracks
+	for(int i = tracks_.size() - 1; i >= 0; --i){
+		for(int j = i - 1; j >= 0  ; --j){
+			float dist = CalculateEuclideanDistanceBetweenTracks(tracks_[i], tracks_[j]);
+			// ROS_INFO("DIST T [%d] and T [%d] = %f ", tracks_[i].id, tracks_[j].id, dist);
+			if(dist < params_.tra_min_dist_between_tracks){
+				ROS_WARN("TOO CLOSE: T [%d] and T [%d] = %f ->  T [%d] deleted ", 
+					tracks_[i].id, tracks_[j].id, dist, tracks_[i].id);
+				std::swap(tracks_[i],tracks_.back());
+				tracks_.pop_back();
+			}
+		}
+	}
+
 }
 
 bool UnscentedKF::is_too_close_to_a_track(const Object & obj){
@@ -614,7 +651,7 @@ void UnscentedKF::initTrack(const Object & obj){
 	track.r = rng_.uniform(0, 255);
 	track.g = rng_.uniform(0, 255);
 	track.b = rng_.uniform(0, 255);
-	track.prob_existence = 0.6f;
+	track.prob_existence = 1.0f;
 	
 	// Push back to track list
 	tracks_.push_back(track);
@@ -700,14 +737,19 @@ void UnscentedKF::publishTracks(const std_msgs::Header & header){
 
 void UnscentedKF::printTrack(const Track & track){
 
-	ROS_INFO("Track [%d] x=[%f,%f,%f,%f,%f], z=[%f]"
-		" P=[%f,%f,%f,%f,%f] is [%s, %f] A[%d, %d] [w,l,h,o] [%f,%f,%f,%f]", 
+	ROS_INFO("Track ID[%d] "
+		"H[%d, %d] "
+		"x=[%f,%f,%f,%f,%f] "
+		"z=[%f] "
+		// P=[%f,%f,%f,%f,%f]
+		"S[%s, %f] "
+		"G[w,l,h,o] [%f,%f,%f,%f]", 
 		track.id,
+		track.hist.good_age, track.hist.bad_age,
 		track.sta.x(0), track.sta.x(1), track.sta.x(2), track.sta.x(3), track.sta.x(4),
 		track.sta.z,
-		track.sta.P(0), track.sta.P(6), track.sta.P(12), track.sta.P(18), track.sta.P(24),
+		// track.sta.P(0), track.sta.P(6), track.sta.P(12), track.sta.P(18), track.sta.P(24),
 		track.sem.name.c_str(), track.sem.confidence,
-		track.hist.good_age, track.hist.bad_age,
 		track.geo.width, track.geo.length,
 		track.geo.height, track.geo.orientation
 	);

@@ -162,6 +162,8 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		"/sensor/cloud/semantic_sparse", 2);
 	image_detection_grid_pub_ = nh_.advertise<Image>(
 		"/sensor/image/detection_grid", 2);
+	image_bev_semantic_grid_pub_ = nh_.advertise<Image>(
+		"/sensor/image/bev_semantic_grid", 2);
 
 	// Define Subscriber
 	sync_.registerCallback(boost::bind(&SensorFusion::process, this, _1, _2));
@@ -473,6 +475,9 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 	// Init detection image and fill free space grid cells
 	detection_grid_ = cv::Mat(params_.grid_height, params_.grid_width, CV_32FC3,
 		cv::Scalar(-100.0, 0.0, 0.0));
+	// Init detection image and fill free space grid cells
+	bev_semantic_grid_ = cv::Mat(params_.grid_height, params_.grid_width, CV_8UC3,
+		cv::Scalar(128, 128, 128));
 
 	// Go through cartesian grid
 	float x = params_.grid_range_max - params_.grid_cell_size / 2;
@@ -500,6 +505,7 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 			if(cell.idx == PolarCell::FREE){
 				occ_grid_->data[cell_index] = 0;
 				detection_grid_.at<cv::Vec3f>(j, i)[0] = -50.0;
+				bev_semantic_grid_.at<cv::Vec3b>(j, i) = cv::Vec3b(255, 255, 255);
 			}
 			// If cell is unknown
 			else if(cell.idx == PolarCell::UNKNOWN)
@@ -732,6 +738,10 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
 		detection_grid_.at<cv::Vec3f>(grid_y, grid_x)[0] = max_class;
 		detection_grid_.at<cv::Vec3f>(grid_y, grid_x)[1] = cell.ground;
 		detection_grid_.at<cv::Vec3f>(grid_y, grid_x)[2] = cell.ground + cell.height;
+		// BGR assignment
+		bev_semantic_grid_.at<cv::Vec3b>(grid_y, grid_x)[0] = tools_.SEMANTIC_CLASS_TO_COLOR(max_class,2);
+		bev_semantic_grid_.at<cv::Vec3b>(grid_y, grid_x)[1] = tools_.SEMANTIC_CLASS_TO_COLOR(max_class,1);
+		bev_semantic_grid_.at<cv::Vec3b>(grid_y, grid_x)[2] = tools_.SEMANTIC_CLASS_TO_COLOR(max_class,0);
 	}
 
 	// Publish sparse semantic cloud
@@ -745,6 +755,11 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
 	cv_detection_grid_image.encoding = image_encodings::TYPE_32FC3;
 	cv_detection_grid_image.header.stamp = image->header.stamp;
 	image_detection_grid_pub_.publish(cv_detection_grid_image.toImageMsg());
+	cv_bridge::CvImage cv_bev_semantic_grid_image;
+	cv_bev_semantic_grid_image.image = bev_semantic_grid_;
+	cv_bev_semantic_grid_image.encoding = image_encodings::TYPE_8UC3;
+	cv_bev_semantic_grid_image.header.stamp = image->header.stamp;
+	image_bev_semantic_grid_pub_.publish(cv_bev_semantic_grid_image.toImageMsg());
 }
 
 void SensorFusion::fromVeloCoordsToPolarCell(const float x, const float y,

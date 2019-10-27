@@ -127,6 +127,7 @@ private:
 
 	cv::Mat sem_image_;
 	cv::Mat detection_grid_;
+	cv::Mat bev_semantic_grid_;
 
 	VRGBPointCloud::Ptr pcl_semantic_;
 	VRGBPointCloud::Ptr pcl_sparse_semantic_;
@@ -149,6 +150,7 @@ private:
 	ros::Publisher cloud_semantic_pub_;
 	ros::Publisher cloud_semantic_sparse_pub_;
 	ros::Publisher image_detection_grid_pub_;
+	ros::Publisher image_bev_semantic_grid_pub_;
 
 	// Subscriber
 	Subscriber<PointCloud2> cloud_sub_;
