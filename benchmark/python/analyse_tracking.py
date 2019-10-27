@@ -29,6 +29,8 @@ except:
     from collections import OrderedDict # only included from python 2.7 on
 
 import mailpy
+import matplotlib.pyplot as plt
+import numpy as np
 
 # TODO: Store home path in file
 # TODO: Pass argument
@@ -422,6 +424,8 @@ class trackingEvaluation(object):
             n_gts = 0
             n_trs = 0
             
+            tp_ious = []
+            fn_ious = []
             for frame,f in enumerate(range(len(seq_gt))):
                 g = seq_gt[f]
                 dc = seq_dc[f]
@@ -477,18 +481,20 @@ class trackingEvaluation(object):
                 frame_10 = str(frame).rjust(10, '0')
                 img_path = image_path + frame_10 + '.png'
 
-                #TODO: Histogram of IoUs
+                
                 # mapping for tracker ids and ground truth ids
                 for row,col in association_matrix:
 
                     # Draw GT
-                    img = cv2.imread(img_path,1)
-                    self.drawRect(img, g[row], (0,255,0))
+                    #img = cv2.imread(img_path,1)
+                    #self.drawRect(img, g[row], (0,255,0))
 
                     # apply gating on boxoverlap
                     c = cost_matrix[row][col]
                     if c<=self.min_overlap:
                         #print("Frame %d HIT IoU %f" % (frame, 1-c))
+                        tp_ious.append(1-c)
+
                         g[row].tracker   = t[col].track_id
                         this_ids[1][row] = t[col].track_id
                         t[col].valid     = True
@@ -499,26 +505,27 @@ class trackingEvaluation(object):
                         seq_trajectories[g[row].track_id][-1] = t[col].track_id
 
                         # Draw TP
-                        self.drawRect(img, t[col], (255,0,0))
-                        cv2.putText(img,'TP IoU  ' + str(1-c) + " #" + str(self.tp) ,(10,50),
-                            cv2.FONT_HERSHEY_SIMPLEX, 2,(0,255,0),2,cv2.LINE_AA)
-                        cv2.imshow('TP', img)
+                        #self.drawRect(img, t[col], (255,0,0))
+                        #cv2.putText(img,'TP IoU  ' + str(1-c) + " #" + str(self.tp) ,(10,50),
+                        #    cv2.FONT_HERSHEY_SIMPLEX, 2,(0,255,0),2,cv2.LINE_AA)
+                        #cv2.imshow('TP', img)
 
                         # true positives are only valid associations
                         self.tp += 1
                         tmptp   += 1
                     else:
+                        fn_ious.append(1-c)
                         g[row].tracker = -1
                         self.fn       += 1
                         tmpfn         += 1
 
                         # Draw FN
-                        self.drawRect(img, t[col], (0,0,255))
-                        cv2.putText(img,'FN IoU  ' + str(1-c) + " #" + str(self.fn) ,(10,50),
-                            cv2.FONT_HERSHEY_SIMPLEX, 2,(0,0,255),2,cv2.LINE_AA)
-                        cv2.imshow('FN', img)
+                        #self.drawRect(img, t[col], (0,0,255))
+                        #cv2.putText(img,'FN IoU  ' + str(1-c) + " #" + str(self.fn) ,(10,50),
+                        #    cv2.FONT_HERSHEY_SIMPLEX, 2,(0,0,255),2,cv2.LINE_AA)
+                        #cv2.imshow('FN', img)
 
-                    cv2.waitKey(0)
+                    #cv2.waitKey(0)
                 
                 # associate tracker and DontCare areas
                 # ignore tracker in neighboring classes
@@ -705,6 +712,15 @@ class trackingEvaluation(object):
             self.n_igts.append(seqigt)
             self.n_itrs.append(seqitr)
         
+            bins = np.linspace(0, 1, 21)
+
+            fn_text = "FN #" + str(len(fn_ious))
+            tp_text = "TP #" + str(len(tp_ious)) 
+            plt.hist(fn_ious, bins, alpha=0.5, label=fn_text)
+            plt.hist(tp_ious, bins, alpha=0.5, label=tp_text)
+            plt.legend(loc='upper right')
+            plt.show()
+            
         # compute MT/PT/ML, fragments, idswitches for all groundtruth trajectories
         n_ignored_tr_total = 0
         for seq_idx, (seq_trajectories,seq_ignored) in enumerate(zip(self.gt_trajectories, self.ign_trajectories)):
