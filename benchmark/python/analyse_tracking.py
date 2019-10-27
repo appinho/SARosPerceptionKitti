@@ -19,6 +19,7 @@
            with appropriate subdir and file names (all subdir's need to be created)
 """
 
+import cv2
 import sys,os,copy,math
 from munkres import Munkres
 from collections import defaultdict
@@ -372,6 +373,13 @@ class trackingEvaluation(object):
             raise TypeError("Unkown type for criterion")
         return o
 
+    def drawRect(self, img, box, color):
+        x1 = (int(box.x1))
+        x2 = (int(box.x2))
+        y1 = (int(box.y1))
+        y2 = (int(box.y2))
+        cv2.rectangle(img,(x1,y1),(x2,y2),color,1)
+
     def compute3rdPartyMetrics(self):
         """
             Computes the metrics defined in
@@ -438,11 +446,8 @@ class trackingEvaluation(object):
                         # overlap == 1 is cost ==0
                         c = 1-self.boxoverlap(gg,tt)
                         # gating for boxoverlap
-                        if c<=self.min_overlap:
-                            cost_row.append(c)
-                        else:
-                            cost_row.append(max_cost) # = 1e9
-                            #print("Frame %d MISS %d %d IoU %f" % (frame, ind_g , ind_t, 1-c))
+                        cost_row.append(c)
+                        #print("Frame %d MISS %d %d IoU %f" % (frame, ind_g , ind_t, 1-c))
 
                     cost_matrix.append(cost_row)
                     # all ground truth trajectories are initially not associated
@@ -469,7 +474,7 @@ class trackingEvaluation(object):
                 for row,col in association_matrix:
                     # apply gating on boxoverlap
                     c = cost_matrix[row][col]
-                    if c < max_cost:
+                    if c<=self.min_overlap:
                         #print("Frame %d HIT IoU %f" % (frame, 1-c))
                         g[row].tracker   = t[col].track_id
                         this_ids[1][row] = t[col].track_id
@@ -480,6 +485,15 @@ class trackingEvaluation(object):
                         tmpcs[row]      = 1-c
                         seq_trajectories[g[row].track_id][-1] = t[col].track_id
 
+                        frame_10 = str(frame).rjust(10, '0')
+                        img_path = '/home/simonappel/kitti_data/0060/segmented_semantic_images/' + frame_10 + '.png'
+                        img = cv2.imread(img_path,1)
+                        self.drawRect(img, g[row], (0,255,0))
+                        self.drawRect(img, t[col], (255,0,0))
+                        cv2.putText(img,'HIT IoU  ' + str(1-c) + " " + str(self.tp) ,(10,50),
+                            cv2.FONT_HERSHEY_SIMPLEX, 2,(255,255,255),2,cv2.LINE_AA)
+                        cv2.imshow('HIT', img)
+                        cv2.waitKey(0)
                         # true positives are only valid associations
                         self.tp += 1
                         tmptp   += 1
@@ -487,6 +501,15 @@ class trackingEvaluation(object):
                         g[row].tracker = -1
                         self.fn       += 1
                         tmpfn         += 1
+                        frame_10 = str(frame).rjust(10, '0')
+                        img_path = '/home/simonappel/kitti_data/0060/segmented_semantic_images/' + frame_10 + '.png'
+                        img = cv2.imread(img_path,1)
+                        self.drawRect(img, g[row], (0,255,0))
+                        self.drawRect(img, t[col], (0,0,255))
+                        cv2.putText(img,'MISS IoU  ' + str(1-c) + " " + str(self.fn) ,(10,50),
+                            cv2.FONT_HERSHEY_SIMPLEX, 2,(0,0,255),2,cv2.LINE_AA)
+                        cv2.imshow('MISS', img)
+                        cv2.waitKey(0)
                 
                 # associate tracker and DontCare areas
                 # ignore tracker in neighboring classes

@@ -47,6 +47,8 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		params_.tra_aging_bad);
 	private_nh_.param("tracking/occlusion_factor", params_.tra_occ_factor, 
 		params_.tra_occ_factor);
+	private_nh_.param("tracking/min_dist_between_tracks", params_.tra_min_dist_between_tracks, 
+		params_.tra_min_dist_between_tracks);
 	private_nh_.param("track/P_init/x", params_.p_init_x,
 		params_.p_init_x);
 	private_nh_.param("track/P_init/y", params_.p_init_y,
@@ -73,6 +75,7 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	ROS_INFO_STREAM("tra_lambda " << params_.tra_lambda);
 	ROS_INFO_STREAM("tra_aging_bad " << params_.tra_aging_bad);
 	ROS_INFO_STREAM("tra_occ_factor " << params_.tra_occ_factor);
+	ROS_INFO_STREAM("tra_min_dist_between_tracks " << params_.tra_min_dist_between_tracks);
 	ROS_INFO_STREAM("p_init_x " << params_.p_init_x);
 	ROS_INFO_STREAM("p_init_y " << params_.p_init_y);
 	ROS_INFO_STREAM("p_init_v " << params_.p_init_v);
@@ -107,7 +110,7 @@ UnscentedKF::UnscentedKF(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		"/tracking/objects", 2);
 
 	// Random color for track
-	rng_(2345);
+	rng_.state = 1234;
 		
 	// Init counter for publishing
 	time_frame_ = 0;
@@ -394,6 +397,17 @@ float UnscentedKF::CalculateDistance(const Track & track,
 		abs(track.sta.z - object.world_pose.point.z);
 }
 
+float UnscentedKF::CalculateEuclideanDistanceBetweenTracks(const Track & t1,
+	const Track & t2){
+
+	// Calculate euclidean distance in x,y,z coordinates of two tracks
+	return sqrt(
+		pow(t1.sta.x(0) - t2.sta.x(0),2) + 
+		pow(t1.sta.x(1) - t2.sta.x(1),2) + 
+		pow(t1.sta.z - t2.sta.z,2)
+		);
+}
+
 float UnscentedKF::CalculateBoxMismatch(const Track & track,
 	const Object & object){
 
@@ -415,6 +429,10 @@ float UnscentedKF::CalculateEuclideanAndBoxOffset(const Track & track,
 	return CalculateDistance(track, object) + 
 		CalculateBoxMismatch(track, object);
 }
+
+bool UnscentedKF::compareGoodAge(Track t1, Track t2) { 
+    return (t1.hist.good_age < t2.hist.good_age); 
+} 
 
 void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 
@@ -514,7 +532,7 @@ void UnscentedKF::Update(const ObjectArrayConstPtr & detected_objects){
 				detected_objects->list[ da_tracks[i] ].length;
 			track.geo.width = 
 				detected_objects->list[ da_tracks[i] ].width;
-			
+			setTrackHeight(track, detected_objects->list[ da_tracks[i] ].height);
 
 			// Update orientation and ground level
 			track.geo.orientation = 
@@ -565,6 +583,25 @@ void UnscentedKF::TrackManagement(const ObjectArrayConstPtr & detected_objects){
 			initTrack(detected_objects->list[i]);
 		}
 	}
+
+	// Sort tracks upon age
+	sort(tracks_.begin(), tracks_.end(), [](Track  & t1, Track & t2)
+		{return (t1.hist.good_age > t2.hist.good_age);});
+
+	// Clear duplicated tracks
+	for(int i = tracks_.size() - 1; i >= 0; --i){
+		for(int j = i - 1; j >= 0  ; --j){
+			float dist = CalculateEuclideanDistanceBetweenTracks(tracks_[i], tracks_[j]);
+			// ROS_INFO("DIST T [%d] and T [%d] = %f ", tracks_[i].id, tracks_[j].id, dist);
+			if(dist < params_.tra_min_dist_between_tracks){
+				ROS_WARN("TOO CLOSE: T [%d] and T [%d] = %f ->  T [%d] deleted ", 
+					tracks_[i].id, tracks_[j].id, dist, tracks_[i].id);
+				std::swap(tracks_[i],tracks_.back());
+				tracks_.pop_back();
+			}
+		}
+	}
+
 }
 
 void UnscentedKF::initTrack(const Object & obj){
@@ -574,48 +611,56 @@ void UnscentedKF::initTrack(const Object & obj){
 		return;
 
 	// Create new track
-	Track tr = Track();
+	Track track = Track();
 
 	// Add id and increment
-	tr.id = track_id_counter_;
+	track.id = track_id_counter_;
 	track_id_counter_++;
 
 	// Add state information
-	tr.sta.x = VectorXd::Zero(params_.tra_dim_x);
-	tr.sta.x[0] = obj.world_pose.point.x;
-	tr.sta.x[1] = obj.world_pose.point.y;
-	tr.sta.z = obj.world_pose.point.z;
-	tr.sta.P = MatrixXd::Zero(params_.tra_dim_x, params_.tra_dim_x);
-	tr.sta.P << params_.p_init_x,  0,  0,  0,  0,
+	track.sta.x = VectorXd::Zero(params_.tra_dim_x);
+	track.sta.x[0] = obj.world_pose.point.x;
+	track.sta.x[1] = obj.world_pose.point.y;
+	track.sta.z = obj.world_pose.point.z - 0.3;
+	track.sta.P = MatrixXd::Zero(params_.tra_dim_x, params_.tra_dim_x);
+	track.sta.P << params_.p_init_x,  0,  0,  0,  0,
 				0,  params_.p_init_y,  0,  0,  0,
 				0,  0,	params_.p_init_v,  0,  0,
 				0,  0,  0,params_.p_init_yaw,  0,
 				0,  0,  0,  0,  params_.p_init_yaw_rate;
-	tr.sta.Xsig_pred = MatrixXd::Zero(params_.tra_dim_x, 
+	track.sta.Xsig_pred = MatrixXd::Zero(params_.tra_dim_x, 
 		2 * params_.tra_dim_x_aug + 1);
 
-	// Add geometric information
-	tr.geo.width = obj.width;
-	tr.geo.length = obj.length;
-	if(obj.semantic_id == 13)
-		tr.geo.height = 1.4f;
-	else
-		tr.geo.height = obj.height;
-	tr.geo.orientation = obj.orientation;
-
 	// Add semantic information
-	tr.sem.name = obj.semantic_name;
-	tr.sem.id = obj.semantic_id;
-	tr.sem.confidence = obj.semantic_confidence;
+	track.sem.name = obj.semantic_name;
+	track.sem.id = obj.semantic_id;
+	track.sem.confidence = obj.semantic_confidence;
+
+	// Add geometric information
+	track.geo.width = obj.width;
+	track.geo.length = obj.length;
+	setTrackHeight(track, obj.height);
+	track.geo.orientation = obj.orientation;
 
 	// Add unique color
-	tr.r = rng_.uniform(0, 255);
-	tr.g = rng_.uniform(0, 255);
-	tr.b = rng_.uniform(0, 255);
-	tr.prob_existence = 0.6f;
+	track.r = rng_.uniform(0, 255);
+	track.g = rng_.uniform(0, 255);
+	track.b = rng_.uniform(0, 255);
+	track.prob_existence = 1.0f;
 	
 	// Push back to track list
-	tracks_.push_back(tr);
+	tracks_.push_back(track);
+}
+
+void UnscentedKF::setTrackHeight(Track & track, const float h){
+	// Exploit semantic id to set a minimum height for pedestrians/cars
+
+	if (track.sem.id == 11)
+		track.geo.height = std::max(1.7f, h);
+	else if(track.sem.id == 13)
+		track.geo.height = std::max(1.3f, h);
+	else
+		ROS_WARN("Unusual semantic label %d", track.sem.id);
 }
 
 void UnscentedKF::publishTracks(const std_msgs::Header & header){
@@ -676,18 +721,23 @@ void UnscentedKF::publishTracks(const std_msgs::Header & header){
 	list_tracked_objects_pub_.publish(track_list);
 }
 
-void UnscentedKF::printTrack(const Track & tr){
+void UnscentedKF::printTrack(const Track & track){
 
-	ROS_INFO("Track [%d] x=[%f,%f,%f,%f,%f], z=[%f]"
-		" P=[%f,%f,%f,%f,%f] is [%s, %f] A[%d, %d] [w,l,h,o] [%f,%f,%f,%f]", 
-		tr.id,
-		tr.sta.x(0), tr.sta.x(1), tr.sta.x(2), tr.sta.x(3), tr.sta.x(4),
-		tr.sta.z,
-		tr.sta.P(0), tr.sta.P(6), tr.sta.P(12), tr.sta.P(18), tr.sta.P(24),
-		tr.sem.name.c_str(), tr.sem.confidence,
-		tr.hist.good_age, tr.hist.bad_age,
-		tr.geo.width, tr.geo.length,
-		tr.geo.height, tr.geo.orientation
+	ROS_INFO("Track ID[%d] "
+		"H[%d, %d] "
+		"x=[%f,%f,%f,%f,%f] "
+		"z=[%f] "
+		// P=[%f,%f,%f,%f,%f]
+		"S[%s, %f] "
+		"G[w,l,h,o] [%f,%f,%f,%f]", 
+		track.id,
+		track.hist.good_age, track.hist.bad_age,
+		track.sta.x(0), track.sta.x(1), track.sta.x(2), track.sta.x(3), track.sta.x(4),
+		track.sta.z,
+		// track.sta.P(0), track.sta.P(6), track.sta.P(12), track.sta.P(18), track.sta.P(24),
+		track.sem.name.c_str(), track.sem.confidence,
+		track.geo.width, track.geo.length,
+		track.geo.height, track.geo.orientation
 	);
 }
 

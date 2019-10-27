@@ -21,8 +21,9 @@ tracking:
     yaw_rate: 0.314
   lambda: 2.0
   aging:
-    bad: 5
+    bad: 3
   occlusion_factor: 2.0
+  min_dist_between_tracks: 2.0
 
 track:
   P_init:

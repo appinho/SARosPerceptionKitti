@@ -148,7 +148,7 @@ void Visualization::showFirstPersonImage(
 		// Get color
 		cv::Scalar color = cv::Scalar(o.r, o.g, o.b);
 
-		cv::rectangle(image, top_left, bot_right, color, linewidth_, 8);
+		cv::rectangle(image, top_left, bot_right, color, linewidth_, 4);
 
 		// Draw text
 		std::stringstream ss;
