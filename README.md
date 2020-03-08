@@ -95,6 +95,17 @@ If you have any questions, things you would love to add or ideas how to actualiz
 
 ### DIY: Data generation
 
+0000 -> 0005
+0001 -> 0009
+0002 -> 0011
+0003 -> 0013
+0004 -> 0014
+0006 -> 0018
+0010 -> 0056
+0011 -> 0059
+0012 -> 0060
+0013 -> 0091
+
 1) [Install Kitti2Bag](https://github.com/tomas789/kitti2bag)
 
 ```
