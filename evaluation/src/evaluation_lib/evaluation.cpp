@@ -40,7 +40,7 @@ Evaluation::Evaluation(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	}
 
 	// Delete content in file if there is one
-	filename_ = data_path + "0012.txt";
+	filename_ = data_path + scenario_name + ".txt";
 
 	tracking_results_.open(filename_.c_str(),
 		std::ofstream::out | std::ofstream::trunc);

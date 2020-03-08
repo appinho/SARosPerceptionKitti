@@ -94,7 +94,7 @@ class trackingEvaluation(object):
         # get number of sequences and
         # get number of frames per sequence from test mapping
         # (created while extracting the benchmark)
-        filename_test_mapping = "./data/tracking/evaluate_0060.seqmap"
+        filename_test_mapping = "./data/tracking/benchmark.seqmap"
         self.n_frames         = []
         self.sequence_name    = []
         with open(filename_test_mapping, "r") as fh:
@@ -309,7 +309,6 @@ class trackingEvaluation(object):
             n_trajectories_seq.append(n_in_seq)
             seq_data.append(f_data)
             f.close()
-
         if not loading_groundtruth:
             self.tracker=seq_data
             self.n_tr_trajectories=n_trajectories
@@ -801,32 +800,32 @@ class trackingEvaluation(object):
         summary += self.printEntry("Mostly Lost", self.ML) + "\n"
         summary += "\n"
         summary += self.printEntry("True Positives", self.tp) + "\n"
-        #summary += self.printEntry("True Positives per Sequence", self.tps) + "\n"
+        summary += self.printEntry("True Positives per Sequence", self.tps) + "\n"
         summary += self.printEntry("Ignored True Positives", self.itp) + "\n"
-        #summary += self.printEntry("Ignored True Positives per Sequence", self.itps) + "\n"
+        summary += self.printEntry("Ignored True Positives per Sequence", self.itps) + "\n"
         summary += self.printEntry("False Positives", self.fp) + "\n"
-        #summary += self.printEntry("False Positives per Sequence", self.fps) + "\n"
+        summary += self.printEntry("False Positives per Sequence", self.fps) + "\n"
         summary += self.printEntry("False Negatives", self.fn) + "\n"
-        #summary += self.printEntry("False Negatives per Sequence", self.fns) + "\n"
+        summary += self.printEntry("False Negatives per Sequence", self.fns) + "\n"
         summary += self.printEntry("Ignored False Negatives", self.ifn) + "\n"
-        #summary += self.printEntry("Ignored False Negatives per Sequence", self.ifns) + "\n"
+        summary += self.printEntry("Ignored False Negatives per Sequence", self.ifns) + "\n"
         summary += self.printEntry("Missed Targets", self.fn) + "\n"
         summary += self.printEntry("ID-switches", self.id_switches) + "\n"
         summary += self.printEntry("Fragmentations", self.fragments) + "\n"
         summary += "\n"
         summary += self.printEntry("Ground Truth Objects (Total)", self.n_gt + self.n_igt) + "\n"
-        #summary += self.printEntry("Ground Truth Objects (Total) per Sequence", self.n_gts) + "\n"
+        summary += self.printEntry("Ground Truth Objects (Total) per Sequence", self.n_gts) + "\n"
         summary += self.printEntry("Ignored Ground Truth Objects", self.n_igt) + "\n"
-        #summary += self.printEntry("Ignored Ground Truth Objects per Sequence", self.n_igts) + "\n"
+        summary += self.printEntry("Ignored Ground Truth Objects per Sequence", self.n_igts) + "\n"
         summary += self.printEntry("Ground Truth Trajectories", self.n_gt_trajectories) + "\n"
         summary += "\n"
         summary += self.printEntry("Tracker Objects (Total)", self.n_tr) + "\n"
-        #summary += self.printEntry("Tracker Objects (Total) per Sequence", self.n_trs) + "\n"
+        summary += self.printEntry("Tracker Objects (Total) per Sequence", self.n_trs) + "\n"
         summary += self.printEntry("Ignored Tracker Objects", self.n_itr) + "\n"
-        #summary += self.printEntry("Ignored Tracker Objects per Sequence", self.n_itrs) + "\n"
+        summary += self.printEntry("Ignored Tracker Objects per Sequence", self.n_itrs) + "\n"
         summary += self.printEntry("Tracker Trajectories", self.n_tr_trajectories) + "\n"
-        #summary += "\n"
-        #summary += self.printEntry("Ignored Tracker Objects with Associated Ignored Ground Truth Objects", self.n_igttr) + "\n"
+        summary += "\n"
+        summary += self.printEntry("Ignored Tracker Objects with Associated Ignored Ground Truth Objects", self.n_igttr) + "\n"
         summary += "="*80
         
         return summary

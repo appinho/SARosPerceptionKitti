@@ -1,33 +1,44 @@
 ==========================tracking evaluation summary===========================
-Multiple Object Tracking Accuracy (MOTA)                                0.328671
-Multiple Object Tracking Precision (MOTP)                               0.614090
-Multiple Object Tracking Accuracy (MOTAL)                               0.328671
-Multiple Object Detection Accuracy (MODA)                               0.328671
-Multiple Object Detection Precision (MODP)                              0.802249
+Multiple Object Tracking Accuracy (MOTA)                                0.091881
+Multiple Object Tracking Precision (MOTP)                               0.704720
+Multiple Object Tracking Accuracy (MOTAL)                               0.098120
+Multiple Object Detection Accuracy (MODA)                               0.098321
+Multiple Object Detection Precision (MODP)                              0.802765
 
-Recall                                                                  0.328671
-Precision                                                               1.000000
-F1                                                                      0.494737
-False Alarm Rate                                                        0.000000
+Recall                                                                  0.533249
+Precision                                                               0.599882
+F1                                                                      0.564607
+False Alarm Rate                                                        1.276251
 
-Mostly Tracked                                                          0.000000
-Partly Tracked                                                          0.500000
-Mostly Lost                                                             0.500000
+Mostly Tracked                                                          0.202703
+Partly Tracked                                                          0.459459
+Mostly Lost                                                             0.337838
 
-True Positives                                                                47
-Ignored True Positives                                                         0
-False Positives                                                                0
-False Negatives                                                               96
-Ignored False Negatives                                                        1
-Missed Targets                                                                96
-ID-switches                                                                    0
-Fragmentations                                                                 1
+True Positives                                                              5084
+True Positives per Sequence                                           [174, 1113, 263, 130, 320, 346, 402, 1457, 29, 12]
+Ignored True Positives                                                       838
+Ignored True Positives per Sequence                                   [189, 253, 70, 11, 30, 68, 10, 203, 0, 4]
+False Positives                                                             3391
+False Positives per Sequence                                          [175, 1414, 197, 160, 106, 124, 118, 1027, 0, 70]
+False Negatives                                                             4450
+False Negatives per Sequence                                          [41, 1159, 737, 204, 448, 154, 178, 1402, 114, 13]
+Ignored False Negatives                                                     1451
+Ignored False Negatives per Sequence                                  [131, 296, 72, 43, 112, 93, 83, 525, 1, 95]
+Missed Targets                                                              4450
+ID-switches                                                                   56
+Fragmentations                                                               303
 
-Ground Truth Objects (Total)                                                 144
-Ignored Ground Truth Objects                                                   1
-Ground Truth Trajectories                                                      2
+Ground Truth Objects (Total)                                               10985
+Ground Truth Objects (Total) per Sequence                             [535, 2821, 1142, 388, 910, 661, 673, 3587, 144, 124]
+Ignored Ground Truth Objects                                                2289
+Ignored Ground Truth Objects per Sequence                             [320, 549, 142, 54, 142, 161, 93, 728, 1, 99]
+Ground Truth Trajectories                                                    248
 
-Tracker Objects (Total)                                                      130
-Ignored Tracker Objects                                                       83
-Tracker Trajectories                                                           2
+Tracker Objects (Total)                                                    11032
+Tracker Objects (Total) per Sequence                                  [782, 3587, 774, 323, 574, 720, 601, 3396, 121, 154]
+Ignored Tracker Objects                                                     2557
+Ignored Tracker Objects per Sequence                                  [244, 807, 244, 22, 118, 182, 71, 709, 92, 68]
+Tracker Trajectories                                                         638
+
+Ignored Tracker Objects with Associated Ignored Ground Truth Objects           0
 ================================================================================
