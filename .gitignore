@@ -1,0 +1,6 @@
+*.cmake
+*.bin
+*.pyc
+bin
+build
+data/rosbags

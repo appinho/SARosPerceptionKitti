@@ -1,9 +1,12 @@
 
 - [X] write script that runs benchmark
 - [X] fuse semantic segmentated images into rosbag
-- [] rename rosbags and upload them
-- [] run benchmark on 10 scenarios
-- [] integrate data folder into package and script to download files
+- [X] rename rosbags
+- [] upload them
+- [X] run benchmark on 10 scenarios
+- [X] integrate data folder into package
+- [] script to download files
+- [] update README
 - [] post that
 
 - [] include SASensorProcessing into package
