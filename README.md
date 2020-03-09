@@ -5,6 +5,31 @@ SARosPerceptionKitti
  
 ROS package for the Perception (Sensor Processing, Detection, Tracking and Evaluation) of the KITTI Vision Benchmark 
 
+## TODO
+
+- [X] write script that runs benchmark
+- [X] fuse semantic segmentated images into rosbag
+- [X] rename rosbags
+- [] upload them
+- [X] run benchmark on 10 scenarios
+- [X] integrate data folder into package
+- [] script to download files
+- [X] update README
+- [] post that
+
+- [] include SASensorProcessing into package
+- [] post depth completion
+- [] restructure package into
+- [] sensor_processing
+- [] detection
+- [] tracking
+- [] evaluation
+- [] util
+
+- [] video tutorial of all components
+- [] release a video each week
+- [] gather more scenarios and write docu for it
+
 ## Demo
 <p align="center">
   <img src="./videos/semantic.gif">
@@ -20,13 +45,14 @@ Sticking to this folder structure is highly recommended:
  
 ```
     ~                                        # Home directory
-    ├── catkin_ws                            # Catkin workspace
-    │   ├── src                              # Source folder
-    │       └── SARosPerceptionKitti         # Repo
-    ├── kitti_data                           # Dataset
-    │   ├── 0060                             # Demo scenario 0060
-    │   │   ├── segmented_semantic_images    # Folder for preprocessed semantic segmented images
-    │   │   └── fused.bag        # Synchronized ROSbag file
+    └── catkin_ws                            # Catkin workspace
+        └── src                              # Source folder
+            └── SARosPerceptionKitti         # Repo
+                ├── data                     # Dataset directory
+                    └── rosbags              # ROSbag directory
+                        ├── 0000.bag         # ROSbag file
+                        ... 
+                        └── 0013.bag         # ROSbag file
 ```
 
 1) Install [ROS](http://wiki.ros.org/Installation/Ubuntu) and create a [catkin workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace) in your home directory:  
