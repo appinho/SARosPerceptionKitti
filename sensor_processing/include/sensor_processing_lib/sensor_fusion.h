@@ -102,7 +102,8 @@ public:
 	// and publishes the output grid message
 	virtual void process(
 		const PointCloud2::ConstPtr & cloud,
-		const Image::ConstPtr & image
+		// const Image::ConstPtr & col_image,
+		const Image::ConstPtr & sem_image
 	);
 
 
@@ -146,7 +147,7 @@ private:
 	ros::Publisher voxel_elevated_pub_;
 	ros::Publisher grid_occupancy_pub_;
 
-	ros::Publisher image_semantic_pub_;
+	// ros::Publisher image_semantic_pub_;
 	ros::Publisher cloud_semantic_pub_;
 	ros::Publisher cloud_semantic_sparse_pub_;
 	ros::Publisher image_detection_grid_pub_;
@@ -154,15 +155,16 @@ private:
 
 	// Subscriber
 	Subscriber<PointCloud2> cloud_sub_;
-	Subscriber<Image> image_sub_;
+	// Subscriber<Image> col_image_sub_;
+	Subscriber<Image> sem_image_sub_;
 	typedef sync_policies::ExactTime<PointCloud2, Image> MySyncPolicy;
 	Synchronizer<MySyncPolicy> sync_;
 
 	// Class functions
 	void processPointCloud(const PointCloud2::ConstPtr & cloud);
-	void processImage(const Image::ConstPtr & image);
+	// void processImage(const Image::ConstPtr & image);
 	void mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
-		const Image::ConstPtr & image);
+		const Image::ConstPtr & sem_image);
 
 	// Conversion functions
 	void fromVeloCoordsToPolarCell(const float x, const float y,

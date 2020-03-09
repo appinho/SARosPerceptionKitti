@@ -26,7 +26,7 @@ Sticking to this folder structure is highly recommended:
     ├── kitti_data                           # Dataset
     │   ├── 0060                             # Demo scenario 0060
     │   │   ├── segmented_semantic_images    # Folder for preprocessed semantic segmented images
-    │   │   └── synchronized_data.bag        # Synchronized ROSbag file
+    │   │   └── fused.bag        # Synchronized ROSbag file
 ```
 
 1) Install [ROS](http://wiki.ros.org/Installation/Ubuntu) and create a [catkin workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace) in your home directory:  

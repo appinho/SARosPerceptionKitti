@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>data</name>
+  <version>0.0.0</version>
+  <description>The data package</description>
+
+  <license>TODO</license>
+
+  <maintainer email="simonappel62@gmail.com">simonappel</maintainer>
+
+</package>

@@ -25,28 +25,20 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	pcl_semantic_(new VRGBPointCloud),
 	pcl_sparse_semantic_(new VRGBPointCloud),
 	cloud_sub_(nh, "/kitti/velo/pointcloud", 2),
-	image_sub_(nh,	"/kitti/camera_color_left/image_raw", 2),
-	sync_(MySyncPolicy(10), cloud_sub_, image_sub_){
-
-	// Get data path
-	std::string home_dir;
-	if(ros::param::get("~home_dir", home_dir)){
-		params_.home_dir = home_dir + "/kitti_data";
-	}
-	else{
-		ROS_ERROR("Set dataset path as parameter");
-	}
+	// col_image_sub_(nh, "/kitti/camera_color_left/image_raw", 2),
+	sem_image_sub_(nh, "/kitti/camera_color_left/semantic", 2),
+	sync_(MySyncPolicy(10), cloud_sub_, sem_image_sub_){
 
 	// Get scenario parameter
-	int scenario;
-	if(ros::param::get("~scenario", scenario)){
-		std::ostringstream scenario_stream;
-		scenario_stream << std::setfill('0') << std::setw(4) << scenario;
-		params_.scenario = scenario_stream.str();
-	}
-	else{
-		ROS_ERROR("Failed to read scenario");
-	}
+	// int scenario;
+	// if(ros::param::get("~scenario", scenario)){
+	// 	std::ostringstream scenario_stream;
+	// 	scenario_stream << std::setfill('0') << std::setw(4) << scenario;
+	// 	params_.scenario = scenario_stream.str();
+	// }
+	// else{
+	// 	ROS_ERROR("Failed to read scenario");
+	// }
 
 	// Define lidar parameters
 	private_nh_.param("lidar/height", params_.lidar_height,
@@ -91,7 +83,7 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	params_.inv_radial_res = 1.0f / params_.grid_cell_size;
 
 	// Print parameters
-	ROS_INFO_STREAM("scenario " << params_.scenario);
+	// ROS_INFO_STREAM("scenario " << params_.scenario);
 	ROS_INFO_STREAM("lidar_height " << params_.lidar_height);
 	ROS_INFO_STREAM("lidar_z_min " << params_.lidar_z_min);
 	ROS_INFO_STREAM("grid_range_min " << params_.grid_range_min);
@@ -154,8 +146,8 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	grid_occupancy_pub_ = nh_.advertise<OccupancyGrid>(
 		"/sensor/grid/occupancy", 2);
 
-	image_semantic_pub_ = nh_.advertise<Image>(
-		"/sensor/image/semantic", 2);
+	// image_semantic_pub_ = nh_.advertise<Image>(
+	// 	"/sensor/image/semantic", 2);
 	cloud_semantic_pub_ = nh_.advertise<PointCloud2>(
 		"/sensor/cloud/semantic", 2);
 	cloud_semantic_sparse_pub_ = nh_.advertise<PointCloud2>(
@@ -178,18 +170,19 @@ SensorFusion::~SensorFusion(){
 
 void SensorFusion::process(
 		const PointCloud2::ConstPtr & cloud,
-		const Image::ConstPtr & image
+		// const Image::ConstPtr & col_image,
+		const Image::ConstPtr & sem_image
 	){
 
 	// Preprocess point cloud
 	processPointCloud(cloud);
 
 	// Preprocess image
-	processImage(image);
+	// processImage(image);
 
 	// Fuse sensors by mapping elevated point cloud into semantic segmentated
 	// image
-	mapPointCloudIntoImage(pcl_elevated_, image);
+	mapPointCloudIntoImage(pcl_elevated_, sem_image);
 
 	// Print sensor fusion
 	ROS_INFO("Publishing Sensor Fusion [%d]: # PCL points [%d] # Ground [%d]"
@@ -544,7 +537,7 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 	grid_occupancy_pub_.publish(occ_grid_);
 }
 
-void SensorFusion::processImage(const Image::ConstPtr & image){
+// void SensorFusion::processImage(const Image::ConstPtr & image){
 
 /******************************************************************************
  * 1. Load precalculated semantic segmentated images to ensure online
@@ -552,22 +545,22 @@ void SensorFusion::processImage(const Image::ConstPtr & image){
  */
 
 	// Define path
-	std::ostringstream path_name;
+	// std::ostringstream path_name;
 
 	// HARDCODE HOME DIRECTORY HERE
-	path_name << params_.home_dir << "/"
-		<< params_.scenario 
-		<< "/segmented_semantic_images/"
-		<< std::setfill('0') << std::setw(10)	<< time_frame_ << ".png";
+	// path_name << params_.home_dir << "/"
+	// 	<< params_.scenario 
+	// 	<< "/segmented_semantic_images/"
+	// 	<< std::setfill('0') << std::setw(10)	<< time_frame_ << ".png";
 
 	// Load semantic segmentated image
-	sem_image_ = cv::imread(path_name.str(), CV_LOAD_IMAGE_COLOR);
+	// sem_image_ = cv::imread(path_name.str(), CV_LOAD_IMAGE_COLOR);
 
 	// Sanity check if image is loaded correctly
-	if(sem_image_.cols == 0 || sem_image_.rows == 0){
-		ROS_WARN("Hardcode path in sensor_fusion.cpp processImage()!");
-		return;
-	}
+	// if(sem_image_.cols == 0 || sem_image_.rows == 0){
+	// 	ROS_WARN("Hardcode path in sensor_fusion.cpp processImage()!");
+	// 	return;
+	// }
 
 	// Canny edge detection
 	/*
@@ -581,16 +574,16 @@ void SensorFusion::processImage(const Image::ConstPtr & image){
 	}
 	*/
 
-	// Publish
-	cv_bridge::CvImage cv_semantic_image;
-	cv_semantic_image.image = sem_image_;
-	cv_semantic_image.encoding = "bgr8";
-	cv_semantic_image.header.stamp = image->header.stamp;
-	image_semantic_pub_.publish(cv_semantic_image.toImageMsg());
-}
+// 	// Publish
+// 	cv_bridge::CvImage cv_semantic_image;
+// 	cv_semantic_image.image = sem_image_;
+// 	cv_semantic_image.encoding = "bgr8";
+// 	cv_semantic_image.header.stamp = image->header.stamp;
+// 	image_semantic_pub_.publish(cv_semantic_image.toImageMsg());
+// }
 
 void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
-	const Image::ConstPtr & image){
+	const Image::ConstPtr & sem_image){
 
 /******************************************************************************
  * 1. Convert velodyne points into image space
@@ -610,8 +603,9 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
 		tools_.transformVeloToImage(matrix_velodyne_points);
 
 	// Get image format
-	int img_width = sem_image_.cols;
-	int img_height = sem_image_.rows;
+	const cv::Mat_<uint8_t> cv_image = cv_bridge::toCvShare(sem_image, image_encodings::BGR8)->image;
+	int img_width = cv_image.cols;
+	int img_height = cv_image.rows;
 
 	// Clear semantic cloud
 	pcl_semantic_->points.clear();
@@ -624,14 +618,15 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
 		const int & img_y = matrix_image_points(1, i);
 		const int & img_z = matrix_image_points(2, i);
 
+		// TODO change to method
 		if( (img_x >= 0 && img_x < img_width) &&
 			(img_y >= 0 && img_y < img_height) &&
 			(img_z >= 0)){
 
 			// Get R G B values of semantic image
-			uint8_t r = sem_image_.at<cv::Vec3b>(img_y,img_x)[2];
-			uint8_t g = sem_image_.at<cv::Vec3b>(img_y,img_x)[1];
-			uint8_t b = sem_image_.at<cv::Vec3b>(img_y,img_x)[0];
+			uint8_t r = cv_image.at<cv::Vec3b>(img_y,img_x)[2];
+			uint8_t g = cv_image.at<cv::Vec3b>(img_y,img_x)[1];
+			uint8_t b = cv_image.at<cv::Vec3b>(img_y,img_x)[0];
 
 			// Create new point and fill it
 			VRGBPoint point;
@@ -753,12 +748,12 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
 	cv_bridge::CvImage cv_detection_grid_image;
 	cv_detection_grid_image.image = detection_grid_;
 	cv_detection_grid_image.encoding = image_encodings::TYPE_32FC3;
-	cv_detection_grid_image.header.stamp = image->header.stamp;
+	cv_detection_grid_image.header.stamp = sem_image->header.stamp;
 	image_detection_grid_pub_.publish(cv_detection_grid_image.toImageMsg());
 	cv_bridge::CvImage cv_bev_semantic_grid_image;
 	cv_bev_semantic_grid_image.image = bev_semantic_grid_;
 	cv_bev_semantic_grid_image.encoding = image_encodings::TYPE_8UC3;
-	cv_bev_semantic_grid_image.header.stamp = image->header.stamp;
+	cv_bev_semantic_grid_image.header.stamp = sem_image->header.stamp;
 	image_bev_semantic_grid_pub_.publish(cv_bev_semantic_grid_image.toImageMsg());
 }
 

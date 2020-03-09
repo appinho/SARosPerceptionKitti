@@ -4,7 +4,7 @@
   <arg name="home_dir"/>
 
   <!-- Choose scenario -->
-  <arg name="scenario" default="0060"/>
+  <arg name="scenario" default="0000"/>
 
   <!-- Choose replay speed -->
   <arg name="speed" default="0.2"/>
@@ -13,7 +13,7 @@
   <arg name="delay" default="3" />
 
   <!-- Play rosbag file -->
-  <node pkg="rosbag" type="play" name="player" args="-r $(arg speed) -d $(arg delay) $(arg home_dir)/kitti_data/$(arg scenario)/synchronized_data.bag"/>
+  <node pkg="rosbag" type="play" name="player" args="-r $(arg speed) -d $(arg delay) $(arg home_dir)/kitti_data/$(arg scenario)/fused.bag"/>
 	
   <!-- Run the sensor setup node -->
   <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node">
@@ -21,11 +21,6 @@
     <!-- Get parameters from parameter.yaml file -->
     <rosparam file="$(find sensor_processing)/config/parameters.yaml" command="load" />
 
-    <!-- Get data path -->
-    <param name="home_dir" value="$(arg home_dir)" />
-
-    <!-- Get scenario identifier -->
-    <param name="scenario" value="$(arg scenario)" />
   </node>
 
   <!-- Run the detection node -->

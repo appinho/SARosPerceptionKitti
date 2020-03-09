@@ -1,5 +1,6 @@
 
-- [] fuse semantic segmentated images into rosbag
+- [X] write script that runs benchmark
+- [X] fuse semantic segmentated images into rosbag
 - [] rename rosbags and upload them
 - [] run benchmark on 10 scenarios
 - [] integrate data folder into package and script to download files

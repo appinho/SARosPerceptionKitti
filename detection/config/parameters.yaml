@@ -24,7 +24,7 @@ car:
       min: 0.90
       max: 5.00
     height:
-      min: 0.20
+      min: 0.50
       max: 2.00
     semantic:
       min: 0.90
