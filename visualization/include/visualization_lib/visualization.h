@@ -50,6 +50,8 @@ public:
 		const ObjectArrayConstPtr & detected_objects);
 	void processTracking(const Image::ConstPtr & image_raw_left,
 		const ObjectArrayConstPtr & tracked_objects);
+	void processGroundTruth(const Image::ConstPtr & image_raw_left,
+		const ObjectArrayConstPtr & ground_truth_objects);
 
 
 private:
@@ -62,6 +64,7 @@ private:
 	std::string scenario_;
 	int det_time_frame_;
 	int tra_time_frame_;
+	int gt_time_frame_;
 	int linewidth_;
 	int fontface_;
 	double fontscale_;
@@ -72,24 +75,30 @@ private:
 	// Marker member
 	std::vector<VizObject> detection_;
 	std::vector<VizObject> tracking_;
+	std::vector<VizObject> ground_truth_;
 
 	// Subscriber
 	Subscriber<Image> image_raw_left_sub_;
 	Subscriber<ObjectArray> list_detected_objects_sub_;
 	Subscriber<ObjectArray> list_tracked_objects_sub_;
+	Subscriber<ObjectArray> list_ground_truth_objects_sub_;
 	typedef sync_policies::ExactTime
 		<Image, ObjectArray> MySyncPolicy;
 	Synchronizer<MySyncPolicy> sync_det_;
 	Synchronizer<MySyncPolicy> sync_tra_;
+	Synchronizer<MySyncPolicy> sync_gt_;
 
 
 	// Publisher
 	ros::Publisher image_detection_pub_;
 	ros::Publisher image_tracking_pub_;
+	ros::Publisher image_ground_truth_pub_;
 	ros::Publisher cube_detection_pub_;
 	ros::Publisher cube_tracking_pub_;
+	ros::Publisher cube_ground_truth_pub_;
 	ros::Publisher text_detection_pub_;
 	ros::Publisher text_tracking_pub_;
+	ros::Publisher text_ground_truth_pub_;
 	ros::Publisher arrow_tracking_pub_;
 
 	// Marker Functions

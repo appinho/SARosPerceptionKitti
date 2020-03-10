@@ -6,17 +6,22 @@
 - [X] run benchmark on 10 scenarios
 - [X] integrate data folder into package
 - [] script to download files
-- [] update README
-- [] post that
+- [X] update README
+- [] post data and benchmarking
+- [] investigate benchmark stability
+- [] show ground truth data
 
 - [] include SASensorProcessing into package
+- [] remove road/sidewalk labels from detection grid
+- [] move tracking velocity arrow to roof height
 - [] post depth completion
 - [] restructure package into
-- [] sensor_processing
-- [] detection
-- [] tracking
-- [] evaluation
-- [] util
+	- [] sensor_processing
+	- [] detection
+	- [] tracking
+	- [] evaluation
+	- [] util
+- [] add tracing
 
 - [] video tutorial of all components
 - [] release a video each week

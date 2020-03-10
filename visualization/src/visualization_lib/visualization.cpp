@@ -17,8 +17,10 @@ Visualization::Visualization(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	image_raw_left_sub_(nh,	"/kitti/camera_color_left/image_raw", 2),
 	list_detected_objects_sub_(nh, "/detection/objects", 2),
 	list_tracked_objects_sub_(nh, "/tracking/objects", 2),
+	list_ground_truth_objects_sub_(nh, "/ground_truth/objects", 2),
 	sync_det_(MySyncPolicy(10), image_raw_left_sub_, list_detected_objects_sub_),
-	sync_tra_(MySyncPolicy(10), image_raw_left_sub_,	list_tracked_objects_sub_)
+	sync_tra_(MySyncPolicy(10), image_raw_left_sub_, list_tracked_objects_sub_),
+	sync_gt_(MySyncPolicy(10), image_raw_left_sub_, list_ground_truth_objects_sub_)
 	{
 
 	// Get scenario parameter
@@ -35,6 +37,7 @@ Visualization::Visualization(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	// Define Subscriber
 	sync_det_.registerCallback(boost::bind(&Visualization::processDetection, this, _1, _2));
 	sync_tra_.registerCallback(boost::bind(&Visualization::processTracking, this, _1, _2));
+	sync_gt_.registerCallback(boost::bind(&Visualization::processGroundTruth, this, _1, _2));
 
 	// Define class members;
 	linewidth_ = 5; // negative for filled
@@ -50,22 +53,31 @@ Visualization::Visualization(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	for(int i = 0; i < viz_buffer_; i++){
 		tracking_.push_back(initVizObject(i));
 	}
+	for(int i = 0; i < viz_buffer_; i++){
+		ground_truth_.push_back(initVizObject(i));
+	}
 
 	// Define Publisher
 	image_detection_pub_ = nh_.advertise<Image>(
 		"/viz/detection/image", viz_buffer_);
 	image_tracking_pub_ = nh_.advertise<Image>(
 		"/viz/tracking/image", viz_buffer_);
+	image_ground_truth_pub_ = nh_.advertise<Image>(
+		"/viz/ground_truth/image", viz_buffer_);
 	cube_detection_pub_ = nh_.advertise<Marker>(
-		"/viz/detection/cubes", viz_buffer_);;
+		"/viz/detection/cubes", viz_buffer_);
 	cube_tracking_pub_ = nh_.advertise<Marker>(
-		"/viz/tracking/cubes", viz_buffer_);;
+		"/viz/tracking/cubes", viz_buffer_);
+	cube_ground_truth_pub_ = nh_.advertise<Marker>(
+		"/viz/ground_truth/cubes", viz_buffer_);
 	text_detection_pub_= nh_.advertise<Marker>(
-		"/viz/detection/texts", viz_buffer_);;
+		"/viz/detection/texts", viz_buffer_);
 	text_tracking_pub_ = nh_.advertise<Marker>(
-		"/viz/tracking/texts", viz_buffer_);;
+		"/viz/tracking/texts", viz_buffer_);
+	text_ground_truth_pub_ = nh_.advertise<Marker>(
+		"/viz/ground_truth/texts", viz_buffer_);
 	arrow_tracking_pub_ = nh_.advertise<Marker>(
-		"/viz/tracking/arrows", viz_buffer_);;
+		"/viz/tracking/arrows", viz_buffer_);
 
 	// Store images externally
 	save_ = true;
@@ -73,6 +85,7 @@ Visualization::Visualization(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	// Init counter for publishing
 	det_time_frame_ = 0;
 	tra_time_frame_ = 0;
+	gt_time_frame_ = 0;
 }
 
 Visualization::~Visualization(){
@@ -109,6 +122,22 @@ void Visualization::processTracking(const Image::ConstPtr & image_raw_left,
 
 	// Increment time frame
 	tra_time_frame_++;
+}
+
+void Visualization::processGroundTruth(const Image::ConstPtr & image_raw_left,
+	const ObjectArrayConstPtr & ground_truth_objects){
+
+	// Show tracking image
+	showFirstPersonImage("ground_truth", ground_truth_objects, image_raw_left);
+
+	// Show rviz markers
+	showRVizMarkers("ground_truth", ground_truth_objects);
+
+	// Print sensor fusion
+	ROS_INFO("Publishing Visualization for Ground Truth [%d]", gt_time_frame_);
+
+	// Increment time frame
+	gt_time_frame_++;
 }
 
 void Visualization::showFirstPersonImage(

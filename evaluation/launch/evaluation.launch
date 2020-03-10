@@ -1,19 +1,16 @@
 <launch>
 
-  <!-- Assign home directory -->
-  <arg name="home_dir"/>
-
   <!-- Choose scenario-->
-  <arg name="scenario" default="0060"/>
+  <arg name="scenario" default="0000"/>
 
   <!-- Choose replay speed -->
-  <arg name="speed" default="0.5"/>
+  <arg name="speed" default="1.0"/>
 
   <!-- Choose replay delay -->
   <arg name="delay" default="3" />
 
   <!-- Play rosbag file -->
-  <node pkg="rosbag" type="play" name="player" required="true" args="-r $(arg speed) -d $(arg delay) $(arg home_dir)/kitti_data/$(arg scenario).bag"/>
+  <node pkg="rosbag" type="play" name="player" required="true" args="-r $(arg speed) -d $(arg delay) $(find data)/rosbags/$(arg scenario).bag"/>
   
   <!-- Run the sensor setup node -->
   <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node">
@@ -49,11 +46,8 @@
   <!-- Run the evaluation node -->
   <node pkg="evaluation" type="evaluation" name="evaluation_node" output="screen">
 
-    <!-- Get data path -->
-    <param name="home_dir" value="$(arg home_dir)" />
-
     <!-- Get scenario identifier -->
-    <param name="scenario" value="$(arg scenario)" />
+    <param name="output_file" value="$(find benchmark)/python/results/sha_key/data/$(arg scenario).txt" />
   </node>
 
 </launch>

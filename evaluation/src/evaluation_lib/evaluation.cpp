@@ -17,31 +17,16 @@ Evaluation::Evaluation(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	{
 
 	// Get data path
-	std::string data_path, home_dir;
-	if(ros::param::get("~home_dir", home_dir)){
-		data_path = home_dir + "/catkin_ws/src/SARosPerceptionKitti/"
-			"benchmark/python/results/sha_key/data/";
+	std::string output_file; 
+	if(ros::param::get("~output_file", output_file)){
+		ROS_INFO("Write evaluation to %s", output_file.c_str());
 	}
 	else{
 		ROS_ERROR("Set dataset path as parameter");
 	}
 
-	// Get scenario parameter
-	int scenario;
-	std::string scenario_name;
-	if(ros::param::get("~scenario", scenario)){
-		std::ostringstream scenario_stream;
-		scenario_stream << std::setfill('0') << std::setw(4) << scenario;
-		scenario_name = scenario_stream.str();
-		ROS_INFO("Read scenario : %s ", scenario_name.c_str());
-	}
-	else{
-		ROS_ERROR("Failed to read scenario");
-	}
-
 	// Delete content in file if there is one
-	filename_ = data_path + scenario_name + ".txt";
-
+	filename_ = output_file;
 	tracking_results_.open(filename_.c_str(),
 		std::ofstream::out | std::ofstream::trunc);
 
@@ -104,7 +89,7 @@ void Evaluation::process(const ObjectArray& tracks){
 		tracking_results_.close();
 	}
 	else{
-		ROS_WARN("Error opening file");
+		ROS_WARN("Error opening file %s", filename_.c_str());
 	}
 
 	// Print sensor fusion
