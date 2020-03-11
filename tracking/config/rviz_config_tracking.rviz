@@ -5,6 +5,8 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Image1
+        - /Marker5
+        - /Marker6
       Splitter Ratio: 0.5
     Tree Height: 649
   - Class: rviz/Selection
@@ -72,7 +74,7 @@ Visualization Manager:
       Use rainbow: true
       Value: true
     - Class: rviz/Image
-      Enabled: true
+      Enabled: false
       Image Topic: /viz/tracking/image
       Max Value: 1
       Median window: 5
@@ -82,7 +84,7 @@ Visualization Manager:
       Queue Size: 2
       Transport Hint: raw
       Unreliable: false
-      Value: true
+      Value: false
     - Class: rviz/Image
       Enabled: false
       Image Topic: /viz/tracking/image
@@ -128,23 +130,23 @@ Visualization Manager:
       Queue Size: 100
       Value: false
     - Class: rviz/Marker
-      Enabled: false
-      Marker Topic: /viz/detection/cubes
+      Enabled: true
+      Marker Topic: /viz/ground_truth/cubes
       Name: Marker
       Namespaces:
         {}
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/Marker
-      Enabled: false
-      Marker Topic: /viz/detection/texts
+      Enabled: true
+      Marker Topic: /viz/ground_truth/texts
       Name: Marker
       Namespaces:
         {}
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/Image
-      Enabled: false
+      Enabled: true
       Image Topic: /viz/tracking/image
       Max Value: 1
       Median window: 5
@@ -154,7 +156,7 @@ Visualization Manager:
       Queue Size: 2
       Transport Hint: raw
       Unreliable: false
-      Value: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

@@ -12,6 +12,7 @@
 - [] show ground truth data
 - [] save image results and txt results + parameter
 - [] think of better way to trigger ground truth
+- [] add ground truth image
 
 - [] include SASensorProcessing into package
 - [] remove road/sidewalk labels from detection grid

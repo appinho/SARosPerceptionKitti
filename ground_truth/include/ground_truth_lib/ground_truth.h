@@ -41,13 +41,16 @@ public:
 private:
 
 	void readGroundTruth();
+	void getObjectFromLine(const std::vector<std::string> & words,
+						   Object & o_msg);
 
 	// Node handle
 	ros::NodeHandle nh_, private_nh_;
 
 	// Class member
-	std::fstream ground_truth_results_;
+	std::fstream ground_truth_file_;
 	std::string ground_truth_filename_;
+	std::map<int, ObjectArray> ground_truth_objects_;
 	int time_frame_;
 	tf::TransformListener listener_;
 	Tools tools_;

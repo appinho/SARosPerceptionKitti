@@ -47,4 +47,10 @@
   <node pkg="rviz" type="rviz" name="my_rviz"
 	args="-d $(find tracking)config/rviz_config_tracking.rviz"/>
 
+  <!-- Run the ground_truth node -->
+  <node pkg="ground_truth" type="ground_truth" name="ground_truth_node" output="screen">
+
+    <param name="filename" value="$(find benchmark)/python/data/tracking/label_02/$(arg scenario).txt" />
+  </node>
+
 </launch>
