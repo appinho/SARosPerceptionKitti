@@ -47,7 +47,8 @@
   <node pkg="evaluation" type="evaluation" name="evaluation_node" output="screen">
 
     <!-- Get scenario identifier -->
-    <param name="output_file" value="$(find benchmark)/python/results/sha_key/data/$(arg scenario).txt" />
+    <param name="tracking_file" value="$(find benchmark)/python/results/sha_key/data/$(arg scenario).txt" />
+
   </node>
 
 </launch>

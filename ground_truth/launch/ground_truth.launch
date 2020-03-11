@@ -1,0 +1,40 @@
+<launch>
+
+  <!-- Choose scenario-->
+  <arg name="scenario" default="0000"/>
+
+  <!-- Choose replay speed -->
+  <arg name="speed" default="0.3"/>
+
+  <!-- Choose replay delay -->
+  <arg name="delay" default="3" />
+
+  <!-- Play rosbag file -->
+  <node pkg="rosbag" type="play" name="player" required="true" args="-r $(arg speed) -d $(arg delay) $(find data)/rosbags/$(arg scenario).bag"/>
+  
+  <!-- Run the sensor setup node -->
+  <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node">
+
+    <!-- Get parameters from parameter.yaml file -->
+    <rosparam file="$(find sensor_processing)/config/parameters.yaml" command="load" />
+
+  </node>
+
+  <!-- Run the visualization node -->
+  <node pkg="visualization" type="visualization" name="visualization_node"
+  output="screen">
+    <!-- Get scenario identifier -->
+    <param name="scenario" value="$(arg scenario)" />
+  </node>
+
+  <!-- Run the ground_truth node -->
+  <node pkg="ground_truth" type="ground_truth" name="ground_truth_node" output="screen">
+
+    <param name="filename" value="$(find benchmark)/python/data/tracking/label_02/$(arg scenario).txt" />
+  </node>
+
+    <!-- Launch rviz for visualization -->
+  <node pkg="rviz" type="rviz" name="my_rviz"
+  args="-d $(find ground_truth)config/rviz_config_ground_truth.rviz"/>
+
+</launch>

@@ -10,6 +10,8 @@
 - [] post data and benchmarking
 - [] investigate benchmark stability
 - [] show ground truth data
+- [] save image results and txt results + parameter
+- [] think of better way to trigger ground truth
 
 - [] include SASensorProcessing into package
 - [] remove road/sidewalk labels from detection grid

@@ -1,13 +1,13 @@
 /******************************************************************************
  *
  * Author: Simon Appel (simonappel62@gmail.com)
- * Date: 25/04/2018
+ * Date: 11/03/2020
  *
  */
 
 // Include guard
-#ifndef evaluation_H
-#define evaluation_H
+#ifndef ground_truth_H
+#define ground_truth_H
 
 // Includes
 #include <ros/ros.h>
@@ -19,42 +19,47 @@
 #include <helper/tools.h>
 
 // Namespaces
-namespace evaluation{
+namespace ground_truth{
 
 using namespace sensor_msgs;
 using namespace geometry_msgs;
 using namespace helper;
 
-class Evaluation{
+class GroundTruth{
 
 public:
 
 	// Default constructor
-	Evaluation(ros::NodeHandle nh, ros::NodeHandle private_nh);
+	GroundTruth(ros::NodeHandle nh, ros::NodeHandle private_nh);
 
 	// Virtual destructor
-	virtual ~Evaluation();
+	virtual ~GroundTruth();
 
-	void process(const ObjectArray& tracks);
+	void process(const Image::ConstPtr& msg);
 
 
 private:
+
+	void readGroundTruth();
 
 	// Node handle
 	ros::NodeHandle nh_, private_nh_;
 
 	// Class member
-	std::ofstream tracking_results_;
-	std::string tracking_filename_;
+	std::fstream ground_truth_results_;
+	std::string ground_truth_filename_;
 	int time_frame_;
 	tf::TransformListener listener_;
 	Tools tools_;
 
 	// Subscriber
-	ros::Subscriber list_tracked_objects_sub_;
+	ros::Subscriber image_raw_left_sub_;
+
+	// Publisher
+	ros::Publisher list_ground_truth_objects_pub_;
 
 };
 
-} // namespace evaluation
+} // namespace ground_truth
 
-#endif // evaluation_H
+#endif // ground_truth_H

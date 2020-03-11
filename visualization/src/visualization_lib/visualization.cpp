@@ -80,7 +80,7 @@ Visualization::Visualization(ros::NodeHandle nh, ros::NodeHandle private_nh):
 		"/viz/tracking/arrows", viz_buffer_);
 
 	// Store images externally
-	save_ = true;
+	save_ = false;
 		
 	// Init counter for publishing
 	det_time_frame_ = 0;
@@ -128,7 +128,7 @@ void Visualization::processGroundTruth(const Image::ConstPtr & image_raw_left,
 	const ObjectArrayConstPtr & ground_truth_objects){
 
 	// Show tracking image
-	showFirstPersonImage("ground_truth", ground_truth_objects, image_raw_left);
+	//showFirstPersonImage("ground_truth", ground_truth_objects, image_raw_left);
 
 	// Show rviz markers
 	showRVizMarkers("ground_truth", ground_truth_objects);
@@ -250,6 +250,15 @@ void Visualization::showRVizMarkers(
 			arrow_tracking_pub_.publish(viz_obj.arr);
 			text_tracking_pub_.publish(viz_obj.txt);
 		}
+		else if(node_name == "ground_truth"){
+			VizObject & viz_obj = tracking_[i];
+			updateBoundingBox(viz_obj, i, objects->list[i]);
+			// updateArrow(viz_obj, i, objects->list[i]);
+			updateText(viz_obj, i, objects->list[i]);
+			cube_ground_truth_pub_.publish(viz_obj.bb);
+			// arrow_ground_truth_pub_.publish(viz_obj.arr);
+			text_ground_truth_pub_.publish(viz_obj.txt);
+		}
 	}
 	// Hide markers
 	for(int i = objects->list.size(); i < viz_buffer_; ++i){
@@ -266,6 +275,13 @@ void Visualization::showRVizMarkers(
 			cube_tracking_pub_.publish(viz_obj.bb);
 			arrow_tracking_pub_.publish(viz_obj.arr);
 			text_tracking_pub_.publish(viz_obj.txt);
+		}
+		else if(node_name == "ground_truth"){
+			VizObject & viz_obj = ground_truth_[i];
+			hide(viz_obj);
+			cube_ground_truth_pub_.publish(viz_obj.bb);
+			// arrow_ground_truth_pub_.publish(viz_obj.arr);
+			text_ground_truth_pub_.publish(viz_obj.txt);
 		}
 	}
 }

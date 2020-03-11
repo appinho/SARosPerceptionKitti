@@ -17,17 +17,15 @@ Evaluation::Evaluation(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	{
 
 	// Get data path
-	std::string output_file; 
-	if(ros::param::get("~output_file", output_file)){
-		ROS_INFO("Write evaluation to %s", output_file.c_str());
+	if(ros::param::get("~tracking_file", tracking_filename_)){
+		ROS_INFO("Write evaluation to %s", tracking_filename_.c_str());
 	}
 	else{
-		ROS_ERROR("Set dataset path as parameter");
+		ROS_ERROR("Could not find benchmark package");
 	}
 
 	// Delete content in file if there is one
-	filename_ = output_file;
-	tracking_results_.open(filename_.c_str(),
+	tracking_results_.open(tracking_filename_.c_str(),
 		std::ofstream::out | std::ofstream::trunc);
 
 	tracking_results_.close();
@@ -46,7 +44,7 @@ Evaluation::~Evaluation(){
 void Evaluation::process(const ObjectArray& tracks){
 
 	// Write results to file
-	tracking_results_.open(filename_,
+	tracking_results_.open(tracking_filename_,
 		std::ofstream::ate | std::fstream::app);
 	if (tracking_results_.is_open()) {
 		
@@ -89,7 +87,7 @@ void Evaluation::process(const ObjectArray& tracks){
 		tracking_results_.close();
 	}
 	else{
-		ROS_WARN("Error opening file %s", filename_.c_str());
+		ROS_WARN("Error opening tracking file %s", tracking_filename_.c_str());
 	}
 
 	// Print sensor fusion
