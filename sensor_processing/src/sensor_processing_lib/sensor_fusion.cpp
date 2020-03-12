@@ -25,20 +25,8 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	pcl_semantic_(new VRGBPointCloud),
 	pcl_sparse_semantic_(new VRGBPointCloud),
 	cloud_sub_(nh, "/kitti/velo/pointcloud", 2),
-	// col_image_sub_(nh, "/kitti/camera_color_left/image_raw", 2),
 	sem_image_sub_(nh, "/kitti/camera_color_left/semantic", 2),
 	sync_(MySyncPolicy(10), cloud_sub_, sem_image_sub_){
-
-	// Get scenario parameter
-	// int scenario;
-	// if(ros::param::get("~scenario", scenario)){
-	// 	std::ostringstream scenario_stream;
-	// 	scenario_stream << std::setfill('0') << std::setw(4) << scenario;
-	// 	params_.scenario = scenario_stream.str();
-	// }
-	// else{
-	// 	ROS_ERROR("Failed to read scenario");
-	// }
 
 	// Define lidar parameters
 	private_nh_.param("lidar/height", params_.lidar_height,
@@ -543,25 +531,6 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
  * 1. Load precalculated semantic segmentated images to ensure online
  * performance
  */
-
-	// Define path
-	// std::ostringstream path_name;
-
-	// HARDCODE HOME DIRECTORY HERE
-	// path_name << params_.home_dir << "/"
-	// 	<< params_.scenario 
-	// 	<< "/segmented_semantic_images/"
-	// 	<< std::setfill('0') << std::setw(10)	<< time_frame_ << ".png";
-
-	// Load semantic segmentated image
-	// sem_image_ = cv::imread(path_name.str(), CV_LOAD_IMAGE_COLOR);
-
-	// Sanity check if image is loaded correctly
-	// if(sem_image_.cols == 0 || sem_image_.rows == 0){
-	// 	ROS_WARN("Hardcode path in sensor_fusion.cpp processImage()!");
-	// 	return;
-	// }
-
 	// Canny edge detection
 	/*
 	cv::Mat sem_edge_img, sem_dil_img, sem_output;

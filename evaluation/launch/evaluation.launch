@@ -4,7 +4,7 @@
   <arg name="scenario" default="0000"/>
 
   <!-- Choose replay speed -->
-  <arg name="speed" default="1.0"/>
+  <arg name="speed" default="0.6"/>
 
   <!-- Choose replay delay -->
   <arg name="delay" default="3" />
@@ -44,7 +44,7 @@
   </node>
 
   <!-- Run the evaluation node -->
-  <node pkg="evaluation" type="evaluation" name="evaluation_node" output="screen">
+  <node pkg="evaluation" type="evaluation" name="evaluation_node">
 
     <!-- Get scenario identifier -->
     <param name="tracking_file" value="$(find benchmark)/python/results/sha_key/data/$(arg scenario).txt" />

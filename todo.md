@@ -2,22 +2,24 @@
 - [X] write script that runs benchmark
 - [X] fuse semantic segmentated images into rosbag
 - [X] rename rosbags
-- [] upload them
+- [X] post depth completion
 - [X] run benchmark on 10 scenarios
 - [X] integrate data folder into package
-- [] script to download files
 - [X] update README
+- [X] show ground truth data
+- [] upload them
+- [] script to download files
 - [] post data and benchmarking
 - [] investigate benchmark stability
-- [] show ground truth data
 - [] save image results and txt results + parameter
 - [] think of better way to trigger ground truth
+- [] add bounding box to object message
 - [] add ground truth image
+- [] change detection list to be no class member like in tracking
 
 - [] include SASensorProcessing into package
 - [] remove road/sidewalk labels from detection grid
 - [] move tracking velocity arrow to roof height
-- [] post depth completion
 - [] restructure package into
 	- [] sensor_processing
 	- [] detection

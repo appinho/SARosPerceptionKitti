@@ -1,32 +1,32 @@
 ==========================tracking evaluation summary===========================
-Multiple Object Tracking Accuracy (MOTA)                                0.077737
-Multiple Object Tracking Precision (MOTP)                               0.706515
-Multiple Object Tracking Accuracy (MOTAL)                               0.083291
-Multiple Object Detection Accuracy (MODA)                               0.083487
-Multiple Object Detection Precision (MODP)                              0.808983
+Multiple Object Tracking Accuracy (MOTA)                                0.039673
+Multiple Object Tracking Precision (MOTP)                               0.697551
+Multiple Object Tracking Accuracy (MOTAL)                               0.044203
+Multiple Object Detection Accuracy (MODA)                               0.044388
+Multiple Object Detection Precision (MODP)                              0.805652
 
-Recall                                                                  0.514478
-Precision                                                               0.592602
-F1                                                                      0.550783
-False Alarm Rate                                                        1.264208
+Recall                                                                  0.491421
+Precision                                                               0.569465
+F1                                                                      0.527572
+False Alarm Rate                                                        1.320286
 
-Mostly Tracked                                                          0.193694
-Partly Tracked                                                          0.463964
-Mostly Lost                                                             0.342342
+Mostly Tracked                                                          0.184685
+Partly Tracked                                                          0.414414
+Mostly Lost                                                             0.400901
 
-True Positives                                                              4886
-True Positives per Sequence                                           [174, 1052, 226, 127, 318, 316, 392, 1441, 27, 12]
-Ignored True Positives                                                       801
-Ignored True Positives per Sequence                                   [195, 254, 72, 0, 25, 54, 9, 187, 0, 5]
-False Positives                                                             3359
-False Positives per Sequence                                          [161, 1463, 173, 144, 76, 144, 136, 1001, 0, 61]
-False Negatives                                                             4611
-False Negatives per Sequence                                          [41, 1220, 774, 207, 450, 184, 188, 1418, 116, 13]
-Ignored False Negatives                                                     1488
-Ignored False Negatives per Sequence                                  [125, 295, 70, 54, 117, 107, 84, 541, 1, 94]
-Missed Targets                                                              4611
-ID-switches                                                                   50
-Fragmentations                                                               292
+True Positives                                                              4640
+True Positives per Sequence                                           [174, 1042, 226, 124, 318, 316, 311, 1344, 27, 12]
+Ignored True Positives                                                       746
+Ignored True Positives per Sequence                                   [195, 247, 72, 0, 25, 54, 3, 145, 0, 5]
+False Positives                                                             3508
+False Positives per Sequence                                          [161, 1462, 174, 139, 76, 144, 192, 1099, 0, 61]
+False Negatives                                                             4802
+False Negatives per Sequence                                          [41, 1230, 774, 210, 450, 184, 269, 1515, 116, 13]
+Ignored False Negatives                                                     1543
+Ignored False Negatives per Sequence                                  [125, 302, 70, 54, 117, 107, 90, 583, 1, 94]
+Missed Targets                                                              4802
+ID-switches                                                                   41
+Fragmentations                                                               285
 
 Ground Truth Objects (Total)                                               10985
 Ground Truth Objects (Total) per Sequence                             [535, 2821, 1142, 388, 910, 661, 673, 3587, 144, 124]
@@ -34,11 +34,11 @@ Ignored Ground Truth Objects                                                2289
 Ignored Ground Truth Objects per Sequence                             [320, 549, 142, 54, 142, 161, 93, 728, 1, 99]
 Ground Truth Trajectories                                                    248
 
-Tracker Objects (Total)                                                    10580
-Tracker Objects (Total) per Sequence                                  [762, 3570, 640, 291, 517, 698, 589, 3319, 48, 146]
-Ignored Tracker Objects                                                     2335
-Ignored Tracker Objects per Sequence                                  [232, 801, 169, 20, 98, 184, 52, 690, 21, 68]
-Tracker Trajectories                                                         570
+Tracker Objects (Total)                                                    10521
+Tracker Objects (Total) per Sequence                                  [762, 3529, 641, 283, 517, 698, 579, 3318, 48, 146]
+Ignored Tracker Objects                                                     2373
+Ignored Tracker Objects per Sequence                                  [232, 778, 169, 20, 98, 184, 73, 730, 21, 68]
+Tracker Trajectories                                                         566
 
 Ignored Tracker Objects with Associated Ignored Ground Truth Objects           0
 ================================================================================

@@ -40,11 +40,12 @@ GroundTruth::~GroundTruth(){
 
 void GroundTruth::process(const Image::ConstPtr& msg){
 	
+	ObjectArray gt_list;
+	gt_list.header = msg->header;
 	if(ground_truth_objects_.find(time_frame_) != ground_truth_objects_.end())
 	{
-		ObjectArray & gt_list = ground_truth_objects_[time_frame_];
-		gt_list.header = msg->header;
-		for(auto & obj: gt_list.list){
+		ObjectArray & current_list = ground_truth_objects_[time_frame_];
+		for(auto & obj: current_list.list){
 			try{
 				listener_.transformPoint("velo_link",
 					obj.cam_pose,
@@ -55,9 +56,12 @@ void GroundTruth::process(const Image::ConstPtr& msg){
 					"\"camera_color_left\" to \"velo_link\": %s", ex.what());
 			}
 		}
-		list_ground_truth_objects_pub_.publish(gt_list);
+		gt_list.list = current_list.list;
 	}
-	ROS_INFO("Publishing Ground Truth [%d]", time_frame_);
+
+	ROS_INFO("Publishing %d Ground Truth objects at [%d]", int(gt_list.list.size()), time_frame_);
+	list_ground_truth_objects_pub_.publish(gt_list);
+
 	// Increment time frame
 	time_frame_++;
 }
