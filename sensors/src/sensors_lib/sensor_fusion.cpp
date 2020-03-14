@@ -1,5 +1,4 @@
-#include <sensors_lib/sensor_fusion.h>
-
+#include "sensors_lib/sensor_fusion.h"
 namespace sensors{
 
 
@@ -16,16 +15,15 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	// pcl_voxel_elevated_(new VPointCloud),
 	// pcl_semantic_(new VRGBPointCloud),
 	// pcl_sparse_semantic_(new VRGBPointCloud),
-	sub_image_color_left_(nh, "kitti/camera_color_left/image_raw", 2),
-	sub_caminfo_color_left_(nh, "kitti/camera_color_left/camera_info", 2),
-	sub_image_color_right_(nh, "kitti/camera_color_right/image_raw", 2),
-	sub_caminfo_color_right_(nh, "kitti/camera_color_right/camera_info", 2),
-	sub_image_semantic_(nh, "/kitti/camera_color_left/semantic", 2),
+	stereo_vision_(nh),
+	depth_completion_(nh),
+	// sub_image_color_left_(nh, "kitti/camera_color_left/image_raw", 2),
+	// sub_caminfo_color_left_(nh, "kitti/camera_color_left/camera_info", 2),
+	// sub_image_color_right_(nh, "kitti/camera_color_right/image_raw", 2),
+	// sub_image_semantic_(nh, "/kitti/camera_color_left/semantic", 2),
+	sub_pointcloud_stereo_(nh, "kitti/stereo/pointcloud", 2),
 	sub_pointcloud_velo_(nh, "/kitti/velo/pointcloud", 2),
-	sync_(MySyncPolicy(10), 
-		sub_image_color_left_, sub_caminfo_color_left_,
-		sub_image_color_right_, sub_caminfo_color_right_,
-		sub_image_semantic_, sub_pointcloud_velo_){
+	sync_(MySyncPolicy(10), sub_pointcloud_stereo_, sub_pointcloud_velo_){
 
 	// Define lidar parameters
 	// private_nh_.param("lidar/height", params_.lidar_height,
@@ -144,8 +142,13 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	// image_bev_semantic_grid_pub_ = nh_.advertise<Image>(
 	// 	"/sensor/image/bev_semantic_grid", 2);
 
+
 	// Define Subscriber
-	sync_.registerCallback(boost::bind(&SensorFusion::process, this, _1, _2, _3, _4, _5, _6));
+	sync_.registerCallback(boost::bind(&SensorFusion::process, this, _1, _2));
+	pub_pointcloud_velo_ = nh.advertise<PointCloud2>(
+		"/kitti/velo/pointcloud_filtered", 2);
+	pub_pointcloud_fused_ = nh.advertise<PointCloud2>(
+		"/kitti/fusion/pointcloud", 2);
 
 	// Init counter for publishing
 	// time_frame_ = 0;
@@ -156,14 +159,53 @@ SensorFusion::~SensorFusion(){
 }
 
 void SensorFusion::process(
-	const ImageConstPtr& msg_image_color_left,
-    const CameraInfoConstPtr& msg_caminfo_color_left,
-    const ImageConstPtr& msg_image_color_right,
-    const CameraInfoConstPtr& msg_caminfo_color_right,
-	const ImageConstPtr & msg_image_semantic,
+	const PointCloud2ConstPtr & msg_pointcloud_stereo,
 	const PointCloud2ConstPtr & msg_pointcloud_velo)
 {
-	ROS_INFO("SF CALLBACK");
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_velo(new pcl::PointCloud<pcl::PointXYZ>);
+	fromROSMsg(*msg_pointcloud_velo, *pcl_velo);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr pcl_velo_filtered(new pcl::PointCloud<pcl::PointXYZRGB>);
+
+	for(const auto & point: pcl_velo->points){
+
+		if(point.z > -2.4){
+			float angle = std::abs( std::atan2(point.y, point.x) );
+	 		if(angle <  M_PI / 4){
+	 			pcl::PointXYZRGB point_rgb;
+	 			point_rgb.x = point.x;
+	 			point_rgb.y = point.y;
+	 			point_rgb.z = point.z;
+	 			pcl_velo_filtered->points.push_back(point_rgb);
+	 		}
+		}
+ 	}
+
+	pcl_velo_filtered->header.frame_id = msg_pointcloud_velo->header.frame_id;
+	pcl_velo_filtered->header.stamp = pcl_conversions::toPCL(msg_pointcloud_velo->header.stamp);
+	pub_pointcloud_velo_.publish(pcl_velo_filtered);
+
+	std::string target_frame = msg_pointcloud_stereo->header.frame_id;
+	bool transformed = pcl_ros::transformPointCloud(
+		target_frame,
+		*pcl_velo_filtered,
+		*pcl_velo_filtered,
+		listener_);
+
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr pcl_stereo(new pcl::PointCloud<pcl::PointXYZRGB>);
+	fromROSMsg(*msg_pointcloud_stereo, *pcl_stereo);
+
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr pcl_fused(new pcl::PointCloud<pcl::PointXYZRGB>);
+	*pcl_fused = *pcl_stereo + *pcl_velo_filtered;
+	ROS_INFO("1 Size %d", int(pcl_stereo->points.size()));
+	ROS_INFO("2 Size %d", int(pcl_velo_filtered->points.size()));
+	ROS_INFO("3 Size %d", int(pcl_fused->points.size()));
+
+	PointCloud2 msg_pointcloud_fused;
+	toROSMsg(*pcl_fused, msg_pointcloud_fused);
+	msg_pointcloud_fused.header.stamp.nsec = msg_pointcloud_stereo->header.stamp.nsec;
+	pub_pointcloud_fused_.publish(msg_pointcloud_fused);
+	
 	// Preprocess point cloud
 	// processPointCloud(cloud);
 

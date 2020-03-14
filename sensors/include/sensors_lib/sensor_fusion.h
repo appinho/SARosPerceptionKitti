@@ -1,16 +1,21 @@
 #ifndef sensors_H
 #define sensors_H
 
+#include "sensors_lib/stereo_vision.h"
+#include "sensors_lib/depth_completion.h"
+
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
+
 // #include <nav_msgs/OccupancyGrid.h>
 // #include <pcl_ros/impl/transforms.hpp>
-// #include <pcl_ros/point_cloud.h>
-// #include <pcl/filters/extract_indices.h>
+#include <pcl_ros/point_cloud.h>
+#include <tf/transform_listener.h>
+#include <pcl_ros/transforms.h>
 // #include <pcl/segmentation/sac_segmentation.h>
 // #include <opencv2/opencv.hpp>
 // #include <cv_bridge/cv_bridge.h>
@@ -85,11 +90,7 @@ public:
 	virtual ~SensorFusion();
 
 	virtual void process(
-		const ImageConstPtr& msg_image_color_left,
-        const CameraInfoConstPtr& msg_caminfo_color_left,
-        const ImageConstPtr& msg_image_color_right,
-        const CameraInfoConstPtr& msg_caminfo_color_right,
-		const ImageConstPtr & msg_image_semantic,
+		const PointCloud2ConstPtr & msg_pointcloud_stereo,
 		const PointCloud2ConstPtr & msg_pointcloud_velo
 	);
 
@@ -98,21 +99,24 @@ private:
 
 	// Node handle
 	ros::NodeHandle nh_, private_nh_;
+	tf::TransformListener listener_;
 
 	// Subscribers
-	Subscriber<Image> sub_image_color_left_;
-	Subscriber<CameraInfo> sub_caminfo_color_left_;
-	Subscriber<Image> sub_image_color_right_;
-	Subscriber<CameraInfo> sub_caminfo_color_right_;
-	Subscriber<Image> sub_image_semantic_;
+	// Subscriber<Image> sub_image_color_left_;
+	// Subscriber<CameraInfo> sub_caminfo_color_left_;
+	// Subscriber<Image> sub_image_color_right_;
+	// Subscriber<CameraInfo> sub_caminfo_color_right_;
+	// Subscriber<Image> sub_image_semantic_;
+	Subscriber<PointCloud2> sub_pointcloud_stereo_;
 	Subscriber<PointCloud2> sub_pointcloud_velo_;
 	
 	// Synchronize input
-	typedef ExactTime<Image, CameraInfo, Image, CameraInfo, Image, PointCloud2> MySyncPolicy;
+	typedef ExactTime<PointCloud2, PointCloud2> MySyncPolicy;
 	Synchronizer<MySyncPolicy> sync_;
 
 	// Publisher
-	// ros::Publisher cloud_filtered_pub_;
+	ros::Publisher pub_pointcloud_velo_;
+	ros::Publisher pub_pointcloud_fused_;
 	// ros::Publisher cloud_ground_plane_inliers_pub_;
 	// ros::Publisher cloud_ground_plane_outliers_pub_;
 	// ros::Publisher cloud_ground_pub_;
@@ -126,6 +130,9 @@ private:
 	// ros::Publisher cloud_semantic_sparse_pub_;
 	// ros::Publisher image_detection_grid_pub_;
 	// ros::Publisher image_bev_semantic_grid_pub_;
+
+	StereoVision stereo_vision_;
+	DepthCompletion depth_completion_;
 
 
 	// // Class members

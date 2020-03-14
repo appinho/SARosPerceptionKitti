@@ -8,9 +8,14 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
+  dynamic_reconfigure
+  message_generation
+  rosgraph_msgs
   rospy
+  roscpp
   std_msgs
+  message_filters 
+  image_geometry
   cv_bridge
   pcl_ros
   nav_msgs
@@ -19,6 +24,11 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+
+generate_dynamic_reconfigure_options(
+  config/stereo_vision_params.cfg
+  config/depth_completion_params.cfg
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -130,6 +140,8 @@ include_directories(
 ## Declare a C++ library
 add_library(
   ${PROJECT_NAME}_lib
+  src/${PROJECT_NAME}_lib/stereo_vision.cpp
+  src/${PROJECT_NAME}_lib/depth_completion.cpp
   src/${PROJECT_NAME}_lib/sensor_fusion.cpp
 )
 
