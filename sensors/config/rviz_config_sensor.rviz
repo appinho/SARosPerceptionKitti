@@ -215,7 +215,7 @@ Visualization Manager:
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.200000003
-      Style: Flat Squares
+      Style: Points
       Topic: /sensor/cloud/semantic
       Unreliable: false
       Use Fixed Frame: true

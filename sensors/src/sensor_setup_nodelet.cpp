@@ -7,9 +7,9 @@
 
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
-#include <sensor_processing_lib/sensor_fusion.h>
+#include <sensors_lib/sensor_fusion.h>
 
-namespace sensor_processing{
+namespace sensors{
 
 class SensorSetupNodelet: public nodelet::Nodelet{
 public:

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>sensor_processing</name>
+  <name>sensors</name>
   <version>0.0.0</version>
   <description>The sensor setup package</description>
 

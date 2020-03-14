@@ -20,7 +20,7 @@ ROS package for the Perception (Sensor Processing, Detection, Tracking and Evalu
 - [] include SASensorProcessing into package
 - [] post depth completion
 - [] restructure package into
-- [] sensor_processing
+- [] sensors
 - [] detection
 - [] tracking
 - [] evaluation
@@ -40,6 +40,8 @@ ROS package for the Perception (Sensor Processing, Detection, Tracking and Evalu
 </p>
 
 ## Setup
+
+
 
 Sticking to this folder structure is highly recommended:  
  
@@ -65,7 +67,7 @@ mkdir -p ~/catkin_ws/src
 
 ```
 cd ~/catkin_ws/src
-git clone https://github.com/appinho/SARosPerceptionKitti.git
+git clone --recurse-submodules https://github.com/appinho/SARosPerceptionKitti.git
 cd ~/catkin_ws
 catkin_make
 source devel/setup.bash
@@ -86,7 +88,7 @@ rm 0060.zip
 
 ```
 source devel/setup.bash
-roslaunch sensor_processing sensor_processing.launch home_dir:=/home/YOUR_USERNAME
+roslaunch sensors sensors.launch home_dir:=/home/YOUR_USERNAME
 roslaunch detection detection.launch home_dir:=/home/YOUR_USERNAME
 roslaunch tracking tracking.launch home_dir:=/home/YOUR_USERNAME
 ```
@@ -170,7 +172,7 @@ cd ~/kitti_data/0060/segmented_semantic_images/
 ### Troubleshooting
 
 * Make sure to close RVIz and restart the ROS launch command if you want to execute the scenario again. Otherwise it seems like the data isn't moving anymore ([see here](https://github.com/appinho/SARosPerceptionKitti/issues/7))
-* Semenatic images warning: Go to sensor.cpp line 543 in sensor_processing_lib and hardcode your personal home directory! ([see full discussion here](https://github.com/appinho/SARosPerceptionKitti/issues/10))
+* Semenatic images warning: Go to sensor.cpp line 543 in sensors_lib and hardcode your personal home directory! ([see full discussion here](https://github.com/appinho/SARosPerceptionKitti/issues/10))
 * Make sure the scenario is encoded as 4 digit number, like above `0060`
 * Make sure the images are encoded as 10 digit numbers starting from `0000000000.png`
 * Make sure the resulting semantic segmentated images have the color encoding of the [Cityscape Dataset](https://www.cityscapes-dataset.com/examples/)

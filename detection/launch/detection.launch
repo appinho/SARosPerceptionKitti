@@ -4,7 +4,7 @@
   <arg name="scenario" default="0000"/>
 
   <!-- Choose replay speed -->
-  <arg name="speed" default="0.2"/>
+  <arg name="speed" default="0.2"/> 
 
   <!-- Choose replay delay -->
   <arg name="delay" default="3" />
@@ -13,10 +13,10 @@
   <node pkg="rosbag" type="play" name="player" args="-r $(arg speed) -d $(arg delay) $(find data)/rosbags/$(arg scenario).bag"/>
 
   <!-- Run the sensor setup node -->
-  <node pkg="sensor_processing" type="sensor_setup" name="sensor_setup_node">
+  <node pkg="sensors" type="sensor_setup" name="sensor_setup_node">
 
     <!-- Get parameters from parameter.yaml file -->
-    <rosparam file="$(find sensor_processing)/config/parameters.yaml" command="load" />
+    <rosparam file="$(find sensors)/config/parameters.yaml" command="load" />
 
   </node>
 
@@ -24,7 +24,7 @@
   <node pkg="detection" type="detection" name="detection_node" output="screen">
 
     <!-- Get parameters from parameter.yaml file -->
-    <rosparam file="$(find sensor_processing)/config/parameters.yaml" command="load" />
+    <rosparam file="$(find sensors)/config/parameters.yaml" command="load" />
     <rosparam file="$(find detection)/config/parameters.yaml" command="load" />
     
   </node>

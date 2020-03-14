@@ -21,7 +21,7 @@
 - [] remove road/sidewalk labels from detection grid
 - [] move tracking velocity arrow to roof height
 - [] restructure package into
-	- [] sensor_processing
+	- [] sensors
 	- [] detection
 	- [] tracking
 	- [] evaluation

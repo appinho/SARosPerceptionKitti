@@ -6,8 +6,8 @@
  */
 
 // Include guard
-#ifndef sensor_processing_H
-#define sensor_processing_H
+#ifndef sensors_H
+#define sensors_H
 
 // Includes
 #include <ros/ros.h>
@@ -31,7 +31,7 @@ typedef pcl::PointXYZRGB VRGBPoint;
 typedef pcl::PointCloud<VRGBPoint> VRGBPointCloud;
 
 // Namespaces
-namespace sensor_processing{
+namespace sensors{
 
 using namespace sensor_msgs;
 using namespace nav_msgs;
@@ -177,6 +177,6 @@ private:
 		const int grid_y, float & x, float & y);
 };
 
-} // namespace sensor_processing
+} // namespace sensors
 
-#endif // sensor_processing_H
+#endif // sensors_H
