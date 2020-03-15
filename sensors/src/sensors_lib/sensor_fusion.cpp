@@ -17,6 +17,7 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	// pcl_sparse_semantic_(new VRGBPointCloud),
 	stereo_vision_(nh),
 	depth_completion_(nh),
+	ground_extraction_(nh, private_nh),
 	// sub_image_color_left_(nh, "kitti/camera_color_left/image_raw", 2),
 	// sub_caminfo_color_left_(nh, "kitti/camera_color_left/camera_info", 2),
 	// sub_image_color_right_(nh, "kitti/camera_color_right/image_raw", 2),
@@ -205,7 +206,7 @@ void SensorFusion::process(
 	toROSMsg(*pcl_fused, msg_pointcloud_fused);
 	msg_pointcloud_fused.header.stamp.nsec = msg_pointcloud_stereo->header.stamp.nsec;
 	pub_pointcloud_fused_.publish(msg_pointcloud_fused);
-	
+
 	// Preprocess point cloud
 	// processPointCloud(cloud);
 
@@ -595,9 +596,6 @@ void SensorFusion::process(
 // // 	image_semantic_pub_.publish(cv_semantic_image.toImageMsg());
 // // }
 
-// void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
-// 	const Image::ConstPtr & sem_image){
-
 // /******************************************************************************
 //  * 1. Convert velodyne points into image space
 //  */
@@ -670,11 +668,15 @@ void SensorFusion::process(
 //  * 2. Gather in each cartesian grid cell the semantic labels
 //  */	
 
+// void SensorFusion::produceDetectionGrid(
+// 	const pcl::PointCloud<pcl::PointXYZRGB>::Ptr & pcl_semantic)
+// {
+
 // 	// Define hash table to remember points of semantic point cloud in each cell
 // 	std::map<int, std::map<int,int> > cell_hash_table;
 
 // 	// Loop through semantic point cloud
-// 	for(int i = 0; i < pcl_semantic_->size(); ++i){
+// 	for(int i = 0; i < pcl_semantic->size(); ++i){
 
 // 		// Read current point
 // 		VRGBPoint & point = pcl_semantic_->at(i);

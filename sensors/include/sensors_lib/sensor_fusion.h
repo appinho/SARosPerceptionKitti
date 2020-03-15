@@ -3,6 +3,7 @@
 
 #include "sensors_lib/stereo_vision.h"
 #include "sensors_lib/depth_completion.h"
+#include "sensors_lib/ground_extraction.h"
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -133,6 +134,7 @@ private:
 
 	StereoVision stereo_vision_;
 	DepthCompletion depth_completion_;
+	GroundExtraction ground_extraction_;
 
 
 	// // Class members
@@ -160,7 +162,8 @@ private:
 
 	// int time_frame_;
 
-
+	// void produceDetectionGrid(
+		// const pcl::PointCloud<pcl::PointXYZRGB>::Ptr & pcl_semantic);
 
 	// // Class functions
 	// void processPointCloud(const PointCloud2::ConstPtr & cloud);

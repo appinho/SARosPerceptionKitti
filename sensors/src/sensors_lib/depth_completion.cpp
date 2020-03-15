@@ -179,7 +179,7 @@ void DepthCompletion::depthImageToRGBPointCloud(
         point.g = cv_image.at<cv::Vec3b>(v, u)[1];
         point.b = cv_image.at<cv::Vec3b>(v, u)[0];
         pcl_img.points.push_back(point);
-      // }
+    //   }
     }
   }
   PointCloud2 pc_img;

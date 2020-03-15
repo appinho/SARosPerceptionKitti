@@ -1,11 +1,19 @@
-grid:
+sensor_frame:
+  z: -1.65
+  z_min: -2.4
+
+polar_grid:
   range:
-    min: 3.0
-    max: 83.0
+    min: 10.0
+    max: 40.0 # 83.0
+  cell:
+    size: 0.25 # 0.25
+    max_height: 0.15
+  segments: 10 # 240
+
+cart_grid:
   cell:
     size: 0.25
-    height: 0.15
-  segments: 240
 
 semantic:
   edge_detection:
@@ -18,6 +26,3 @@ ransac:
   tolerance: 0.2
   iterations: 50
 
-lidar:
-  height: -1.73
-  z_min: -2.4
