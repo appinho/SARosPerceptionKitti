@@ -1,24 +1,20 @@
-
-- [X] write script that runs benchmark
-- [X] fuse semantic segmentated images into rosbag
-- [X] rename rosbags
-- [X] post depth completion
-- [X] run benchmark on 10 scenarios
-- [X] integrate data folder into package
-- [X] update README
-- [X] show ground truth data
+- [] print tracking update distance
+- [] better bounding box fitter
+- [] implement better gronud estimation/investigate bad occupancy grid
+- [] init orientation better
 - [] upload them
+- [] unify sensor parameters
 - [] script to download files
 - [] post data and benchmarking
 - [] investigate benchmark stability
-- [] save image results and txt results + parameter
+- [] save image results and txt results + parameters used
+- [] integrate mask rcnn
 - [] think of better way to trigger ground truth
 - [] add bounding box to object message
 - [] add ground truth image
 - [] change detection list to be no class member like in tracking
+- [] add stereo SGBM
 
-- [] include SASensorProcessing into package
-- [] remove road/sidewalk labels from detection grid
 - [] move tracking velocity arrow to roof height
 - [] restructure package into
 	- [] sensors

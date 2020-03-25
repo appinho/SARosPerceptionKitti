@@ -1,13 +1,6 @@
-/******************************************************************************
- *
- * Author: Simon Appel (simonappel62@gmail.com)
- * Date: 19/04/2018
- *
- */
-
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
-#include <sensors_lib/sensor_fusion.h>
+#include <sensors_lib/sensor_setup.h>
 
 namespace sensors{
 
@@ -19,11 +12,11 @@ public:
 private:
   virtual void onInit()
   {
-    sensor_fusion_.reset(
-      new SensorFusion(getNodeHandle(), getPrivateNodeHandle()));
+    sensor_setup_.reset(
+      new SensorSetup(getNodeHandle(), getPrivateNodeHandle()));
   }
 
-  boost::shared_ptr<SensorFusion> sensor_fusion_;
+  boost::shared_ptr<SensorSetup> sensor_setup_;
 };
 
-} // namespace sensor
+} // namespace sensors

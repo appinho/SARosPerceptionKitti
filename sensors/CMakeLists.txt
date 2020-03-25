@@ -26,9 +26,9 @@ find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 generate_dynamic_reconfigure_options(
-  config/stereo_vision_params.cfg
-  config/depth_completion_params.cfg
-  config/ground_extraction_params.cfg
+  config/dyn_params_stereo_vision.cfg
+  config/dyn_params_depth_completion.cfg
+  config/dyn_params_ground_extraction.cfg
 )
 
 ## System dependencies are found with CMake's conventions
@@ -145,6 +145,7 @@ add_library(
   src/${PROJECT_NAME}_lib/depth_completion.cpp
   src/${PROJECT_NAME}_lib/ground_extraction.cpp
   src/${PROJECT_NAME}_lib/sensor_fusion.cpp
+  src/${PROJECT_NAME}_lib/sensor_setup.cpp
 )
 
 ## Specify libraries to link a library or executable target against

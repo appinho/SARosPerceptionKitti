@@ -70,17 +70,12 @@ private:
 		const float x, const float y, int & seg, int & bin);
 	void fromPolarCellToSensorCoordinates(
 		const int seg, const int bin, float & x, float & y);
+	
 	// Node handle
 	ros::NodeHandle nh_;
 	ros::NodeHandle pnh_;
-	// tf::TransformListener listener_;
 
 	// Subscribers
-	// Subscriber<Image> sub_image_color_left_;
-	// Subscriber<CameraInfo> sub_caminfo_color_left_;
-	// Subscriber<Image> sub_image_color_right_;
-	// Subscriber<CameraInfo> sub_caminfo_color_right_;
-	// Subscriber<Image> sub_image_semantic_;
 	ros::Subscriber sub_pointcloud_;
 
 	// Publisher
@@ -109,51 +104,11 @@ private:
 
 	float ransac_tolerance_;
 	int ransac_iterations_;
-	// ros::Publisher pub_pointcloud_fused_;
-	// ros::Publisher cloud_ground_plane_inliers_pub_;
-	// ros::Publisher cloud_ground_plane_outliers_pub_;
-	// ros::Publisher cloud_ground_pub_;
-	// ros::Publisher cloud_elevated_pub_;
-	// ros::Publisher voxel_ground_pub_;
-	// ros::Publisher voxel_elevated_pub_;
-	// ros::Publisher grid_occupancy_pub_;
 
-	// // ros::Publisher image_semantic_pub_;
-	// ros::Publisher cloud_semantic_pub_;
-	// ros::Publisher cloud_semantic_sparse_pub_;
-	// ros::Publisher image_detection_grid_pub_;
-	// ros::Publisher image_bev_semantic_grid_pub_;
-
-
-	// // Class members
-	// Parameters params_;
-
-	// VPointCloud::Ptr pcl_ground_plane_;
-	// VPointCloud::Ptr pcl_ground_plane_inliers_;
-	// VPointCloud::Ptr pcl_ground_plane_outliers_;
-	// VPointCloud::Ptr pcl_ground_;
-	// VPointCloud::Ptr pcl_elevated_;
-	// VPointCloud::Ptr pcl_voxel_ground_;
-	// VPointCloud::Ptr pcl_voxel_elevated_;
 	std::vector< std::vector<PolarCell> > polar_grid_;
 	OccupancyGrid::Ptr occ_grid_;
 
-	// cv::Mat sem_image_;
-	// cv::Mat detection_grid_;
-	// cv::Mat bev_semantic_grid_;
-
-	// VRGBPointCloud::Ptr pcl_semantic_;
-	// VRGBPointCloud::Ptr pcl_sparse_semantic_;
-
-	// Tools tools_;
-
 	int time_frame_;
-
-	// // Class functions
-	// void processPointCloud(const PointCloud2::ConstPtr & cloud);
-	// // void processImage(const Image::ConstPtr & image);
-	// void mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
-	// 	const Image::ConstPtr & sem_image);
 
 	// Conversion functions
 	void fromVeloCoordsToPolarCell(const float x, const float y,

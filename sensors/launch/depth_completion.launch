@@ -1,0 +1,23 @@
+<launch>
+
+   <!-- Choose scenario -->
+  <arg name="scenario" default="0000"/>
+
+  <!-- Choose replay speed -->
+  <arg name="speed" default="0.2"/>
+
+  <!-- Choose replay delay -->
+  <arg name="delay" default="3" />
+  
+  <node pkg="sensors" type="depth_completion" name="depth_completion" output="screen">
+  </node>
+
+  <!-- Play rosbag file -->
+  <node pkg="rosbag" type="play" name="player" args="-r $(arg speed) -d $(arg delay) $(find data)/rosbags/$(arg scenario).bag"/>
+  
+  <include file="$(find sensors)/launch/tools.launch"/>
+  
+  <node pkg="rviz" type="rviz" name="my_rviz"
+	args="-d $(find sensors)cfg/config_depth_completion.rviz"/>  
+  
+</launch>

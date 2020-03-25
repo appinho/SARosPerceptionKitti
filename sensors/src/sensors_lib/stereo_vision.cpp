@@ -4,8 +4,8 @@
 
 namespace sensors
 {
-StereoVision::StereoVision(ros::NodeHandle nh) : 
-  nh_(nh),
+StereoVision::StereoVision(ros::NodeHandle nh, ros::NodeHandle pnh) : 
+  nh_(nh), pnh_(pnh),
   exact_sync_(ExactPolicy(10),
     sub_left_image_, sub_left_camera_info_,
     sub_right_image_, sub_right_camera_info_)
@@ -18,14 +18,13 @@ StereoVision::StereoVision(ros::NodeHandle nh) :
 
   // Initialize node parameters from launch file or command line. Use a private node handle so that multiple instances
   // of the node can be run simultaneously while using different parameters.
-  ros::NodeHandle pnh("~");
   int num_disparities;
-  pnh.param("numDisparities", num_disparities, num_disparities);
+  pnh_.param("numDisparities", num_disparities, num_disparities);
   num_disparities_ = convertNumDisparities(num_disparities);
   int block_size;
-  pnh.param("blockSize", block_size, block_size);
+  pnh_.param("blockSize", block_size, block_size);
   block_size_ = convertBlockSize(block_size);
-  pnh.param("maxDepth", max_depth_);
+  pnh_.param("maxDepth", max_depth_);
 
   sub_left_image_.subscribe(nh_, "kitti/camera_gray_left/image_raw", 1);
   sub_left_camera_info_.subscribe(nh_, "/kitti/camera_gray_left/camera_info", 1);
@@ -34,9 +33,9 @@ StereoVision::StereoVision(ros::NodeHandle nh) :
   exact_sync_.registerCallback(boost::bind(&StereoVision::callback,
                                               this, _1, _2, _3, _4));
 
-  pub_disparity_ = nh.advertise<DisparityImage>("/kitti/stereo/disparity", 1);
-  pub_disparity_image_ = nh_.advertise<Image>("/kitti/stereo/disparity_image", 1);
-  pub_points2_ = nh_.advertise<PointCloud2>("/kitti/stereo/pointcloud", 1);
+  pub_disparity_ = nh.advertise<DisparityImage>("/sensors/stereo/disparity", 1);
+  pub_disparity_image_ = nh_.advertise<Image>("/sensors/stereo/disparity_image", 1);
+  pub_points2_ = nh_.advertise<PointCloud2>("/sensors/stereo/pointcloud", 1);
 
   block_matcher_ = cv::StereoBM::create(num_disparities_, block_size_);
   sg_block_matcher_ = cv::StereoSGBM::create(1, 1, 10);

@@ -1,13 +1,6 @@
-/******************************************************************************
- *
- * Author: Simon Appel (simonappel62@gmail.com)
- * Date: 23/04/2018
- *
- */
-
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
-#include <detection_lib/dbscan.h>
+#include <detection_lib/detection.h>
 
 namespace detection{
 
@@ -21,10 +14,10 @@ private:
 	virtual void onInit()
 	{
 		detector_.reset(
-			new DbScan(getNodeHandle(), getPrivateNodeHandle()));
+			new Detection(getNodeHandle(), getPrivateNodeHandle()));
 	}
 
-	boost::shared_ptr<DbScan> detector_;
+	boost::shared_ptr<Detection> detector_;
 };
 
 } // namespace sensor

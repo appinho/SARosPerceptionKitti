@@ -1,3 +1,8 @@
+cart_grid:
+  height: 240
+  width: 480
+  cell_size: 0.25
+
 pedestrian:
   spawn:
     side:
@@ -21,19 +26,19 @@ pedestrian:
 car:
   spawn:
     side:
-      min: 0.90
+      min: 1.10
       max: 5.00
     height:
       min: 0.50
       max: 2.00
     semantic:
-      min: 0.90
+      min: 0.80
   update:
     side:
-      min: 0.40
+      min: 0.90
       max: 5.00
     height:
-      min: 0.10
+      min: 0.50
       max: 2.00
     semantic:
       min: 0.60

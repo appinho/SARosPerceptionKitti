@@ -26,7 +26,7 @@ class StereoVision
 {
  public:
   //! Constructor.
-  explicit StereoVision(ros::NodeHandle nh);
+  explicit StereoVision(ros::NodeHandle nh, ros::NodeHandle pnh);
 
  private:
   void configCallback(sensors::StereoVisionParamsConfig &config, uint32_t level);
@@ -46,6 +46,7 @@ class StereoVision
   int convertBlockSize(const int block_size);
   
   ros::NodeHandle nh_;
+  ros::NodeHandle pnh_;
 
   message_filters::Subscriber<Image> sub_left_image_;
   message_filters::Subscriber<CameraInfo> sub_left_camera_info_;

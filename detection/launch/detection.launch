@@ -17,7 +17,7 @@
 
     <!-- Get parameters from parameter.yaml file -->
     <rosparam file="$(find sensors)/config/parameters.yaml" command="load" />
-
+    <rosparam file="$(find detection)/config/parameters.yaml" command="load" />
   </node>
 
   <!-- Run the detection node -->
@@ -33,6 +33,12 @@
   <node pkg="visualization" type="visualization" name="visualization_node" output="screen">
     <!-- Get scenario identifier -->
     <param name="scenario" value="$(arg scenario)" />
+  </node>
+
+  <!-- Run the ground_truth node -->
+  <node pkg="ground_truth" type="ground_truth" name="ground_truth_node" output="screen">
+
+    <param name="filename" value="$(find benchmark)/python/data/tracking/label_02/$(arg scenario).txt" />
   </node>
 
   

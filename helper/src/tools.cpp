@@ -69,7 +69,7 @@ Tools::Tools(){
 	SEMANTIC_KERNEL_SIZE <<
 		1, // Pedestrian
 		2, // Rider
-		1, // Car
+		2, // Car
 		4, // Truck
 		5, // Bus
 		5, // Train

@@ -128,7 +128,8 @@ include_directories(
 ## Declare a C++ library
 add_library(
   ${PROJECT_NAME}_lib
-  src/${PROJECT_NAME}_lib/dbscan.cpp
+  # src/${PROJECT_NAME}_lib/dbscan.cpp
+  src/${PROJECT_NAME}_lib/detection.cpp
 )
 
 ## Specify libraries to link a library or executable target against

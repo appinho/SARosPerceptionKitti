@@ -17,7 +17,7 @@
 
     <!-- Get parameters from parameter.yaml file -->
     <rosparam file="$(find sensors)/config/parameters.yaml" command="load" />
-
+    <rosparam file="$(find detection)/config/parameters.yaml" command="load" />
   </node>
 
   <!-- Run the detection node -->

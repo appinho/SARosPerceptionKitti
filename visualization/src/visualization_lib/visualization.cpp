@@ -388,7 +388,7 @@ void Visualization::updateArrow(VizObject & viz_obj, const int i, const Object &
 
 	viz_obj.arr.pose.position.x = obj.world_pose.point.x;
 	viz_obj.arr.pose.position.y = obj.world_pose.point.y;
-	viz_obj.arr.pose.position.z = obj.world_pose.point.z + obj.height * 0.5;
+	viz_obj.arr.pose.position.z = obj.world_pose.point.z + obj.height;
 
 	tf::Quaternion quat = tf::createQuaternionFromRPY(
 		obj.heading, 0, 0);

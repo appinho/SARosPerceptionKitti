@@ -9,19 +9,7 @@ GroundExtraction::GroundExtraction(ros::NodeHandle nh,
 	ros::NodeHandle pnh):
 	nh_(nh),
 	pnh_(pnh)
-	// pcl_ground_plane_(new VPointCloud),
-	// pcl_ground_plane_inliers_(new VPointCloud),
-	// pcl_ground_plane_outliers_(new VPointCloud),
-	// pcl_ground_(new VPointCloud),
-	// pcl_elevated_(new VPointCloud),
-	// pcl_voxel_ground_(new VPointCloud),
-	// pcl_voxel_elevated_(new VPointCloud),
-	// pcl_semantic_(new VRGBPointCloud),
-	// pcl_sparse_semantic_(new VRGBPointCloud),
 	{
-
-	// Define sensor_frame parameters
-	// ros::NodeHandle pnh("~");
 
 	pnh_.param("sensor_frame/z",
 		sensor_frame_z_, sensor_frame_z_);
@@ -30,113 +18,54 @@ GroundExtraction::GroundExtraction(ros::NodeHandle nh,
 	sensor_frame_opening_angle_ = M_PI / 4;
 
 	// Define polar grid parameters
-	pnh_.param("polar_grid/range/min", 
+	pnh_.param("ground_extraction/polar_grid/range/min", 
 		polar_grid_range_min_, polar_grid_range_min_);
-	pnh_.param("polar_grid/range/max", 
+	pnh_.param("ground_extraction/polar_grid/range/max", 
 		polar_grid_range_max_, polar_grid_range_max_);
-	pnh_.param("polar_grid/cell/size",
-		polar_grid_cell_size_, polar_grid_cell_size_);
-	pnh_.param("polar_grid/cell/max_height",
-		polar_grid_cell_max_height_, polar_grid_cell_max_height_);
-	pnh_.param("polar_grid/segments",
+	pnh_.param("ground_extraction/polar_grid/segments",
 		polar_grid_segments_, polar_grid_segments_);
-	polar_grid_bins_ = std::ceil(polar_grid_range_max_ / 
-		polar_grid_cell_size_);
+	pnh_.param("ground_extraction/polar_grid/bins",
+		polar_grid_bins_, polar_grid_bins_);
+	pnh_.param("ground_extraction/polar_grid/cell/max_height",
+		polar_grid_cell_max_height_, polar_grid_cell_max_height_);
+	polar_grid_cell_size_ = (polar_grid_range_max_ - polar_grid_range_min_) / 
+		polar_grid_bins_;
 
-	// Define cartesian grid parameters
-	pnh_.param("cart_grid/cell/size",
-		cart_grid_cell_size_, cart_grid_cell_size_);
-	cart_grid_height_ = int(polar_grid_range_max_ / cart_grid_cell_size_ / std::sqrt(2));
-	cart_grid_width_ = cart_grid_height_ * 2;
-	// polar_grid_bins = (params_.polar_grid_range_max * std::sqrt(2)) /
-	// 	params_.polar_grid_cell_size + 1;
-
-	// // Define semantic parameters
-	// private_nh_.param("semantic/edge_detection/perform", params_.sem_ed,
-	// 	params_.sem_ed);
-	// private_nh_.param("semantic/edge_detection/min", params_.sem_ed_min,
-	// 	params_.sem_ed_min);
-	// private_nh_.param("semantic/edge_detection/max", params_.sem_ed_max,
-	// 	params_.sem_ed_max);
-	// private_nh_.param("semantic/edge_detection/kernel", params_.sem_ed_kernel,
-	// 	params_.sem_ed_kernel);
 	// Define ransac ground plane parameters
-	pnh_.param("ransac/tolerance",
+	pnh_.param("ground_extraction/ransac/tolerance",
 		ransac_tolerance_, ransac_tolerance_);
-	pnh_.param("ransac/iterations",
+	pnh_.param("ground_extraction/ransac/iterations",
 		ransac_iterations_, ransac_iterations_);
-
-	// // Define static conversion values
-
-	// // Print parameters
-	// // ROS_INFO_STREAM("scenario " << params_.scenario);
-	// ROS_INFO_STREAM("lidar_height " << params_.lidar_height);
-	// ROS_INFO_STREAM("lidar_z_min " << params_.lidar_z_min);
-	// ROS_INFO_STREAM("grid_range_min " << params_.grid_range_min);
-	// ROS_INFO_STREAM("grid_range_max " << params_.grid_range_max);
-	// ROS_INFO_STREAM("grid_height " << params_.grid_height);
-	// ROS_INFO_STREAM("grid_width " << params_.grid_width);
-	// ROS_INFO_STREAM("grid_cell_size " << params_.grid_cell_size);
-	// ROS_INFO_STREAM("grid_cell_height " << params_.grid_cell_height);
-	// ROS_INFO_STREAM("grid_bins " << params_.grid_bins);
-	// ROS_INFO_STREAM("grid_segments " << params_.grid_segments);
-	// ROS_INFO_STREAM("ransac_tolerance " << params_.ransac_tolerance);
-	// ROS_INFO_STREAM("ransac_iterations " << params_.ransac_iterations);
-	// ROS_INFO_STREAM("inv_angular_res " << params_.inv_angular_res);
-	// ROS_INFO_STREAM("inv_radial_res " << params_.inv_radial_res);
-
-	// // Define polar grid
-	// polar_grid_ = std::vector< std::vector<PolarCell> >(params_.grid_segments,
-	// 	std::vector<PolarCell>(params_.grid_bins));
-
-	// Define occupancy grid
 	
-
-	// // Define Publisher 
-	// cloud_filtered_pub_ = nh_.advertise<PointCloud2>(
-	// 	"/sensor/cloud/filtered", 2);
-	// cloud_ground_pub_ = nh_.advertise<PointCloud2>(
-	// 	"/sensor/cloud/ground", 2);
-	// cloud_elevated_pub_ = nh_.advertise<PointCloud2>(
-	// 	"/sensor/cloud/elevated", 2);
-	// voxel_ground_pub_ = nh_.advertise<PointCloud2>(
-	// 	"/sensor/voxel/ground", 2);
-	// voxel_elevated_pub_ = nh_.advertise<PointCloud2>(
-	// 	"/sensor/voxel/elevated", 2);
-	// grid_occupancy_pub_ = nh_.advertise<OccupancyGrid>(
-	// 	"/sensor/grid/occupancy", 2);
-
-	// // image_semantic_pub_ = nh_.advertise<Image>(
-	// // 	"/sensor/image/semantic", 2);
-	// cloud_semantic_pub_ = nh_.advertise<PointCloud2>(
-	// 	"/sensor/cloud/semantic", 2);
-	// cloud_semantic_sparse_pub_ = nh_.advertise<PointCloud2>(
-	// 	"/sensor/cloud/semantic_sparse", 2);
-	// image_detection_grid_pub_ = nh_.advertise<Image>(
-	// 	"/sensor/image/detection_grid", 2);
-	// image_bev_semantic_grid_pub_ = nh_.advertise<Image>(
-	// 	"/sensor/image/bev_semantic_grid", 2);
+	// Define cartesian grid parameters
+	pnh_.param("cart_grid/cell_size",
+		cart_grid_cell_size_, cart_grid_cell_size_);
+	pnh_.param("cart_grid/height",
+		cart_grid_height_, cart_grid_height_);
+	pnh_.param("cart_grid/width",
+		cart_grid_width_, cart_grid_width_);
 
 
-	// initOccupancyGrid();
+	// Init Occupancy grid with default values
+	initOccupancyGrid();
 
 	// Define Subscriber
 	sub_pointcloud_ = nh_.subscribe(
-		"kitti/completed_pointcloud", 2, &GroundExtraction::callback, this);
+		"/sensors/depth_completion/pointcloud", 2, &GroundExtraction::callback, this);
 	pub_pointcloud_ground_inliers_ = nh_.advertise<PointCloud2>(
-		"/sensors/pointcloud/ground_inliers", 2);
+		"/sensors/ground/inliers", 2);
 	pub_pointcloud_ground_outliers_ = nh_.advertise<PointCloud2>(
-		"/sensors/pointcloud/ground_outliers", 2);
+		"/sensors/ground/outliers", 2);
 	pub_pointcloud_ground_ = nh_.advertise<PointCloud2>(
-		"/sensors/pointcloud/ground", 2);
+		"/sensors/ground/pointcloud", 2);
 	pub_pointcloud_elevated_ = nh_.advertise<PointCloud2>(
-		"/sensors/pointcloud/elevated", 2);
+		"/sensors/elevated/pointcloud", 2);
 	pub_voxel_ground_ = nh_.advertise<PointCloud2>(
-		"/sensors/voxel/ground", 2);
+		"/sensors/ground/voxelcloud", 2);
 	pub_voxel_elevated_ = nh_.advertise<PointCloud2>(
-		"/sensors/voxel/elevated", 2);
+		"/sensors/elevated/voxelcloud", 2);
 	pub_occupancy_grid_ = nh_.advertise<OccupancyGrid>(
-		"/sensors/occupancy_grid", 2);
+		"/sensors/occupancy", 2);
 
 	// Init counter for publishing
 	time_frame_ = 0;
@@ -173,7 +102,7 @@ void GroundExtraction::callback(
 	const PointCloud2ConstPtr & msg_pointcloud)
 {
 
-	if(true){
+	if(false){
 		semanticBasedGroundExtraction(msg_pointcloud);
 	}
 	else{
@@ -201,6 +130,7 @@ void GroundExtraction::semanticBasedGroundExtraction(
 		VRGBPoint & point = pcl_cloud->at(i);
 
 		if(isSidewalkOrRoad(point)){
+		// if(point.g != 142 || point.x > 25){
 			pcl_outliers->indices.push_back(i);
 		}
 	}
@@ -228,8 +158,6 @@ void GroundExtraction::geometricBasedGroundExtraction(
 	pcl::PointIndices::Ptr pcl_inliers(new pcl::PointIndices());
 	pcl::ExtractIndices<VRGBPoint> pcl_extractor;
 
-	ROS_INFO("Converted");
-
 	// Reset polar grid
 	polar_grid_ = std::vector< std::vector<PolarCell> >(
 		polar_grid_segments_, std::vector<PolarCell>(polar_grid_bins_));
@@ -246,14 +174,15 @@ void GroundExtraction::geometricBasedGroundExtraction(
 		   range < polar_grid_range_max_){
 
 		   	// Add index for filtered point cloud
-			pcl_inliers->indices.push_back(i);
+		   	if(!isSidewalkOrRoad(point)){
+				pcl_inliers->indices.push_back(i);
+		   	}
 
 			// Buffer variables
 			int seg, bin;
 
 			// Get polar grid cell indices
 			fromVeloCoordsToPolarCell(point.x, point.y, seg, bin);
-
 			// Grab cell
 			PolarCell & cell = polar_grid_[seg][bin];
 
@@ -264,7 +193,16 @@ void GroundExtraction::geometricBasedGroundExtraction(
 			}
 			else{
 				if(point.z < cell.min_point.z){
-					cell.min_point = point;
+					if(false){
+						float x, y;
+						fromPolarCellToVeloCoords(seg, bin, x, y);
+						cell.min_point.x = x;
+						cell.min_point.y = y;
+						cell.min_point.z = point.z;
+					}
+					else{
+						cell.min_point = point;
+					}
 				}
 				if(point.z > cell.max_point.z){
 					cell.max_point = point;
@@ -276,31 +214,36 @@ void GroundExtraction::geometricBasedGroundExtraction(
 	}
 
 	// Extract points from original point cloud
+	int num_points_before =  int(pcl_cloud->points.size());
 	pcl_extractor.setInputCloud(pcl_cloud);
 	pcl_extractor.setIndices(pcl_inliers);
 	pcl_extractor.setNegative(false);
 	pcl_extractor.filter(*pcl_cloud);
 
-
 	VRGBPointCloud::Ptr pcl_ground_plane(new VRGBPointCloud);
 	// Loop over polar grid
-	for(int i = 0; i < polar_grid_segments_; ++i){
-		for(int j = 0; j < polar_grid_bins_; ++j){
+	for(int seg = 0; seg < polar_grid_segments_; ++seg){
+		for(int bin = 0; bin < polar_grid_bins_; ++bin){
 
 			// Grab cell
-			PolarCell & cell = polar_grid_[i][j];
+			PolarCell & cell = polar_grid_[seg][bin];
 
 			// Check if cell can be ground cell
-			if(cell.count > 0 &&
-			  (cell.max_point.z - cell.min_point.z < polar_grid_cell_max_height_)
+			if(cell.count > 0
+			  && (cell.max_point.z - cell.min_point.z < polar_grid_cell_max_height_)
 			  && isSidewalkOrRoad(cell.min_point)
 			){
 
 				// Push back cell attributes to ground plane cloud
 				pcl_ground_plane->points.push_back(cell.min_point);
-				// std::cout << cell.min_point << std::endl;
 			}
 		}
+	}
+
+	if(int(pcl_ground_plane->points.size()) < 5){
+		ROS_WARN("Too few ground inliers %d",
+			int(pcl_ground_plane->points.size()));
+		return;
 	}
 
 	// Estimate the ground plane using PCL and RANSAC
@@ -349,13 +292,7 @@ void GroundExtraction::geometricBasedGroundExtraction(
 		pcl_conversions::toPCL(msg_pointcloud->header.stamp);
 	pub_pointcloud_ground_outliers_.publish(pcl_ground_plane_outliers);
 
-	// Print
-	ROS_INFO("Ground plane estimation [%d] # Points [%d] # Inliers [%d] "
-		" C [%f][%f][%f][%f]",	time_frame_, 
-		int(pcl_ground_plane->size()),	int(pcl_ground_plane_inliers->size()), 
-		coefficients->values[0], coefficients->values[1],
-		coefficients->values[2], coefficients->values[3]);
-
+	
 	// Loop over segments
 	for(int s = 0; s < polar_grid_segments_; s++){
 
@@ -369,7 +306,7 @@ void GroundExtraction::geometricBasedGroundExtraction(
 			PolarCell & cell = polar_grid_[s][b];
 
 			// Buffer variables
-			float x,y;
+			float x, y;
 
 			// Get velodyne coodinates
 			fromPolarCellToVeloCoords(s, b, x, y);
@@ -383,14 +320,14 @@ void GroundExtraction::geometricBasedGroundExtraction(
 			if(cell.count == 0){
 
 				// And has hit sth so far mark as unknown
-				if(hit)
+				if(hit){
 					cell.idx = PolarCell::UNKNOWN;
+				}
 
 				// And has not hit sth so far mark as free
-				else
+				else{
 					cell.idx = PolarCell::FREE;
-
-				continue;
+				}
 			}
 			else{
 
@@ -428,20 +365,18 @@ void GroundExtraction::geometricBasedGroundExtraction(
 		// Read current point
 		VRGBPoint point = pcl_cloud->at(i);
 
-		// Buffer variables
-		int seg, bin;
-
-		// Get polar grid cell indices
-		fromVeloCoordsToPolarCell(point.x, point.y, seg, bin);
-
 		// Grab cell
-		PolarCell & cell = polar_grid_[seg][bin];
+		float ground = (-coefficients->values[0] * point.x -
+				coefficients->values[1] * point.y - coefficients->values[3]) /
+				coefficients->values[2];
 
-		if(point.z > cell.ground && cell.height > polar_grid_cell_max_height_){
-			pcl_elevated->points.push_back(point);
+		if(point.z < ground + polar_grid_cell_max_height_
+			// || isSidewalkOrRoad(point)
+			){
+			pcl_ground->points.push_back(point);
 		}
 		else{
-			pcl_ground->points.push_back(point);
+			pcl_elevated->points.push_back(point);
 		}
 	}
 
@@ -451,42 +386,32 @@ void GroundExtraction::geometricBasedGroundExtraction(
 	pub_pointcloud_ground_.publish(pcl_ground);
 
 	// Publish elevated cloud
-	pcl_elevated->header.frame_id = msg_pointcloud->header.frame_id;
-	pcl_elevated->header.stamp = pcl_conversions::toPCL(msg_pointcloud->header.stamp);
-	pub_pointcloud_elevated_.publish(pcl_elevated);	
-
+	PointCloud2 msg_pointcloud_elevated;
+	pcl::toROSMsg(*pcl_elevated, msg_pointcloud_elevated);
+	msg_pointcloud_elevated.header = msg_pointcloud->header;
+	msg_pointcloud_elevated.header.stamp.nsec = msg_pointcloud->header.stamp.nsec;
+	pub_pointcloud_elevated_.publish(msg_pointcloud_elevated);
 	
 	// Clear voxel pcls
 	VRGBPointCloud::Ptr pcl_voxel_elevated(new VRGBPointCloud);
 	VRGBPointCloud::Ptr pcl_voxel_ground(new VRGBPointCloud);
 
-	// Init detection image and fill free space grid cells
-	cv::Mat detection_grid = cv::Mat(cart_grid_height_, cart_grid_width_, CV_32FC3,
-		cv::Scalar(-100.0, 0.0, 0.0));
-	// Init detection image and fill free space grid cells
-	// bev_semantic_grid_ = cv::Mat(cart_grid_height_, cart_grid_width_, CV_8UC3,
-	// 	cv::Scalar(128, 128, 128));
-
 	// Go through cartesian grid
-	float x = polar_grid_range_max_ - cart_grid_cell_size_ / 2;
+	float x = cart_grid_height_ * cart_grid_cell_size_ - cart_grid_cell_size_ / 2;
 	for(int j = 0; j < cart_grid_height_; ++j, x -= cart_grid_cell_size_){
 		float y = x;
 		for(int i = j; i < cart_grid_width_ - j; ++i, y -= cart_grid_cell_size_){
 
 			// Buffer variables
 			int seg, bin;
-			float rx, ry;
-
-			// Get polar grid cell indices
-			// ROS_INFO("%f %f", x, y);
-			fromVeloCoordsToPolarCell(x, y, seg, bin);
-			fromPolarCellToVeloCoords(seg, bin, rx, ry);
-			float dx = std::sqrt( (x-rx)*(x-rx) + (y-ry)*(y-ry) );
-			// if(dx / 2 * std::sqrt(2) > cart_grid_cell_size_ )
-				
-			ROS_WARN("%f %f %d %d %f %f", x, y, seg, bin, rx, ry);
-			// ROS_INFO("%d %d", seg, bin);
 			
+			// Get polar grid cell indices
+			fromVeloCoordsToPolarCell(x, y, seg, bin);
+			if(seg < 0 || seg >= polar_grid_segments_ ||
+				bin < 0 || bin >= polar_grid_bins_){
+				continue;
+			}
+
 			// Grab polar cell
 			PolarCell & cell = polar_grid_[seg][bin];
 
@@ -494,40 +419,35 @@ void GroundExtraction::geometricBasedGroundExtraction(
 			VRGBPoint ground_point;
 			ground_point.x = x;
 			ground_point.y = y;
-			ground_point.z = cell.ground;
+			ground_point.z = cell.ground - cart_grid_cell_size_ / 2;
 			pcl_voxel_ground->points.push_back(ground_point);
 
 			// Calculate occupancy grid cell index
 			int cell_index = j * cart_grid_width_ + i;
-			// ROS_INFO("%d", cell_index);
-			// ROS_INFO("%d %d", i, j);
-
 			// If cell is free
 			if(cell.idx == PolarCell::FREE){
-				// occ_grid_->data[cell_index] = 0;
-				// detection_grid.at<cv::Vec3f>(j, i)[0] = -50.0;
-				// bev_semantic_grid_.at<cv::Vec3b>(j, i) = cv::Vec3b(255, 255, 255);
+				occ_grid_->data[cell_index] = 0;
 			}
+
 			// If cell is unknown
-			// else if(cell.idx == PolarCell::UNKNOWN)
-			// 	occ_grid_->data[cell_index] = 50;
+			else if(cell.idx == PolarCell::UNKNOWN){
+				occ_grid_->data[cell_index] = 50;
+			}
 
 			// If cell is occupied
 			else{
-				// occ_grid_->data[cell_index] = 100;
-				if(cell.count == 0){
-					ROS_WARN("OCCUPIED BUT NO CELL DATA");
-				}
+				occ_grid_->data[cell_index] = 100;
 				// Fill elevated voxel cloud
-				// ROS_INFO("%f", cell.max_point.z);
-				// for(float v = cell.ground; v < cell.max_point.z; v += cart_grid_cell_size_){
-				// 	VRGBPoint voxel;
-				// 	voxel.x = x;
-				// 	voxel.x = y;
-				// 	voxel.z = v;
-				// 	pcl_voxel_elevated->points.push_back(voxel);
-
-				// }
+				for(float v = cell.ground; v < cell.max_point.z; v += cart_grid_cell_size_){
+					VRGBPoint voxel;
+					voxel.x = x;
+					voxel.y = y;
+					voxel.z = v;
+					voxel.r = cell.max_point.r;
+					voxel.g = cell.max_point.g;
+					voxel.b = cell.max_point.b;
+					pcl_voxel_elevated->points.push_back(voxel);
+				}
 			}
 		}
 	}
@@ -543,13 +463,21 @@ void GroundExtraction::geometricBasedGroundExtraction(
 	pcl_voxel_elevated->header.stamp = 
 		pcl_conversions::toPCL(msg_pointcloud->header.stamp);
 	pub_voxel_elevated_.publish(pcl_voxel_elevated);
-	/*
+
 	// Publish occupancy grid
 	occ_grid_->header.stamp = msg_pointcloud->header.stamp;
 	occ_grid_->header.frame_id = msg_pointcloud->header.frame_id;
 	occ_grid_->info.map_load_time = occ_grid_->header.stamp;
 	pub_occupancy_grid_.publish(occ_grid_);
-	*/
+
+	// Print
+	ROS_INFO("Ground extraction [%d]: # Before %d # In Range %d"
+		" # Inliers/Outliers %d/%d C [%f][%f][%f][%f] # Elevated %d # Ground %d",	
+		time_frame_, num_points_before, int(pcl_cloud->size()),
+		int(pcl_ground_plane_inliers->size()), int(pcl_ground_plane_outliers->size()), 
+		coefficients->values[0], coefficients->values[1],
+		coefficients->values[2], coefficients->values[3],
+		int(pcl_elevated->points.size()), int(pcl_ground->points.size()));
 
 	// Increment time frame
 	time_frame_++;
@@ -763,17 +691,17 @@ void GroundExtraction::fromVeloCoordsToPolarCell(
 	float mag = std::sqrt(x * x + y * y);
 	float ang = -std::atan2(y, x);
 	seg = int((ang + sensor_frame_opening_angle_) * (2 * polar_grid_segments_/ M_PI));
-	bin = int(mag / polar_grid_cell_size_);
-
+	bin = int((mag - polar_grid_range_min_) / polar_grid_cell_size_);
 	// For last segment
-	if(x == -y)
+	if(x == -y){
 		seg = polar_grid_segments_ - 1;
+	}
 }
 
 void GroundExtraction::fromPolarCellToVeloCoords(
 	const int seg, const int bin, float & x, float & y){
 
-	float mag = bin * polar_grid_cell_size_;
+	float mag = bin * polar_grid_cell_size_ + polar_grid_range_min_;
 	float ang = seg * M_PI / 2 / polar_grid_segments_ - sensor_frame_opening_angle_;
 	y = - std::sin(ang) * mag;
 	x = std::cos(ang) * mag;

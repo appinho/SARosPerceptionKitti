@@ -27,7 +27,7 @@ class DepthCompletion
 {
  public:
   //! Constructor.
-  explicit DepthCompletion(ros::NodeHandle nh);
+  explicit DepthCompletion(ros::NodeHandle nh, ros::NodeHandle pnh);
 
  private:
 
@@ -46,16 +46,19 @@ class DepthCompletion
     const cv::Mat depth_image,
     const ImageConstPtr& image_msg,
     const CameraInfoConstPtr& cam_info,
-    PointCloud2 & pc);
+    PointCloud2 & semantic_pc,
+    cv::Mat & semantic_depth_image);
 
   bool inImage(const CameraInfoConstPtr& cam_info, const int u, const int v);
   void depthToCV8UC1(const cv::Mat& float_img, cv::Mat& mono8_img);
+  void depthToCV16UC1(const cv::Mat& float_img, cv::Mat& mono16_img);
 
   // void configCallback(sensors::DepthCompletionParamsConfig &config, uint32_t level);
   int convertKernelSize(const int full_kernel_size);
 
   
   ros::NodeHandle nh_;
+  ros::NodeHandle pnh_;
 
   message_filters::Subscriber<PointCloud2> sub_pointcloud_;
   message_filters::Subscriber<CameraInfo> sub_left_color_camera_info_;
@@ -66,7 +69,9 @@ class DepthCompletion
 
   ros::Publisher pub_depth_image_;
   ros::Publisher pub_completion_image_;
+  ros::Publisher pub_completion_image_16_;
   ros::Publisher pub_completed_pointcloud_;
+  ros::Publisher pub_semantic_completion_image_;
 
   // dynamic_reconfigure::Server<sensors::DepthCompletionParamsConfig> dr_srv_;
 
@@ -83,6 +88,10 @@ class DepthCompletion
   double bilateral_sigma_;
   int image_width_ = 1242;
   int image_height_ = 375;
+
+  int time_frame_;
+  int counter_pixels_;
+  int counter_completed_pixels_;
 };
 }
 

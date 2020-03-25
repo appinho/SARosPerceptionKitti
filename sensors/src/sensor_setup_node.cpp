@@ -1,16 +1,9 @@
-/******************************************************************************
- *
- * Author: Simon Appel (simonappel62@gmail.com)
- * Date: 19/04/2018
- *
- */
-
 #include <ros/ros.h>
-#include <sensors_lib/sensor_fusion.h>
+#include <sensors_lib/sensor_setup.h>
 
 int main(int argc, char **argv){
 	ros::init(argc, argv, "sensor_setup_node");
-	sensors::SensorFusion sensor_setup(
+	sensors::SensorSetup sensor_setup(
 		ros::NodeHandle(), ros::NodeHandle("~"));
 	ros::spin();
 

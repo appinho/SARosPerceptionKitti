@@ -327,13 +327,14 @@ void UnscentedKF::GlobalNearestNeighbor(
 		}
 
 		// Loop through detected objects
+		float min_dist = 1000;
 		for(int j = 0; j < detected_objects->list.size(); ++j){
 
 			// Calculate distance between track and detected object
 			if(tracks_[i].sem.id == detected_objects->list[j].semantic_id){
 				float dist = CalculateDistance(tracks_[i], 
 					detected_objects->list[j]);
-
+				min_dist = std::min(min_dist, dist);
 				if(dist < gate){
 					distances.push_back(dist);
 					matches.push_back(j);
@@ -383,7 +384,8 @@ void UnscentedKF::GlobalNearestNeighbor(
 			}
 		}
 		else{
-			ROS_WARN("No measurement found for track [%d]", tracks_[i].id);
+			ROS_WARN("No measurement found for track [%d]: Closest %f<%f", tracks_[i].id,
+				min_dist, gate);
 		}
 	}
 }
@@ -707,7 +709,7 @@ void UnscentedKF::publishTracks(const std_msgs::Header & header){
 		track_msg.r = track.r;
 		track_msg.g = track.g;
 		track_msg.b = track.b;
-		track_msg.a = track.prob_existence;
+		track_msg.a = 0.6;
 
 		// Push back track message
 		track_list.list.push_back(track_msg);

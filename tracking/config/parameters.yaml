@@ -1,11 +1,11 @@
 data_association:
   ped:
     dist:
-      position: 1.0
+      position: 2.0
       form: 2.0
   car:
     dist:
-      position: 2.0
+      position: 4.0
       form: 5.0
 
 tracking:

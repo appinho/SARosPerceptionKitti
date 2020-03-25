@@ -118,12 +118,12 @@ void GroundTruth::getObjectFromLine(const std::vector<std::string> & words,
 	obj.orientation = orientation;
 	if(obj.semantic_name == "Car"){
 		obj.r = 0;
-		obj.g = 0;
+		obj.g = 120;
 		obj.b = 255;
 	}
 	else{
 		obj.r = 255;
-		obj.g = 0;
+		obj.g = 120;
 		obj.b = 0;
 	}
 	obj.a = 0.3;
