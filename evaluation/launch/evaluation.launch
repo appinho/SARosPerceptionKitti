@@ -4,7 +4,7 @@
   <arg name="home_dir"/>
 
   <!-- Choose scenario-->
-  <arg name="scenario" default="0060"/>
+  <arg name="scenario" default="0012"/>
 
   <!-- Choose replay speed -->
   <arg name="speed" default="0.5"/>
