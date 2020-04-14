@@ -24,7 +24,7 @@ Sticking to this folder structure is highly recommended:
     │   ├── src                              # Source folder
     │       └── SARosPerceptionKitti         # Repo
     ├── kitti_data                           # Dataset
-    │   ├── 0060                             # Demo scenario 0060
+    │   ├── 0012                             # Demo scenario 0012
     │   │   ├── segmented_semantic_images    # Folder for preprocessed semantic segmented images
     │   │   └── synchronized_data.bag        # Synchronized ROSbag file
 ```
@@ -49,9 +49,9 @@ source devel/setup.bash
 
 ```
 mkdir ~/kitti_data && cd ~/kitti_data/
-mv ~/Downloads/0060.zip .
-unzip 0060.zip
-rm 0060.zip
+mv ~/Downloads/0012.zip .
+unzip 0012.zip
+rm 0012.zip
 ```
 
 ## Usage 
@@ -66,11 +66,11 @@ roslaunch tracking tracking.launch home_dir:=/home/YOUR_USERNAME
 ```
 
    * Default parameters:
-        * scenario:=0060
+        * scenario:=0012
         * speed:=0.2   
         * delay:=3  
 
-Without assigning any of the abovementioned parameters the demo scenario 0060 is replayed at 20% of its speed with a 3 second delay so RViz has enough time to boot up.  
+Without assigning any of the abovementioned parameters the demo scenario 0012 is replayed at 20% of its speed with a 3 second delay so RViz has enough time to boot up.  
 
 2) Write the results to file and evaluate them:
 
@@ -80,7 +80,7 @@ cd ~/catkin_ws/src/SARosPerceptionKitti/benchmark/python
 python evaluate_tracking.py
 ```
 
-## Results for demo scenario 0060
+## Results for demo scenario 0012
 
 | Class        |  MOTA   |  MOTP   |  MOTAL  |  MODA   |  MODP   |
 | ------------ |:-------:|:-------:|:-------:|:-------:|:-------:|
