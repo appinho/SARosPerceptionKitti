@@ -25,7 +25,6 @@ Sticking to this folder structure is highly recommended:
     │       └── SARosPerceptionKitti         # Repo
     ├── kitti_data                           # Dataset
     │   ├── 0012                             # Demo scenario 0012
-    │   │   ├── segmented_semantic_images    # Folder for preprocessed semantic segmented images
     │   │   └── synchronized_data.bag        # Synchronized ROSbag file
 ```
 
