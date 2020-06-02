@@ -371,7 +371,7 @@ void GroundExtraction::geometricBasedGroundExtraction(
 				coefficients->values[2];
 
 		if(point.z < ground + polar_grid_cell_max_height_
-			// || isSidewalkOrRoad(point)
+			 || isSidewalkOrRoad(point)
 			){
 			pcl_ground->points.push_back(point);
 		}
@@ -690,7 +690,7 @@ void GroundExtraction::fromVeloCoordsToPolarCell(
 
 	float mag = std::sqrt(x * x + y * y);
 	float ang = -std::atan2(y, x);
-	seg = int((ang + sensor_frame_opening_angle_) * (2 * polar_grid_segments_/ M_PI));
+	seg = int((ang + sensor_frame_opening_angle_) * (polar_grid_segments_/ M_PI));
 	bin = int((mag - polar_grid_range_min_) / polar_grid_cell_size_);
 	// For last segment
 	if(x == -y){
@@ -702,7 +702,7 @@ void GroundExtraction::fromPolarCellToVeloCoords(
 	const int seg, const int bin, float & x, float & y){
 
 	float mag = bin * polar_grid_cell_size_ + polar_grid_range_min_;
-	float ang = seg * M_PI / 2 / polar_grid_segments_ - sensor_frame_opening_angle_;
+	float ang = seg * M_PI / polar_grid_segments_ - sensor_frame_opening_angle_;
 	y = - std::sin(ang) * mag;
 	x = std::cos(ang) * mag;
 }
