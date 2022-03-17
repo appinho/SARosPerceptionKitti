@@ -98,11 +98,11 @@ public:
 	// Virtual destructor
 	virtual ~SensorFusion();
 
-	// Processes 3D Velodyne point cloud together with raw camera image
+	// Processes 3D Velodyne point cloud together with segmented camera image
 	// and publishes the output grid message
 	virtual void process(
 		const PointCloud2::ConstPtr & cloud,
-		const Image::ConstPtr & image
+		const Image::ConstPtr & image_seg
 	);
 
 
@@ -154,15 +154,14 @@ private:
 
 	// Subscriber
 	Subscriber<PointCloud2> cloud_sub_;
-	Subscriber<Image> image_sub_;
+	Subscriber<Image> image_seg_sub_;
 	typedef sync_policies::ExactTime<PointCloud2, Image> MySyncPolicy;
 	Synchronizer<MySyncPolicy> sync_;
 
 	// Class functions
 	void processPointCloud(const PointCloud2::ConstPtr & cloud);
-	void processImage(const Image::ConstPtr & image);
 	void mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
-		const Image::ConstPtr & image);
+		const Image::ConstPtr & image_msg);
 
 	// Conversion functions
 	void fromVeloCoordsToPolarCell(const float x, const float y,

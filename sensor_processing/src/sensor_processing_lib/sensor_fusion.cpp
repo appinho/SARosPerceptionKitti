@@ -25,8 +25,8 @@ SensorFusion::SensorFusion(ros::NodeHandle nh, ros::NodeHandle private_nh):
 	pcl_semantic_(new VRGBPointCloud),
 	pcl_sparse_semantic_(new VRGBPointCloud),
 	cloud_sub_(nh, "/kitti/velo/pointcloud", 2),
-	image_sub_(nh,	"/kitti/camera_color_left/image_raw", 2),
-	sync_(MySyncPolicy(10), cloud_sub_, image_sub_){
+	image_seg_sub_(nh,	"/kitti/camera_color_left/semantic", 2),
+	sync_(MySyncPolicy(10), cloud_sub_, image_seg_sub_){
 
 	// Get data path
 	std::string home_dir;
@@ -178,18 +178,15 @@ SensorFusion::~SensorFusion(){
 
 void SensorFusion::process(
 		const PointCloud2::ConstPtr & cloud,
-		const Image::ConstPtr & image
+		const Image::ConstPtr & image_seg
 	){
 
 	// Preprocess point cloud
 	processPointCloud(cloud);
 
-	// Preprocess image
-	processImage(image);
-
 	// Fuse sensors by mapping elevated point cloud into semantic segmentated
 	// image
-	mapPointCloudIntoImage(pcl_elevated_, image);
+	mapPointCloudIntoImage(pcl_elevated_, image_seg);
 
 	// Print sensor fusion
 	ROS_INFO("Publishing Sensor Fusion [%d]: # PCL points [%d] # Ground [%d]"
@@ -544,54 +541,18 @@ void SensorFusion::processPointCloud(const PointCloud2::ConstPtr & cloud){
 	grid_occupancy_pub_.publish(occ_grid_);
 }
 
-void SensorFusion::processImage(const Image::ConstPtr & image){
-
-/******************************************************************************
- * 1. Load precalculated semantic segmentated images to ensure online
- * performance
- */
-
-	// Define path
-	std::ostringstream path_name;
-
-	// HARDCODE HOME DIRECTORY HERE
-	path_name << params_.home_dir << "/"
-		<< params_.scenario 
-		<< "/segmented_semantic_images/"
-		<< std::setfill('0') << std::setw(10)	<< time_frame_ << ".png";
-
-	// Load semantic segmentated image
-	sem_image_ = cv::imread(path_name.str(), CV_LOAD_IMAGE_COLOR);
-
-	// Sanity check if image is loaded correctly
-	if(sem_image_.cols == 0 || sem_image_.rows == 0){
-		ROS_WARN("Hardcode path in sensor_fusion.cpp processImage()!");
-		return;
-	}
-
-	// Canny edge detection
-	/*
-	cv::Mat sem_edge_img, sem_dil_img, sem_output;
-	if(params_.sem_ed){
-		cv::Canny(sem_image_, sem_edge_img, params_.sem_ed_min,
-			params_.sem_ed_max, params_.sem_ed_kernel);
-		cv::dilate(sem_edge_img, sem_dil_img, cv::Mat(), 
-			cv::Point(-1, -1), 1, 1, 1);
-		sem_image_.copyTo(sem_output, sem_dil_img);
-	}
-	*/
-
-	// Publish
-	cv_bridge::CvImage cv_semantic_image;
-	cv_semantic_image.image = sem_image_;
-	cv_semantic_image.encoding = "bgr8";
-	cv_semantic_image.header.stamp = image->header.stamp;
-	image_semantic_pub_.publish(cv_semantic_image.toImageMsg());
-}
-
 void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
-	const Image::ConstPtr & image){
-
+	const Image::ConstPtr & image_msg){
+    cv_bridge::CvImagePtr cv_ptr;
+    try
+    {
+      cv_ptr = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8);
+    }
+    catch (cv_bridge::Exception& e)
+    {
+      ROS_ERROR("cv_bridge exception: %s", e.what());
+      return;
+    }
 /******************************************************************************
  * 1. Convert velodyne points into image space
  */
@@ -610,8 +571,8 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
 		tools_.transformVeloToImage(matrix_velodyne_points);
 
 	// Get image format
-	int img_width = sem_image_.cols;
-	int img_height = sem_image_.rows;
+	int img_width = cv_ptr->image.cols;
+	int img_height = cv_ptr->image.rows;
 
 	// Clear semantic cloud
 	pcl_semantic_->points.clear();
@@ -629,9 +590,9 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
 			(img_z >= 0)){
 
 			// Get R G B values of semantic image
-			uint8_t r = sem_image_.at<cv::Vec3b>(img_y,img_x)[2];
-			uint8_t g = sem_image_.at<cv::Vec3b>(img_y,img_x)[1];
-			uint8_t b = sem_image_.at<cv::Vec3b>(img_y,img_x)[0];
+			uint8_t r = cv_ptr->image.at<cv::Vec3b>(img_y,img_x)[2];
+			uint8_t g = cv_ptr->image.at<cv::Vec3b>(img_y,img_x)[1];
+			uint8_t b = cv_ptr->image.at<cv::Vec3b>(img_y,img_x)[0];
 
 			// Create new point and fill it
 			VRGBPoint point;
@@ -753,12 +714,12 @@ void SensorFusion::mapPointCloudIntoImage(const VPointCloud::Ptr cloud,
 	cv_bridge::CvImage cv_detection_grid_image;
 	cv_detection_grid_image.image = detection_grid_;
 	cv_detection_grid_image.encoding = image_encodings::TYPE_32FC3;
-	cv_detection_grid_image.header.stamp = image->header.stamp;
+	cv_detection_grid_image.header.stamp = image_msg->header.stamp;
 	image_detection_grid_pub_.publish(cv_detection_grid_image.toImageMsg());
 	cv_bridge::CvImage cv_bev_semantic_grid_image;
 	cv_bev_semantic_grid_image.image = bev_semantic_grid_;
 	cv_bev_semantic_grid_image.encoding = image_encodings::TYPE_8UC3;
-	cv_bev_semantic_grid_image.header.stamp = image->header.stamp;
+	cv_bev_semantic_grid_image.header.stamp = image_msg->header.stamp;
 	image_bev_semantic_grid_pub_.publish(cv_bev_semantic_grid_image.toImageMsg());
 }
 
